@@ -7,10 +7,38 @@
 
 import SwiftUI
 
+final class SignInEmailViewModel: ObservableObject {
+    
+    @Published var email = ""
+    @Published var password = ""
+    
+    func signIn() {
+        guard !email.isEmpty, !password.isEmpty else {
+            print("No email or password found.")
+            return
+        }
+        
+        
+        Task {
+            do {
+                let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
+                print("Success!")
+                print(returnedUserData)
+            } catch {
+                print("Error: \(error)")
+            }
+        }
+        
+    }
+}
+
+
 struct Home: View {
+    @StateObject private var viewModel = SignInEmailViewModel()
+    
     @State private var activeIntro: PageIntro = pageIntros[0]
-    @State private var emailID: String = ""
-    @State private var password: String = ""
+    //@State private var emailID: String = ""
+    //@State private var password: String = ""
     //@State private var keyboardHeight: GGFloat = 0
     var body: some View {
         GeometryReader{
@@ -20,15 +48,15 @@ struct Home: View {
                 // User Login/Signup View
                 VStack(spacing: 10) {
                     // Custom TextField
-                    CustomTextField(text: $emailID, hint: "Email Address", leadingIcon: Image(systemName: "envelope"))
-                    CustomTextField(text: $emailID, hint: "Password", leadingIcon: Image(systemName: "lock"), isPassword: true)
+                    CustomTextField(text: $viewModel.email, hint: "Email Address", leadingIcon: Image(systemName: "envelope"))
+                    CustomTextField(text: $viewModel.password, hint: "Password", leadingIcon: Image(systemName: "lock"), isPassword: true)
                     
                     Spacer(minLength: 10)
                     
                     Button {
-                        
+                        viewModel.signIn()
                     } label: {
-                        Text("Continue")
+                        Text("Sign up")
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
                             .padding(.vertical, 15)

@@ -18,5 +18,5 @@ struct PageIntro: Identifiable, Hashable {
 var pageIntros: [PageIntro] = [
     .init(introAssetImage: "intro_image_1", title: "Welcome to Studyon!", subTitile: "Ready to Study?"),
     .init(introAssetImage: "intro_image_2", title: "Features", subTitile: "Study with your friends!"),
-    .init(introAssetImage: "intro_action_1", title: "Let's Get Started", subTitile: "Sign up using your Phone number!", displayAction: true)
+    .init(introAssetImage: "intro_action_1", title: "Let's Get Started", subTitile: "Sign up using your email!", displayAction: true)
 ]
