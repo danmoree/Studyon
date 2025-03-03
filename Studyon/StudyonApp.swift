@@ -12,6 +12,7 @@ import FirebaseCore
 struct StudyonApp: App {
     // Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

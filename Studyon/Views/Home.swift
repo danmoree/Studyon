@@ -6,72 +6,143 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
-final class SignInEmailViewModel: ObservableObject {
-    
+// New combined authentication view model
+@MainActor
+final class AuthViewModel: ObservableObject {
     @Published var email = ""
     @Published var password = ""
+    @Published var errorMessage: String? = nil
     
-    func signIn() {
+    func signUp() {
         guard !email.isEmpty, !password.isEmpty else {
-            print("No email or password found.")
+            print("No email or password provided for sign up.")
             return
         }
-        
         
         Task {
             do {
                 let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
-                print("Success!")
+                print("Sign up successful!")
                 print(returnedUserData)
             } catch {
-                print("Error: \(error)")
+                let nsError = error as NSError
+                if nsError.code == AuthErrorCode.emailAlreadyInUse.rawValue {
+                    // email in use already
+                    DispatchQueue.main.async {
+                        withAnimation {
+                            self.errorMessage = "Email already in use."
+                        }
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        withAnimation {
+                            self.errorMessage = error.localizedDescription
+                        }
+                    }
+                }
+                //print("Sign up error: \(error)")
             }
         }
+    }
+    
+    func signIn() {
+        guard !email.isEmpty, !password.isEmpty else {
+            errorMessage = "Please enter both email and password."
+            return
+        }
         
+        Task {
+            do {
+                let userData = try await AuthenticationManager.shared.signIn(email: email, password: password)
+                print("Sign in successful!")
+                print(userData)
+            } catch {
+                DispatchQueue.main.async {
+                    withAnimation {
+                        self.errorMessage = error.localizedDescription
+                    }
+                }
+            }
+        }
     }
 }
 
-
 struct Home: View {
-    @StateObject private var viewModel = SignInEmailViewModel()
+    @StateObject private var viewModel = AuthViewModel()
     
     @State private var activeIntro: PageIntro = pageIntros[0]
-    //@State private var emailID: String = ""
-    //@State private var password: String = ""
-    //@State private var keyboardHeight: GGFloat = 0
+    @State private var isSignUp = true  // true = Sign Up mode; false = Sign In mode
+    
     var body: some View {
-        GeometryReader{
-            let size = $0.size
+        GeometryReader { geo in
+            let size = geo.size
             
             IntroView(intro: $activeIntro, size: size) {
-                // User Login/Signup View
+                // Combined Authentication View
                 VStack(spacing: 10) {
-                    // Custom TextField
-                    CustomTextField(text: $viewModel.email, hint: "Email Address", leadingIcon: Image(systemName: "envelope"))
-                    CustomTextField(text: $viewModel.password, hint: "Password", leadingIcon: Image(systemName: "lock"), isPassword: true)
+                    // Email field
+                    CustomTextField(
+                        text: $viewModel.email,
+                        hint: "Email Address",
+                        leadingIcon: Image(systemName: "envelope")
+                    )
+                    
+                    // Password field
+                    CustomTextField(
+                        text: $viewModel.password,
+                        hint: "Password",
+                        leadingIcon: Image(systemName: "lock"),
+                        isPassword: true
+                    )
                     
                     Spacer(minLength: 10)
                     
+                    // Primary action button (Sign Up / Sign In)
                     Button {
-                        viewModel.signIn()
+                        if isSignUp {
+                            viewModel.signUp()
+                        } else {
+                            viewModel.signIn()
+                        }
                     } label: {
-                        Text("Sign up")
+                        Text(isSignUp ? "Sign Up" : "Sign In")
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
                             .padding(.vertical, 15)
                             .frame(maxWidth: .infinity)
                             .background {
-                                Capsule()
-                                    .fill(.black)
+                                Capsule().fill(.black)
                             }
-                        
+                    }
+                    
+                    // Toggle mode button
+                    Button {
+                        isSignUp.toggle()
+                    } label: {
+                        Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
+                            .font(.subheadline)
+                            .foregroundColor(.blue)
                     }
                 }
                 .padding(.top, 25)
             }
         }
         .padding(15)
+        
+        // error banner
+        if let error = viewModel.errorMessage {
+            ErrorBannerView(message: error)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        withAnimation{
+                            viewModel.errorMessage = nil
+                        }
+                    }
+                }
+        }
     }
 }
 
@@ -81,7 +152,7 @@ struct Home_Previews: PreviewProvider {
     }
 }
 
-// Intro view
+// Intro view remains unchanged
 struct IntroView<ActionView: View>: View {
     @Binding var intro: PageIntro
     var size: CGSize
@@ -99,8 +170,7 @@ struct IntroView<ActionView: View>: View {
     
     var body: some View {
         VStack {
-            
-            // back button
+            // Back button (if not on first intro)
             HStack {
                 if intro != pageIntros.first {
                     Button {
@@ -112,19 +182,15 @@ struct IntroView<ActionView: View>: View {
                             .foregroundColor(.black)
                             .contentShape(Rectangle())
                     }
-
                     .padding(10)
-                    // animate
                     .offset(y: showView ? 0 : -200)
                     .offset(y: hideWholeView ? -200 : 0)
                 }
                 
                 Spacer()
             }
-            //.background(Color.black)
-        
             
-            
+            // Title
             HStack {
                 Text(intro.title)
                     .font(.title)
@@ -134,9 +200,8 @@ struct IntroView<ActionView: View>: View {
             }
             .padding()
             
-            GeometryReader {
-                let size = $0.size
-                
+            GeometryReader { proxy in
+                let size = proxy.size
                 
                 Image(intro.introAssetImage)
                     .resizable()
@@ -144,7 +209,6 @@ struct IntroView<ActionView: View>: View {
                     .padding(30)
                     .frame(width: size.width, height: size.height)
             }
-            // move up
             .offset(y: showView ? 0 : -size.height / 2)
             .opacity(showView ? 1 : 0)
             
@@ -156,7 +220,11 @@ struct IntroView<ActionView: View>: View {
                 Group {
                     Spacer(minLength: 25)
                     
-                    CustomIndicatorView(totalPages: filteredPages.count, currentPage: filteredPages.firstIndex(of: intro) ?? 0, activeTint: .gray)
+                    CustomIndicatorView(
+                        totalPages: filteredPages.count,
+                        currentPage: filteredPages.firstIndex(of: intro) ?? 0,
+                        activeTint: .gray
+                    )
                     
                     Spacer(minLength: 10)
                     
@@ -167,30 +235,25 @@ struct IntroView<ActionView: View>: View {
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
                             .frame(width: size.width * 0.4)
-                            .padding(.vertical,15)
+                            .padding(.vertical, 15)
                             .background {
-                                Capsule()
-                                    .fill(.black)
+                                Capsule().fill(.black)
                             }
                     }
                     .frame(maxWidth: .infinity)
                 }
             } else {
-                // Action view
+                // Action view: here our combined Auth view is injected
                 actionView
                     .offset(y: showView ? 0 : size.height / 2)
                     .opacity(showView ? 1 : 0)
             }
-            
-        } // end of vstack
+        } // end of VStack
         .frame(maxWidth: .infinity, alignment: .leading)
-        // move down
         .offset(y: showView ? 0 : size.height / 2)
         .opacity(showView ? 1 : 0)
         .offset(y: hideWholeView ? size.height / 2 : 0)
         .opacity(hideWholeView ? 0 : 1)
-        
-
         .onAppear {
             withAnimation(.spring(response: 0.8, dampingFraction: 0.8, blendDuration: 0).delay(0.1)) {
                 showView = true
@@ -198,20 +261,19 @@ struct IntroView<ActionView: View>: View {
         }
     }
     
-    
     func changeIntro(_ isPrevious: Bool = false) {
         withAnimation(.spring(response: 0.8, dampingFraction: 0.8, blendDuration: 0)) {
             hideWholeView = true
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if let index = pageIntros.firstIndex(of: intro), (isPrevious ? index != 0 : index != pageIntros.count - 1){
+            if let index = pageIntros.firstIndex(of: intro),
+               (isPrevious ? index != 0 : index != pageIntros.count - 1) {
                 intro = isPrevious ? pageIntros[index - 1] : pageIntros[index + 1]
             } else {
                 intro = isPrevious ? pageIntros[0] : pageIntros[pageIntros.count - 1]
             }
             
-            //
             hideWholeView = false
             showView = false
             
@@ -219,8 +281,6 @@ struct IntroView<ActionView: View>: View {
                 showView = true
             }
         }
-        
-       
     }
     
     var filteredPages: [PageIntro] {
@@ -228,4 +288,19 @@ struct IntroView<ActionView: View>: View {
     }
 }
 
-
+struct ErrorBannerView: View {
+    let message: String
+    
+    var body: some View {
+        Text(message)
+            .font(.callout)
+            .padding()
+            //.frame(maxWidth: .infinity)
+            //.background(Color.red.opacity(0.9))
+            .foregroundColor(.white)
+            .padding(.horizontal)
+            .background {
+                Capsule().fill(.red)
+            }
+    }
+}
