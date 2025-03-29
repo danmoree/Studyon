@@ -9,23 +9,30 @@ import SwiftUI
 
 struct TabBarView: View {
     @Binding var selectedTab: Tab
+    @Namespace private var animation
     
     var body: some View {
         HStack {
             ForEach(Tab.allCases, id: \.self) { tab in
                 Spacer()
                 Button(action: {
-                    selectedTab = tab
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        selectedTab = tab
+                    }
                 }) {
                     VStack {
-                        Image(systemName: tab.iconName)
-                            .font(.system(size: 22))
-                            .foregroundColor(selectedTab == tab ? .black : .gray)
-                            .background(
+                        ZStack {
+                            if selectedTab == tab {
                                 Circle()
-                                    .fill(selectedTab == tab ? Color.white : Color.clear)
+                                    .fill(Color.white)
                                     .frame(width: 40, height: 40)
-                            )
+                                    .matchedGeometryEffect(id: "background", in: animation)
+                            }
+
+                            Image(systemName: tab.iconName)
+                                .font(.system(size: 22))
+                                .foregroundColor(selectedTab == tab ? .black : .gray)
+                        }
                     }
                 }
                 Spacer()
