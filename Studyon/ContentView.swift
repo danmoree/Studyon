@@ -10,9 +10,9 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         
-        AuthView()
-            .preferredColorScheme(.light)
-        //MainTabView()
+        //AuthView()
+        //    .preferredColorScheme(.light)
+        MainTabView()
     }
 }
 

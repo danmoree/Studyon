@@ -11,7 +11,7 @@ struct HomeParentView: View {
     @State private var selectedFilter: HomeFilter = .all
 
     var body: some View {
-        Spacer()
+        
         VStack(alignment: .leading, spacing: 16) {
             // Header
             VStack(alignment: .leading, spacing: 4) {
@@ -48,8 +48,9 @@ struct HomeParentView: View {
             }
             .fontWidth(.expanded)
             .padding(.horizontal, 23)
+            .padding(.top, 20)
 
-            // Segmented Control
+            // Segmented Control - Top tab bar
             HStack {
                 HomeSegmentedControl(selectedFilter: $selectedFilter)
             }
@@ -60,10 +61,39 @@ struct HomeParentView: View {
                 VStack(spacing: 24) {
                     switch selectedFilter {
                     case .all:
-                        //SummaryCard()
-                        //TimeSpentCard()
-                        //ActiveRoomsPreviewView()
-                        Text("Summary")
+                        VStack {
+                            VStack {
+                                HStack {
+                                    Text("Summary")
+                                        .fontWeight(.bold)
+                                        .fontWidth(.expanded)
+                                        .font(.title3)
+                                        .padding(.leading, 5)
+                                    Spacer()
+                                }
+                                
+                                HStack {
+                                    TodayTasks()
+                                        .padding(.trailing,10)
+                                    TimeSpentCard()
+                                }
+                            }
+                            .padding(.bottom)
+                            
+                            // Active rooms sections
+                            HStack {
+                                Text("Active Rooms!!")
+                                    .fontWeight(.bold)
+                                    .fontWidth(.expanded)
+                                    .font(.title3)
+                                    .padding(.leading, 5)
+                                
+                                Spacer()
+                            }
+                            ActiveRoomsPreviewView()
+                        }
+                       
+                        
                     case .todo:
                         //TodoSummaryView()
                         Text("Todo")
