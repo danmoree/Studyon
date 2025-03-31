@@ -54,7 +54,6 @@ struct HomeParentView: View {
                 HomeSegmentedControl(selectedFilter: $selectedFilter)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 8)
 
             // Scrollable content
             ScrollView {
@@ -71,6 +70,8 @@ struct HomeParentView: View {
                     case .activeRooms:
                         //ActiveRoomsPreviewView()
                         Text("Active rooms")
+                    case .friends:
+                        Text("Friends")
                     }
                 }
                 .padding()

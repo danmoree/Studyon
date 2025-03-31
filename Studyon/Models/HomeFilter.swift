@@ -11,4 +11,5 @@ enum HomeFilter: String, CaseIterable {
     case all = "All"
     case todo = "Todo"
     case activeRooms = "Active Rooms"
+    case friends = "Friends"
 }

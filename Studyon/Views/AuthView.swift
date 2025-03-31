@@ -69,7 +69,7 @@ final class AuthViewModel: ObservableObject {
     }
 }
 
-struct Home: View {
+struct AuthView: View {
     @StateObject private var viewModel = AuthViewModel()
     
     @State private var activeIntro: PageIntro = pageIntros[0]
