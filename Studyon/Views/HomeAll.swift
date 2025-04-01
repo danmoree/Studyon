@@ -121,7 +121,21 @@ struct ActiveRoomsPreviewView: View {
             VStack {
                 HStack {
                     Text("Brady’s Study Room")
-                        .bold()
+                        .foregroundColor(.white)
+                        .fontWidth(.expanded)
+                        .fontWeight(.medium)
+                    
+                    Spacer()
+                 
+                }
+                
+                HStack {
+                    
+                    Capsule()
+                        .fill(Color.white)
+                        .frame(width: 110, height: 40)
+    
+                    
                     Spacer()
                     Button("Join") {
                         // join room logic
@@ -130,19 +144,47 @@ struct ActiveRoomsPreviewView: View {
                     .padding(.vertical, 6)
                     .background(Color.black)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(30)
+                    .fontWidth(.expanded)
+                    .fontWeight(.bold)
+                    
+                    
                 }
+                
+                
                 HStack {
-                    Text("Start 9:00")
+                    VStack {
+                        Text("Start")
+                        Text("9:00")
+                    }
+                    .foregroundColor(.white)
+                    
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Text("34 mins left")
+                                .foregroundColor(.white)
+                            Spacer()
+                        }
+                        
+                        Capsule()
+                            .frame(width: 250, height: 10)
+                            .padding(.horizontal)
+                    }
                     Spacer()
-                    Text("34 mins left")
-                    Spacer()
-                    Text("End 11:30")
+                   
+                    
+                    VStack(alignment: .leading) {
+                        Text("End")
+                        Text("11:30")
+                    }
+                    .foregroundColor(.white)
+                    
                 }
                 .font(.caption)
             }
             .padding()
-            .background(Color.green.opacity(0.2))
+            .background(Color.green.opacity(0.9))
             .cornerRadius(16)
         }
     }
@@ -151,4 +193,5 @@ struct ActiveRoomsPreviewView: View {
 #Preview {
     TodayTasks()
     TimeSpentCard()
+    ActiveRoomsPreviewView()
 }
