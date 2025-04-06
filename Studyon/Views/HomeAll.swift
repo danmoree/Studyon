@@ -91,7 +91,7 @@ struct TimeSpentCard: View {
                                 .fill(Color.white.opacity(0.2))
                                 .frame(width: 8, height: 60)
                             Capsule()
-                                .fill(Color.green)
+                                .fill(Color(red: 105/255, green: 169/255, blue: 98/255))
                                 .frame(width: 8, height: CGFloat.random(in: 20...60))
                         }
                         Text(day)
@@ -130,11 +130,35 @@ struct ActiveRoomsPreviewView: View {
                 }
                 
                 HStack {
-                    
-                    Capsule()
-                        .fill(Color.white)
-                        .frame(width: 110, height: 40)
-    
+                    HStack(spacing: -12) {
+                        ForEach(0..<3) { index in
+                            Image("profile_pic\(index + 1)")// Replace with actual image names or URLs
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                            
+                            
+                        }
+                        
+                        
+                        
+                        ZStack {
+                            Circle()
+                                .fill(Color.gray)
+                                .frame(width: 40, height: 40)
+                            Text("+4")
+                                .foregroundColor(.white)
+                                .fontWeight(.bold)
+                                .fontWidth(.expanded)
+                        }
+                        
+                        
+                    }
+                    .padding(8)
+                    .background(Color.white)
+                    .clipShape(Capsule())
                     
                     Spacer()
                     Button("Join") {
@@ -147,10 +171,10 @@ struct ActiveRoomsPreviewView: View {
                     .cornerRadius(30)
                     .fontWidth(.expanded)
                     .fontWeight(.bold)
-                    
-                    
                 }
+    
                 
+               
                 
                 HStack {
                     VStack {
@@ -167,9 +191,13 @@ struct ActiveRoomsPreviewView: View {
                             Spacer()
                         }
                         
-                        Capsule()
-                            .frame(width: 250, height: 10)
-                            .padding(.horizontal)
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(Color.white.opacity(0.5))
+                                .frame(width: 250, height: 10)
+                            Capsule()
+                                .frame(width: 200, height: 10)
+                        }
                     }
                     Spacer()
                    
@@ -184,9 +212,10 @@ struct ActiveRoomsPreviewView: View {
                 .font(.caption)
             }
             .padding()
-            .background(Color.green.opacity(0.9))
+            .background(Color(red: 105/255, green: 169/255, blue: 98/255)) // dark green
             .cornerRadius(16)
         }
+        .fontWidth(.expanded)
     }
 }
 
