@@ -22,7 +22,8 @@ struct MainTabView: View {
                     Text("Rooms")
                 case .home:
                     //HomeView()
-                    Text("Home")
+                    //Text("Home")
+                    HomeParentView()
                 case .social:
                     //SocialFeedView()
                     Text("Social")
