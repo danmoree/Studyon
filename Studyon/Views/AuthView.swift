@@ -15,7 +15,7 @@ final class AuthViewModel: ObservableObject {
     @Published var password = ""
     @Published var errorMessage: String? = nil
     
-    func signUp() {
+    func signUp(onSuccess: @escaping () -> Void) {
         guard !email.isEmpty, !password.isEmpty else {
             print("No email or password provided for sign up.")
             return
@@ -26,6 +26,7 @@ final class AuthViewModel: ObservableObject {
                 let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
                 print("Sign up successful!")
                 print(returnedUserData)
+                onSuccess()
             } catch {
                 let nsError = error as NSError
                 if nsError.code == AuthErrorCode.emailAlreadyInUse.rawValue {
@@ -47,7 +48,7 @@ final class AuthViewModel: ObservableObject {
         }
     }
     
-    func signIn() {
+    func signIn(onSuccess: @escaping () -> Void) {
         guard !email.isEmpty, !password.isEmpty else {
             errorMessage = "Please enter both email and password."
             return
@@ -58,6 +59,7 @@ final class AuthViewModel: ObservableObject {
                 let userData = try await AuthenticationManager.shared.signIn(email: email, password: password)
                 print("Sign in successful!")
                 print(userData)
+                onSuccess()
             } catch {
                 DispatchQueue.main.async {
                     withAnimation {
@@ -70,6 +72,7 @@ final class AuthViewModel: ObservableObject {
 }
 
 struct AuthView: View {
+    var onLoginSuccess: () -> Void
     @StateObject private var viewModel = AuthViewModel()
     
     @State private var activeIntro: PageIntro = pageIntros[0]
@@ -102,9 +105,9 @@ struct AuthView: View {
                     // Primary action button (Sign Up / Sign In)
                     Button {
                         if isSignUp {
-                            viewModel.signUp()
+                            viewModel.signUp(onSuccess: onLoginSuccess)
                         } else {
-                            viewModel.signIn()
+                            viewModel.signIn(onSuccess: onLoginSuccess)
                         }
                     } label: {
                         Text(isSignUp ? "Sign Up" : "Sign In")

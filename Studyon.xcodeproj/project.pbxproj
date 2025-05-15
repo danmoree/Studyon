@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		654189432DD685B2007E7F77 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 654189422DD685B2007E7F77 /* FirebaseFirestore */; };
 		65D805D92D725AEE00BF8A91 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 65D805D82D725AEE00BF8A91 /* FirebaseAnalytics */; };
 		65D805DC2D72CF4C00BF8A91 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 65D805DB2D72CF4C00BF8A91 /* FirebaseAuth */; };
 /* End PBXBuildFile section */
@@ -59,6 +60,7 @@
 			files = (
 				65D805D92D725AEE00BF8A91 /* FirebaseAnalytics in Frameworks */,
 				65D805DC2D72CF4C00BF8A91 /* FirebaseAuth in Frameworks */,
+				654189432DD685B2007E7F77 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,6 +131,7 @@
 			packageProductDependencies = (
 				65D805D82D725AEE00BF8A91 /* FirebaseAnalytics */,
 				65D805DB2D72CF4C00BF8A91 /* FirebaseAuth */,
+				654189422DD685B2007E7F77 /* FirebaseFirestore */,
 			);
 			productName = Studyon;
 			productReference = 65B85A522D5F20B600A735DE /* Studyon.app */;
@@ -591,6 +594,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		654189422DD685B2007E7F77 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 65D805D72D725AEE00BF8A91 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
 		65D805D82D725AEE00BF8A91 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 65D805D72D725AEE00BF8A91 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

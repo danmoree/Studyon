@@ -9,6 +9,8 @@ import SwiftUI
 
 struct HomeParentView: View {
     @State private var selectedFilter: HomeFilter = .all
+    @State private var showingSettings = false
+    @Binding var isUserLoggedIn: Bool
 
     var body: some View {
         
@@ -16,9 +18,18 @@ struct HomeParentView: View {
             // Header
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Image(systemName: "person.crop.circle.fill")
-                        .resizable()
-                        .frame(width: 60, height: 60)
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Image(systemName: "person.crop.circle.fill")
+                            .resizable()
+                            .frame(width: 60, height: 60)
+                    }
+                    .sheet(isPresented: $showingSettings) {
+                        UserSettings(isUserLoggedIn: $isUserLoggedIn)
+                    }
+
+                  
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Hi, Daniel ☕️")
@@ -111,5 +122,5 @@ struct HomeParentView: View {
 }
 
 #Preview {
-    HomeParentView()
+    HomeParentView(isUserLoggedIn: .constant(true))
 }

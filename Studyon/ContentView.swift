@@ -6,13 +6,24 @@
 //
 
 import SwiftUI
+import Firebase
+import FirebaseAuth
 
 struct ContentView: View {
+    @State private var isUserLoggedIn = Auth.auth().currentUser != nil
+    
     var body: some View {
         
-        //AuthView()
-        //    .preferredColorScheme(.light)
-        MainTabView()
+        Group {
+            if isUserLoggedIn {
+                MainTabView(isUserLoggedIn: $isUserLoggedIn)
+            } else {
+                AuthView(onLoginSuccess: {
+                    self.isUserLoggedIn = true
+                })
+            }
+        }
+    
     }
 }
 
