@@ -129,4 +129,5 @@ struct HomeParentView: View {
 
 #Preview {
     HomeParentView(isUserLoggedIn: .constant(true))
+        .environmentObject(ProfileViewModel())
 }
