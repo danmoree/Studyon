@@ -11,6 +11,7 @@ struct HomeParentView: View {
     @State private var selectedFilter: HomeFilter = .all
     @State private var showingSettings = false
     @Binding var isUserLoggedIn: Bool
+    @EnvironmentObject var userVM: ProfileViewModel
 
     var body: some View {
         
@@ -32,9 +33,14 @@ struct HomeParentView: View {
                   
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Hi, Daniel ☕️")
-                            .font(.title)
-                            .bold()
+                        if let user = userVM.user {
+                            Text("Hi, \(user.userId)")
+                                .font(.title)
+                                .bold()
+                        } else {
+                            Text("Loading...")
+                        }
+                        
                             
                         
                         HStack(spacing: 10) {
