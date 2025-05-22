@@ -12,12 +12,15 @@ import FirebaseAuth
 struct UserSettings: View {
     @Binding var isUserLoggedIn: Bool
     @Environment(\.dismiss) private var dismiss
-
+    
+    @EnvironmentObject var viewModel: ProfileViewModel
+    
     var body: some View {
         VStack(spacing: 20) {
             Text("User Settings")
                 .font(.title)
 
+           
             Button(action: {
                 do {
                     try Auth.auth().signOut()
@@ -40,6 +43,17 @@ struct UserSettings: View {
                 .background(Color.blue)
                 .cornerRadius(8)
             }
+            
+            if let user = viewModel.user {
+                Button {
+                    viewModel.togglePremiumStatus()
+                } label: {
+                    Text("User is premium: \((user.isPremium ?? false).description.capitalized)")
+                }
+            }
+            
+       
+
         }
         .padding()
     }

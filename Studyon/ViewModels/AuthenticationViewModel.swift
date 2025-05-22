@@ -34,11 +34,16 @@ final class AuthenticationManager {
         return AuthDataResultModel(user: user)
     }
     
-    func createUser(email: String, password: String ) async throws {
+//    func createUser(email: String, password: String ) async throws {
+//        let authDataResult = try await Auth.auth().createUser(withEmail: email, password: password)
+//        let user = DBUser(userId: authDataResult.user.uid, email: authDataResult.user.email, photoUrl: authDataResult.user.photoURL?.absoluteString, dateCreated: Date())
+//        
+//        try await UserManager.shared.createNewUser(user: user)
+//    }
+    
+    func createUser(email: String, password: String) async throws -> AuthDataResultModel {
         let authDataResult = try await Auth.auth().createUser(withEmail: email, password: password)
-        let user = DBUser(userId: authDataResult.user.uid, email: authDataResult.user.email, photoUrl: authDataResult.user.photoURL?.absoluteString, dateCreated: Date())
-        
-        try await UserManager.shared.createNewUser(user: user)
+        return AuthDataResultModel(user: authDataResult.user)
     }
     
     // New signIn method for returning users

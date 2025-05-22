@@ -24,6 +24,8 @@ final class AuthViewModel: ObservableObject {
         Task {
             do {
                 let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
+                let user = DBUser(auth: returnedUserData)
+                try await UserManager.shared.createNewUser(user: user)
                 print("Sign up successful!")
                 print(returnedUserData)
                 onSuccess()
