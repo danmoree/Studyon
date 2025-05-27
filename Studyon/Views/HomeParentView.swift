@@ -34,7 +34,7 @@ struct HomeParentView: View {
                     
                     VStack(alignment: .leading, spacing: 2) {
                         if let user = userVM.user {
-                            Text("Hi, \(user.userId)")
+                            Text("Hi, \(user.fullName ?? "there")")
                                 .font(.title)
                                 .bold()
                         } else {

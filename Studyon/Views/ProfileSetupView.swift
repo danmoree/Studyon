@@ -12,13 +12,14 @@ import FirebaseAuth
 struct ProfileSetupView: View {
     let userID: String
     
+    @Binding var needsProfileSetup: Bool
     @State private var fullName    = ""
     @State private var username    = ""
     @State private var birthDate   = Date()
     @State private var errorMessage: String?
     
     @EnvironmentObject var userVM: ProfileViewModel
-    @Environment(\.presentationMode) var presentation
+    
     
     var body: some View {
         VStack(spacing: 20) {
@@ -86,6 +87,27 @@ struct ProfileSetupView: View {
                 }
                 errorMessage = nil
                 
+                
+                Task {
+                    do {
+                        try await UserManager.shared.updateUserProfileInfo(
+                            userId: userID,
+                            fullName: fullName,
+                            username: username,
+                            dateOfBirth: birthDate
+                        )
+                        
+                        // Optional: refresh profile
+                        try await userVM.loadCurrentUser()
+                        
+                        needsProfileSetup = false
+                        
+                        
+                    } catch {
+                        errorMessage = "Failed to save profile: \(error.localizedDescription)"
+                    }
+                }
+                
             } label: {
                 Text("Study!")
                     .fontWeight(.semibold)
@@ -108,5 +130,5 @@ struct ProfileSetupView: View {
  
 
 #Preview {
-    ProfileSetupView(userID: "sdfasdga")
+    ProfileSetupView(userID: "sdfasdga", needsProfileSetup: .constant(true))
 }

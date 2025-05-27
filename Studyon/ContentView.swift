@@ -20,7 +20,8 @@ struct ContentView: View {
         Group {
             if isUserLoggedIn {
                 if needsProfileSetup, let uid = userID {
-                    ProfileSetupView(userID: uid)
+                    ProfileSetupView(userID: uid, needsProfileSetup: $needsProfileSetup)
+                        .environmentObject(userVM)
                 } else {
                     MainTabView(isUserLoggedIn: $isUserLoggedIn)
                         .task {

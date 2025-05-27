@@ -15,6 +15,9 @@ struct DBUser: Codable {
     let photoUrl: String?
     let dateCreated: Date?
     let isPremium: Bool?
+    let fullName: String?
+    let username: String?
+    let dateOfBirth: Date?
     
     
     init(auth: AuthDataResultModel) {
@@ -23,6 +26,9 @@ struct DBUser: Codable {
         self.photoUrl = auth.photoUrl
         self.dateCreated = Date()
         self.isPremium = false
+        self.fullName = nil
+        self.username = nil
+        self.dateOfBirth = nil
     }
     
     init(
@@ -30,13 +36,19 @@ struct DBUser: Codable {
         email: String? = nil,
         photoUrl: String? = nil,
         dateCreated: Date? = nil,
-        isPremium: Bool? = nil
+        isPremium: Bool? = nil,
+        fullName: String? = nil,
+        username: String? = nil,
+        dateOfBirth: Date? = nil
     ) {
         self.userId = userId
         self.email = email
         self.photoUrl = photoUrl
         self.dateCreated = dateCreated
         self.isPremium = isPremium
+        self.fullName = fullName
+        self.username = username
+        self.dateOfBirth = dateOfBirth
     }
     
 //    func toggleIsPremiumStatus() -> DBUser {
@@ -56,6 +68,9 @@ struct DBUser: Codable {
         case photoUrl = "photo_url"
         case dateCreated = "date_created"
         case isPremium = "is_premium"
+        case fullName = "full_name"
+        case username = "username"
+        case dateOfBirth = "date_of_birth"
     }
     
     // download from firestore
@@ -66,6 +81,9 @@ struct DBUser: Codable {
         self.photoUrl = try container.decodeIfPresent(String.self, forKey: .photoUrl)
         self.dateCreated = try container.decodeIfPresent(Date.self, forKey: .dateCreated)
         self.isPremium = try container.decodeIfPresent(Bool.self, forKey: .isPremium)
+        self.fullName = try container.decodeIfPresent(String.self, forKey: .fullName)
+        self.username = try container.decodeIfPresent(String.self, forKey: .username)
+        self.dateOfBirth = try container.decodeIfPresent(Date.self, forKey: .dateOfBirth)
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -75,6 +93,9 @@ struct DBUser: Codable {
         try container.encodeIfPresent(self.photoUrl, forKey: .photoUrl)
         try container.encodeIfPresent(self.dateCreated, forKey: .dateCreated)
         try container.encodeIfPresent(self.isPremium, forKey: .isPremium)
+        try container.encodeIfPresent(self.fullName, forKey: .fullName)
+        try container.encodeIfPresent(self.username, forKey: .username)
+        try container.encodeIfPresent(self.dateOfBirth, forKey: .dateOfBirth)
     }
     
  
@@ -153,5 +174,14 @@ final class UserManager {
             DBUser.CodingKeys.isPremium.rawValue : isPremium
         ]
         try await userDocument(userId: userId).updateData(data)
+    }
+    
+    func updateUserProfileInfo(userId: String, fullName: String, username: String, dateOfBirth: Date) async throws {
+        let data: [String: Any] = [
+            DBUser.CodingKeys.fullName.rawValue: fullName,
+            DBUser.CodingKeys.username.rawValue: username,
+            DBUser.CodingKeys.dateOfBirth.rawValue: Timestamp(date: dateOfBirth)
+        ]
+        try await userDocument(userId: userId).setData(data, merge: true)
     }
 }
