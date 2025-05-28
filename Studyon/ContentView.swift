@@ -14,12 +14,13 @@ struct ContentView: View {
     @StateObject private var userVM = ProfileViewModel()
     @State private var needsProfileSetup = false
     @State private var userID: String? = Auth.auth().currentUser?.uid
+    @State private var hasCheckedProfile = false
     
     var body: some View {
         
         Group {
-            if isUserLoggedIn {
-                if needsProfileSetup, let uid = userID {
+            if let uid = userID, isUserLoggedIn, hasCheckedProfile {
+                if needsProfileSetup {
                     ProfileSetupView(userID: uid, needsProfileSetup: $needsProfileSetup)
                         .environmentObject(userVM)
                 } else {
@@ -29,12 +30,18 @@ struct ContentView: View {
                         }
                         .environmentObject(userVM)
                 }
+            } else if isUserLoggedIn && !hasCheckedProfile {
+                ProgressView("Loading profile...")
             } else {
                 AuthView(onLoginSuccess: {
                     self.userID = Auth.auth().currentUser?.uid
-                    self.checkProfile()
-                    self.isUserLoggedIn = true
+                    self.checkProfileThenLogin()
                 })
+            }
+        }
+        .task {
+            if isUserLoggedIn && !hasCheckedProfile {
+                self.checkProfile()
             }
         }
     
@@ -53,6 +60,25 @@ struct ContentView: View {
             } else {
                 self.needsProfileSetup = true
             }
+            self.hasCheckedProfile = true
+        }
+    }
+    
+    private func checkProfileThenLogin() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(uid)
+
+        userRef.getDocument { snapshot, error in
+            if let data = snapshot?.data(),
+               let username = data["username"] as? String,
+               !username.isEmpty {
+                self.needsProfileSetup = false
+            } else {
+                self.needsProfileSetup = true
+            }
+            self.hasCheckedProfile = true
+            self.isUserLoggedIn = true
         }
     }
 }
