@@ -16,8 +16,8 @@ struct MainTabView: View {
             ZStack {
                 switch selectedTab {
                 case .tasks:
-                    //TasksView()
-                    Text("Tasks")
+                    TasksView(isUserLoggedIn: $isUserLoggedIn)
+                    
                 case .rooms:
                     //StudyRoomsView()
                     Text("Rooms")
