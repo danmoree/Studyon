@@ -10,6 +10,7 @@ import SwiftUI
 struct TasksView: View {
     @State private var selectedFilter: TasksFilter = .all
     @State private var showingSettings = false
+    @State private var showingAddTaskSheet = false
     @Binding var isUserLoggedIn: Bool
     @EnvironmentObject var userVM: ProfileViewModel
 
@@ -26,7 +27,7 @@ struct TasksView: View {
                     Spacer()
                     
                     Button {
-                        
+                        showingAddTaskSheet = true
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .resizable()
@@ -91,6 +92,11 @@ struct TasksView: View {
                 }
                 .padding()
             }
+        }
+        .sheet(isPresented: $showingAddTaskSheet) {
+            TaskAddView(showingAddTaskSheet: $showingAddTaskSheet)
+                .presentationDetents([.height(420)])
+                .presentationDragIndicator(.visible)
         }
     }
 }
