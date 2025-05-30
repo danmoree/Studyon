@@ -2,7 +2,7 @@
 //  Task.swift
 //  Studyon
 //
-//  Created by Daniel Moreno on 3/30/25.
+//  Created by Daniel Moreno on 5/29/25.
 //
 
 import Foundation
@@ -15,5 +15,3 @@ struct UserTask: Codable, Identifiable {
     var description: String
     var priority: Int
 }
-
-

@@ -9,13 +9,13 @@ import Foundation
 import Firebase
 import FirebaseFirestore
 
-struct Task: Codable {
+struct UTask: Codable {
     let taskId: String
-    let title: String
+    let title: String?
     let description: String?
-    let createdAt: Date
-    let dueDate: Date
-    let completed: Bool
+    let createdAt: Date?
+    let dueDate: Date?
+    let completed: Bool?
     let priority: String
     let tag: String?
     
@@ -98,7 +98,7 @@ final class TaskManager {
     
     
 
-    func addTask(for userId: String, task: Task, completion: @escaping (Error?) -> Void) {
+    func addTask(for userId: String, task: UTask, completion: @escaping (Error?) -> Void) {
         do {
             let data = try Firestore.Encoder().encode(task)
             taskDocument(userId: userId, taskId: task.taskId).setData(data, completion: completion)
@@ -109,7 +109,7 @@ final class TaskManager {
 
     
     
-    func updateTask(for userId: String, task: Task, completion: @escaping (Error?) -> Void) {
+    func updateTask(for userId: String, task: UTask, completion: @escaping (Error?) -> Void) {
         do {
             let data = try Firestore.Encoder().encode(task)
             taskDocument(userId: userId, taskId: task.taskId).updateData(data, completion: completion)
@@ -123,7 +123,7 @@ final class TaskManager {
         taskDocument(userId: userId, taskId: taskId).delete(completion: completion)
     }
     
-    func fetchTasks(for userId: String, completion: @escaping ([Task]?, Error?) -> Void) {
+    func fetchTasks(for userId: String, completion: @escaping ([UTask]?, Error?) -> Void) {
         tasksCollection(for: userId).getDocuments { snapshot, error in
             if let error = error {
                 completion(nil, error)
@@ -135,8 +135,8 @@ final class TaskManager {
                 return
             }
             
-            let tasks: [Task] = documents.compactMap { doc in
-                try? doc.data(as: Task.self)
+            let tasks: [UTask] = documents.compactMap { doc in
+                try? doc.data(as: UTask.self)
             }
             
             completion(tasks,nil)

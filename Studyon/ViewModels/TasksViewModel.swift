@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 
 final class TasksViewModel: ObservableObject {
-    @Published var tasks: [Task] = []
+    @Published var tasks: [UTask] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     
