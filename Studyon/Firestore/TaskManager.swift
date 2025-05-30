@@ -121,9 +121,15 @@ final class TaskManager {
     
     func fetchTasks(for userId: String) async throws -> [UTask] {
         let snapshot = try await tasksCollection(for: userId).getDocuments()
-        return snapshot.documents.compactMap { doc in
-            try? doc.data(as: UTask.self)
+        
+        var tasks: [UTask] = []
+        
+        for doc in snapshot.documents {
+            if let task = try? doc.data(as: UTask.self) {
+                tasks.append(task)
+            }
         }
+        return tasks
     }
     
     

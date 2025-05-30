@@ -69,15 +69,15 @@ struct TasksView: View {
                                 
                                 VStack (spacing: 0){
                                     //                                    CustomTaskView(title: "Finish ch3", dueDate: Date().addingTimeInterval(0), isCompleted: false, priority: "High")
-                                    //                                    
+                                    //
                                     //                                    CustomTaskView(title: "Finish ch6 quiz insect", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "medium")
-                                    //                                    
+                                    //
                                     //                                    CustomTaskView(title: "Quiz 3 - ML", dueDate: Date().addingTimeInterval(250400), isCompleted: false, priority: "low")
-                                    //                                    
+                                    //
                                     //                                    CustomTaskView(title: "Exam 2 - Geo", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "")
-                                    //                                    
+                                    //
                                     //                                    CustomTaskView(title: "Finish ch3 hw", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "none")
-                                    ForEach(tasksVM.tasks) { task in
+                                    ForEach(tasksVM.sortedTasksByDueDate().reversed()) { task in
                                         if let title = task.title {
                                             CustomTaskView(
                                                 title: title,
@@ -103,14 +103,20 @@ struct TasksView: View {
                 .padding()
             }
         }
-        .sheet(isPresented: $showingAddTaskSheet) {
+        .sheet(isPresented: $showingAddTaskSheet, onDismiss: {
+            if let userId = userVM.user?.userId {
+                tasksVM.fetchTasks(for: userId)
+                tasksVM.tasks = tasksVM.sortedTasksByDueDate().reversed()
+            }
+        }) {
             TaskAddView(showingAddTaskSheet: $showingAddTaskSheet, viewModel: tasksVM)
                 .presentationDetents([.height(420)])
                 .presentationDragIndicator(.visible)
         }
         .task {
             if let userId = userVM.user?.userId {
-                await tasksVM.fetchTasks(for: userId)
+                 tasksVM.fetchTasks(for: userId)
+                 tasksVM.tasks = tasksVM.sortedTasksByDueDate().reversed()
             }
         }
     }

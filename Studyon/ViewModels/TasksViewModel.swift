@@ -32,4 +32,19 @@ final class TasksViewModel: ObservableObject {
             }
         }
     }
+    
+    func sortedTasksByDueDate() -> [UTask] {
+        return tasks.sorted { task1, task2 in
+            switch (task1.dueDate, task2.dueDate) {
+            case let (date1?, date2?):
+                return date1 > date2
+            case (nil, _?):
+                return false
+            case (_?, nil):
+                return true
+            case (nil, nil):
+                return false
+            }
+        }
+    }
 }
