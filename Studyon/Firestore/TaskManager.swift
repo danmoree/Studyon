@@ -10,7 +10,7 @@ import Firebase
 import FirebaseFirestore
 
 struct UTask: Codable {
-    let taskId: String
+    var taskId: String
     let title: String?
     let description: String?
     let createdAt: Date?
@@ -55,7 +55,7 @@ struct UTask: Codable {
     // get from firestore
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.taskId = try container.decode(String.self, forKey: .taskId)
+        self.taskId = try container.decodeIfPresent(String.self, forKey: .taskId) ?? ""
         self.title = try container.decode(String.self, forKey: .title)
         self.description = try container.decodeIfPresent(String.self, forKey: .description)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
@@ -84,11 +84,12 @@ final class TaskManager {
     static let shared = TaskManager()
 
     private let userCollection = Firestore.firestore().collection("users")
-
+    // /users/{userId}/tasks
     private func tasksCollection(for userId: String) -> CollectionReference {
         userCollection.document(userId).collection("tasks")
     }
     
+    // /users/{userId}/tasks/{taskId}
     private func taskDocument(userId: String, taskId: String) -> DocumentReference {
         tasksCollection(for: userId).document(taskId)
     }
@@ -97,50 +98,29 @@ final class TaskManager {
     
     
     
-
-    func addTask(for userId: String, task: UTask, completion: @escaping (Error?) -> Void) {
-        do {
-            let data = try Firestore.Encoder().encode(task)
-            taskDocument(userId: userId, taskId: task.taskId).setData(data, completion: completion)
-        } catch {
-            completion(error)
-        }
+    func addTask(for userId: String, task: UTask) async throws {
+        let newDocRef = tasksCollection(for: userId).document()
+        var data = try Firestore.Encoder().encode(task)
+        data["task_id"] = newDocRef.documentID
+        try await newDocRef.setData(data)
     }
 
     
     
-    func updateTask(for userId: String, task: UTask, completion: @escaping (Error?) -> Void) {
-        do {
-            let data = try Firestore.Encoder().encode(task)
-            taskDocument(userId: userId, taskId: task.taskId).updateData(data, completion: completion)
-        } catch {
-            completion(error)
-        }
+    func updateTask(for userId: String, task: UTask) async throws {
+        let data = try Firestore.Encoder().encode(task)
+        try await taskDocument(userId: userId, taskId: task.taskId).updateData(data)
     }
 
     
-    func deleteTask(for userId: String, taskId: String, completion: @escaping (Error?) -> Void) {
-        taskDocument(userId: userId, taskId: taskId).delete(completion: completion)
+    func deleteTask(for userId: String, taskId: String) async throws {
+        try await taskDocument(userId: userId, taskId: taskId).delete()
     }
     
-    func fetchTasks(for userId: String, completion: @escaping ([UTask]?, Error?) -> Void) {
-        tasksCollection(for: userId).getDocuments { snapshot, error in
-            if let error = error {
-                completion(nil, error)
-                return
-            }
-            
-            guard let documents = snapshot?.documents else {
-                completion([], nil)
-                return
-            }
-            
-            let tasks: [UTask] = documents.compactMap { doc in
-                try? doc.data(as: UTask.self)
-            }
-            
-            completion(tasks,nil)
-        
+    func fetchTasks(for userId: String) async throws -> [UTask] {
+        let snapshot = try await tasksCollection(for: userId).getDocuments()
+        return snapshot.documents.compactMap { doc in
+            try? doc.data(as: UTask.self)
         }
     }
     

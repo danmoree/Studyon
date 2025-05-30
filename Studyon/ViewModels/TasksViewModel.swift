@@ -15,15 +15,19 @@ final class TasksViewModel: ObservableObject {
     
     func fetchTasks(for userId: String) {
         isLoading = true
-        TaskManager.shared.fetchTasks(for: userId) { [weak self] fetchedTasks, error in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-                if let error = error {
-                    self?.errorMessage = error.localizedDescription
-                    self?.tasks = []
-                } else {
-                    self?.errorMessage = nil
-                    self?.tasks = fetchedTasks ?? []
+        Task {
+            do {
+                let fetchedTasks = try await TaskManager.shared.fetchTasks(for: userId)
+                await MainActor.run {
+                    self.tasks = fetchedTasks
+                    self.errorMessage = nil
+                    self.isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.tasks = []
+                    self.errorMessage = error.localizedDescription
+                    self.isLoading = false
                 }
             }
         }
