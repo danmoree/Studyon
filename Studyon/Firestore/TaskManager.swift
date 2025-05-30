@@ -9,7 +9,7 @@ import Foundation
 import Firebase
 import FirebaseFirestore
 
-struct UTask: Codable {
+struct UTask: Identifiable, Codable {
     var taskId: String
     let title: String?
     let description: String?
@@ -18,6 +18,8 @@ struct UTask: Codable {
     let completed: Bool?
     let priority: String
     let tag: String?
+    
+    var id: String { taskId }
     
     
     init(

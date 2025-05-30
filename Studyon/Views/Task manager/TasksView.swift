@@ -13,6 +13,7 @@ struct TasksView: View {
     @State private var showingAddTaskSheet = false
     @Binding var isUserLoggedIn: Bool
     @EnvironmentObject var userVM: ProfileViewModel
+    @StateObject private var tasksVM = TasksViewModel()
 
     var body: some View {
         
@@ -67,17 +68,26 @@ struct TasksView: View {
                                 
                                 
                                 VStack (spacing: 0){
-                                    CustomTaskView(title: "Finish ch3", dueDate: Date().addingTimeInterval(0), isCompleted: false, priority: "High")
-                                    
-                                    CustomTaskView(title: "Finish ch6 quiz insect", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "medium")
-                                    
-                                    CustomTaskView(title: "Quiz 3 - ML", dueDate: Date().addingTimeInterval(250400), isCompleted: false, priority: "low")
-                                    
-                                    CustomTaskView(title: "Exam 2 - Geo", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "")
-                                    
-                                    CustomTaskView(title: "Finish ch3 hw", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "none")
+                                    //                                    CustomTaskView(title: "Finish ch3", dueDate: Date().addingTimeInterval(0), isCompleted: false, priority: "High")
+                                    //                                    
+                                    //                                    CustomTaskView(title: "Finish ch6 quiz insect", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "medium")
+                                    //                                    
+                                    //                                    CustomTaskView(title: "Quiz 3 - ML", dueDate: Date().addingTimeInterval(250400), isCompleted: false, priority: "low")
+                                    //                                    
+                                    //                                    CustomTaskView(title: "Exam 2 - Geo", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "")
+                                    //                                    
+                                    //                                    CustomTaskView(title: "Finish ch3 hw", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "none")
+                                    ForEach(tasksVM.tasks) { task in
+                                        if let title = task.title {
+                                            CustomTaskView(
+                                                title: title,
+                                                dueDate: task.dueDate ?? Date(),
+                                                isCompleted: task.completed ?? false,
+                                                priority: task.priority ?? "none"
+                                            )
+                                        }
+                                    }
                                 }
-                                
                                
                                     
                             }
@@ -94,9 +104,14 @@ struct TasksView: View {
             }
         }
         .sheet(isPresented: $showingAddTaskSheet) {
-            TaskAddView(showingAddTaskSheet: $showingAddTaskSheet)
+            TaskAddView(showingAddTaskSheet: $showingAddTaskSheet, viewModel: tasksVM)
                 .presentationDetents([.height(420)])
                 .presentationDragIndicator(.visible)
+        }
+        .task {
+            if let userId = userVM.user?.userId {
+                await tasksVM.fetchTasks(for: userId)
+            }
         }
     }
 }

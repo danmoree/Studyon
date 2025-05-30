@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct TaskAddView: View {
     @State private var title = ""
@@ -15,7 +16,9 @@ struct TaskAddView: View {
     @State private var showPriorityOptions = false
     @Binding var showingAddTaskSheet: Bool
     
-
+    @ObservedObject var viewModel: TasksViewModel
+    
+    
     var body: some View {
         
         VStack {
@@ -49,7 +52,7 @@ struct TaskAddView: View {
             VStack {
                 CustomTextField(text: $title, hint: "What would you like to do?", leadingIcon: Image(systemName: "list.clipboard.fill"), isPassword: false)
                 
-               
+                
                 
                 HStack(spacing: 0) {
                     Image(systemName: "calendar")
@@ -62,8 +65,8 @@ struct TaskAddView: View {
                         selection: $dueDate,
                         displayedComponents: includeTime ? [.date, .hourAndMinute] : [.date]
                     )
-                        .labelsHidden()
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    .labelsHidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(.horizontal, 15)
                 .padding(.vertical, 15)
@@ -89,7 +92,7 @@ struct TaskAddView: View {
                         .background(Color.gray.opacity(0.1))
                         .cornerRadius(10)
                     }
-    
+                    
                     
                     Spacer()
                 }
@@ -103,13 +106,13 @@ struct TaskAddView: View {
                                 .padding(.horizontal, 16)
                                 .background(
                                     priority == level
-                                        ? (
-                                            level == "Low" ? Color.blue :
+                                    ? (
+                                        level == "Low" ? Color.blue :
                                             level == "Medium" ? Color.orange :
                                             level == "High" ? Color.red :
                                             Color.gray
-                                        )
-                                        : Color.gray.opacity(0.2)
+                                    )
+                                    : Color.gray.opacity(0.2)
                                 )
                                 .foregroundColor(priority == level ? .white : .black)
                                 .clipShape(Capsule())
@@ -123,7 +126,20 @@ struct TaskAddView: View {
                 }
                 
                 Button {
-                    
+                    Task {
+                        guard let userId = Auth.auth().currentUser?.uid else { return }
+                        
+                        let newTask = UTask(taskId: "", title: title, createdAt: Date(), dueDate: dueDate, completed: false, priority: priority)
+                        
+                        do {
+                            try await TaskManager.shared.addTask(for: userId, task: newTask)
+                            await viewModel.fetchTasks(for: userId)
+                            showingAddTaskSheet = false // dismiss sheet
+                        } catch {
+                            print("Failed to add task:", error.localizedDescription)
+                        }
+                        
+                    }
                 } label: {
                     Text("Add")
                         .fontWeight(.semibold)
@@ -134,7 +150,7 @@ struct TaskAddView: View {
                             Capsule().fill(.black)
                         }
                 }
-
+                
             }
             
             .padding()
@@ -143,5 +159,8 @@ struct TaskAddView: View {
 }
 
 #Preview {
-    TaskAddView(showingAddTaskSheet: .constant(true))
+    TaskAddView(
+        showingAddTaskSheet: .constant(true),
+        viewModel: TasksViewModel()
+    )
 }
