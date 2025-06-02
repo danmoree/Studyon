@@ -57,7 +57,7 @@ struct TasksView: View {
                         
                             VStack {
                                 HStack {
-                                    Text("4 Tasks")
+                                    Text("\(tasksVM.tasks.count) Tasks")
                                         .fontWeight(.bold)
                                         .fontWidth(.expanded)
                                         .font(.title3)
@@ -68,15 +68,9 @@ struct TasksView: View {
                                 
                                 
                                 VStack (spacing: 0){
-                                    //                                    CustomTaskView(title: "Finish ch3", dueDate: Date().addingTimeInterval(0), isCompleted: false, priority: "High")
-                                    //
-                                    //                                    CustomTaskView(title: "Finish ch6 quiz insect", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "medium")
-                                    //
-                                    //                                    CustomTaskView(title: "Quiz 3 - ML", dueDate: Date().addingTimeInterval(250400), isCompleted: false, priority: "low")
-                                    //
-                                    //                                    CustomTaskView(title: "Exam 2 - Geo", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "")
-                                    //
+                                   
                                     //                                    CustomTaskView(title: "Finish ch3 hw", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "none")
+                                    
                                     ForEach(tasksVM.sortedTasksByDueDate().reversed()) { task in
                                         if let title = task.title {
                                             CustomTaskView(
@@ -93,9 +87,73 @@ struct TasksView: View {
                             }
     
                     case .today:
-                        Text("Today")
+                        VStack {
+                            let todayTasks = tasksVM.sortedTasksByDueDate().filter {
+                                if let dueDate = $0.dueDate {
+                                    return Calendar.current.isDateInToday(dueDate)
+                                }
+                                return false
+                            }
+                            HStack {
+                                Text("\(todayTasks.count) Tasks")
+                                    .fontWeight(.bold)
+                                    .fontWidth(.expanded)
+                                    .font(.title3)
+                                    .padding(.leading, 5)
+                                Spacer()
+                            }
+                            
+                            
+                            
+                            VStack (spacing: 0){
+                               
+                                //                                    CustomTaskView(title: "Finish ch3 hw", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "none")
+                                
+                                ForEach(todayTasks) { task in
+                                    if let title = task.title {
+                                        CustomTaskView(
+                                            title: title,
+                                            dueDate: task.dueDate ?? Date(),
+                                            isCompleted: task.completed ?? false,
+                                            priority: task.priority ?? "none"
+                                        )
+                                    }
+                                }
+                            }
+                           
+                                
+                        }
+                        
                     case .upcoming:
-                        Text("Upcoming")
+                        VStack {
+                            let upcomingTasks = tasksVM.sortedTasksByDueDate().filter {
+                                if let dueDate = $0.dueDate {
+                                    return dueDate > Date() && !Calendar.current.isDateInToday(dueDate)
+                                }
+                                return false
+                            }
+                            HStack {
+                                Text("\(upcomingTasks.count) Tasks")
+                                    .fontWeight(.bold)
+                                    .fontWidth(.expanded)
+                                    .font(.title3)
+                                    .padding(.leading, 5)
+                                Spacer()
+                            }
+
+                            VStack (spacing: 0){
+                                ForEach(upcomingTasks) { task in
+                                    if let title = task.title {
+                                        CustomTaskView(
+                                            title: title,
+                                            dueDate: task.dueDate ?? Date(),
+                                            isCompleted: task.completed ?? false,
+                                            priority: task.priority ?? "none"
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     case .completed:
                         Text("Completed")
                     }
