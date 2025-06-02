@@ -11,6 +11,8 @@ struct TasksView: View {
     @State private var selectedFilter: TasksFilter = .all
     @State private var showingSettings = false
     @State private var showingAddTaskSheet = false
+    @State private var selectedTask: UTask? = nil
+    @State private var isShowingEditSheet = false
     @Binding var isUserLoggedIn: Bool
     @EnvironmentObject var userVM: ProfileViewModel
     @StateObject private var tasksVM = TasksViewModel()
@@ -79,6 +81,10 @@ struct TasksView: View {
                                                 isCompleted: task.completed ?? false,
                                                 priority: task.priority ?? "none"
                                             )
+                                            .onTapGesture {
+                                                selectedTask = task
+                                                isShowingEditSheet = true
+                                            }
                                         }
                                     }
                                 }
@@ -117,6 +123,10 @@ struct TasksView: View {
                                             isCompleted: task.completed ?? false,
                                             priority: task.priority ?? "none"
                                         )
+                                        .onTapGesture {
+                                            selectedTask = task
+                                            isShowingEditSheet = true
+                                        }
                                     }
                                 }
                             }
@@ -150,6 +160,10 @@ struct TasksView: View {
                                             isCompleted: task.completed ?? false,
                                             priority: task.priority ?? "none"
                                         )
+                                        .onTapGesture {
+                                            selectedTask = task
+                                            isShowingEditSheet = true
+                                        }
                                     }
                                 }
                             }
@@ -175,6 +189,13 @@ struct TasksView: View {
             if let userId = userVM.user?.userId {
                  tasksVM.fetchTasks(for: userId)
                  tasksVM.tasks = tasksVM.sortedTasksByDueDate().reversed()
+            }
+        }
+        .sheet(isPresented: $isShowingEditSheet) {
+            if let task = selectedTask {
+                EditTaskView(task: task, isShowingEditSheet: $isShowingEditSheet, viewModel: tasksVM)
+                    .presentationDetents([.height(420)])
+                    .presentationDragIndicator(.visible)
             }
         }
     }
