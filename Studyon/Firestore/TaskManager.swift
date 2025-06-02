@@ -113,6 +113,13 @@ final class TaskManager {
         let data = try Firestore.Encoder().encode(task)
         try await taskDocument(userId: userId, taskId: task.taskId).updateData(data)
     }
+    
+    func updateTaskCompletion(for userId: String, taskId: String, isCompleted: Bool) async throws {
+        try await taskDocument(userId: userId, taskId: taskId).updateData([
+            "completed": isCompleted
+        ])
+    }
+    
 
     
     func deleteTask(for userId: String, taskId: String) async throws {
@@ -132,5 +139,6 @@ final class TaskManager {
         return tasks
     }
     
+  
     
 }

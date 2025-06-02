@@ -76,10 +76,12 @@ struct TasksView: View {
                                     ForEach(tasksVM.sortedTasksByDueDate().reversed()) { task in
                                         if let title = task.title {
                                             CustomTaskView(
+                                                taskId: task.taskId,
                                                 title: title,
                                                 dueDate: task.dueDate ?? Date(),
                                                 isCompleted: task.completed ?? false,
-                                                priority: task.priority ?? "none"
+                                                priority: task.priority ?? "none",
+                                                viewModel: TasksViewModel()
                                             )
                                             .onTapGesture {
                                                 selectedTask = task
@@ -118,10 +120,12 @@ struct TasksView: View {
                                 ForEach(todayTasks) { task in
                                     if let title = task.title {
                                         CustomTaskView(
+                                            taskId: task.taskId,
                                             title: title,
                                             dueDate: task.dueDate ?? Date(),
                                             isCompleted: task.completed ?? false,
-                                            priority: task.priority ?? "none"
+                                            priority: task.priority ?? "none",
+                                            viewModel: TasksViewModel()
                                         )
                                         .onTapGesture {
                                             selectedTask = task
@@ -155,10 +159,12 @@ struct TasksView: View {
                                 ForEach(upcomingTasks) { task in
                                     if let title = task.title {
                                         CustomTaskView(
+                                            taskId: task.taskId,
                                             title: title,
                                             dueDate: task.dueDate ?? Date(),
                                             isCompleted: task.completed ?? false,
-                                            priority: task.priority ?? "none"
+                                            priority: task.priority ?? "none",
+                                            viewModel: TasksViewModel()
                                         )
                                         .onTapGesture {
                                             selectedTask = task

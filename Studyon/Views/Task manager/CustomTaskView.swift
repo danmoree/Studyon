@@ -6,21 +6,27 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct CustomTaskView: View {
     @State private var completedState: Bool
     
+    let taskId: String
     let title: String
     let dueDate: Date
     let priority: String
     let isCompleted: Bool
+    
+    @ObservedObject var viewModel: TasksViewModel
 
-    init(title: String, dueDate: Date, isCompleted: Bool, priority: String) {
+    init(taskId: String, title: String, dueDate: Date, isCompleted: Bool, priority: String, viewModel: TasksViewModel) {
+        self.taskId = taskId
         self.title = title
         self.dueDate = dueDate
         self.isCompleted = isCompleted
         self.priority = priority
         self._completedState = State(initialValue: isCompleted)
+        self.viewModel = viewModel
     }
     
     private var formattedDueDate: String {
@@ -73,6 +79,16 @@ struct CustomTaskView: View {
                             Button {
                                 
                                 completedState.toggle()
+                                Task {
+                                    guard let userId = Auth.auth().currentUser?.uid else { return }
+                                    
+                                    do {
+                                        try await TaskManager.shared.updateTaskCompletion(for: userId , taskId: taskId, isCompleted: completedState)
+                                    } catch {
+                                        print("Error updating task completion:", error.localizedDescription)
+                                    }
+                                }
+                                
                             } label: {
                                 Image(systemName: completedState ? "checkmark.square" : "square")
                                     .foregroundColor(.white)
@@ -109,5 +125,5 @@ struct CustomTaskView: View {
 
 
 #Preview {
-    CustomTaskView(title: "Finish ch3", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "")
+    CustomTaskView(taskId: "preview-task-id", title: "Finish ch3", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "", viewModel: TasksViewModel())
 }
