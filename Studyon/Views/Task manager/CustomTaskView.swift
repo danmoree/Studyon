@@ -84,6 +84,7 @@ struct CustomTaskView: View {
                                     
                                     do {
                                         try await TaskManager.shared.updateTaskCompletion(for: userId , taskId: taskId, isCompleted: completedState)
+                                            viewModel.fetchTasks(for: userId)
                                     } catch {
                                         print("Error updating task completion:", error.localizedDescription)
                                     }

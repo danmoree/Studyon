@@ -15,6 +15,7 @@ struct EditTaskView: View {
     @State private var priority: String
     
     @State private var showPriorityOptions = false
+    @State private var showDeleteAlert = false
     
     var task: UTask
     
@@ -46,20 +47,40 @@ struct EditTaskView: View {
                     Spacer()
                     
                     Button {
-                        isShowingEditSheet = false
+                        showDeleteAlert = true
                     } label: {
-                        Image(systemName: "x.circle.fill")
+                        Image(systemName: "trash.circle.fill")
                             .resizable()
-                            .frame(width: 28, height: 28)
+                            .frame(width: 30, height: 30)
                             .foregroundStyle(Color.red)
                         
                     }
+                    
                     
                 }
                 
             }
             .padding(.horizontal, 23)
             .padding(.top, 20)
+        }
+        .alert("Delete Task?", isPresented: $showDeleteAlert) {
+            Button("Delete", role: .destructive) {
+                Task {
+                    guard let userId = Auth.auth().currentUser?.uid else { return }
+                    
+                    do {
+                        try await TaskManager.shared.deleteTask(for: userId, taskId: task.taskId)
+                        viewModel.fetchTasks(for: userId)
+                        isShowingEditSheet = false
+                    }
+                    catch {
+                        print("Failed to delete task:", error.localizedDescription)
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure?")
         }
         
         ScrollView {
@@ -147,7 +168,7 @@ struct EditTaskView: View {
                         
                         do {
                             try await TaskManager.shared.updateTask(for: userId, task: updatedTask)
-                            await viewModel.fetchTasks(for: userId)
+                            viewModel.fetchTasks(for: userId)
                             isShowingEditSheet = false // dismiss sheet
                         } catch {
                             print("Failed to update task:", error.localizedDescription)
