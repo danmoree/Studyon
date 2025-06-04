@@ -12,7 +12,6 @@ struct TasksView: View {
     @State private var showingSettings = false
     @State private var showingAddTaskSheet = false
     @State private var selectedTask: UTask? = nil
-    @State private var isShowingEditSheet = false
     @Binding var isUserLoggedIn: Bool
     @EnvironmentObject var userVM: ProfileViewModel
     @StateObject private var tasksVM = TasksViewModel()
@@ -85,7 +84,6 @@ struct TasksView: View {
                                             )
                                             .onTapGesture {
                                                 selectedTask = task
-                                                isShowingEditSheet = true
                                             }
                                         }
                                     }
@@ -129,7 +127,6 @@ struct TasksView: View {
                                         )
                                         .onTapGesture {
                                             selectedTask = task
-                                            isShowingEditSheet = true
                                         }
                                     }
                                 }
@@ -168,7 +165,6 @@ struct TasksView: View {
                                         )
                                         .onTapGesture {
                                             selectedTask = task
-                                            isShowingEditSheet = true
                                         }
                                     }
                                 }
@@ -206,7 +202,6 @@ struct TasksView: View {
                                         )
                                         .onTapGesture {
                                             selectedTask = task
-                                            isShowingEditSheet = true
                                         }
                                     }
                                 }
@@ -244,7 +239,6 @@ struct TasksView: View {
                                         )
                                         .onTapGesture {
                                             selectedTask = task
-                                            isShowingEditSheet = true
                                         }
                                     }
                                 }
@@ -272,12 +266,17 @@ struct TasksView: View {
                  tasksVM.fetchTasks(for: userId)
             }
         }
-        .sheet(isPresented: $isShowingEditSheet) {
-            if let task = selectedTask {
-                EditTaskView(task: task, isShowingEditSheet: $isShowingEditSheet, viewModel: tasksVM)
-                    .presentationDetents([.height(420)])
-                    .presentationDragIndicator(.visible)
-            }
+        .sheet(item: $selectedTask) { task in
+            EditTaskView(
+                task: task,
+                isShowingEditSheet: Binding(
+                    get: { selectedTask != nil },
+                    set: { if !$0 { selectedTask = nil } }
+                ),
+                viewModel: tasksVM
+            )
+            .presentationDetents([.height(420)])
+            .presentationDragIndicator(.visible)
         }
         .onChange(of: tasksVM.tasks) { _ in
             print("Tasks updated — UI will reflect changes")
