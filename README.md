@@ -41,6 +41,11 @@ We believe studying should be social, supportive, and even a little exciting. St
 > "Great things happen when you study smart — and when you study together."
 
 ---
+- **🛠️ Tech Stack**
+  -	Frontend: Swift, SwiftUI
+  - Backend: Firebase Authentication, Cloud Firestore
+  - Architecture: MVVM Architecture, Combine
+  -	Design Tools: Figma (UI/UX Design)
 
 **Still a Work in Progress!** 🚀 
 We're constantly improving and adding new features. Stay tuned for in-room chat, detailed study analytics, and even more ways to customize your study journey!
