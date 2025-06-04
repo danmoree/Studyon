@@ -81,7 +81,7 @@ struct TasksView: View {
                                                 dueDate: task.dueDate ?? Date(),
                                                 isCompleted: task.completed ?? false,
                                                 priority: task.priority ?? "none",
-                                                viewModel: TasksViewModel()
+                                                viewModel: tasksVM
                                             )
                                             .onTapGesture {
                                                 selectedTask = task
@@ -98,7 +98,7 @@ struct TasksView: View {
                         VStack {
                             let todayTasks = tasksVM.sortedTasksByDueDate().filter {
                                 if let dueDate = $0.dueDate {
-                                    return Calendar.current.isDateInToday(dueDate)
+                                    return Calendar.current.isDateInToday(dueDate) && ($0.completed ?? false) == false
                                 }
                                 return false
                             }
@@ -125,7 +125,7 @@ struct TasksView: View {
                                             dueDate: task.dueDate ?? Date(),
                                             isCompleted: task.completed ?? false,
                                             priority: task.priority ?? "none",
-                                            viewModel: TasksViewModel()
+                                            viewModel: tasksVM
                                         )
                                         .onTapGesture {
                                             selectedTask = task
@@ -142,7 +142,7 @@ struct TasksView: View {
                         VStack {
                             let upcomingTasks = tasksVM.sortedTasksByDueDate().filter {
                                 if let dueDate = $0.dueDate {
-                                    return dueDate > Date() && !Calendar.current.isDateInToday(dueDate)
+                                    return dueDate > Date() && !Calendar.current.isDateInToday(dueDate) && ($0.completed ?? false) == false
                                 }
                                 return false
                             }
@@ -164,7 +164,7 @@ struct TasksView: View {
                                             dueDate: task.dueDate ?? Date(),
                                             isCompleted: task.completed ?? false,
                                             priority: task.priority ?? "none",
-                                            viewModel: TasksViewModel()
+                                            viewModel: tasksVM
                                         )
                                         .onTapGesture {
                                             selectedTask = task
@@ -174,18 +174,94 @@ struct TasksView: View {
                                 }
                             }
                         }
+                        
+                    case .overDue:
+                        VStack {
+                            let overdueTasks = tasksVM.sortedTasksByDueDate().filter {
+                                if let dueDate = $0.dueDate {
+                                    return dueDate < Date() && !Calendar.current.isDateInToday(dueDate) && ($0.completed ?? false) == false
+                                        
+                                }
+                                return false
+                            }
+                            HStack {
+                                Text("\(overdueTasks.count) Tasks")
+                                    .fontWeight(.bold)
+                                    .fontWidth(.expanded)
+                                    .font(.title3)
+                                    .padding(.leading, 5)
+                                Spacer()
+                            }
+
+                            VStack (spacing: 0){
+                                ForEach(overdueTasks) { task in
+                                    if let title = task.title {
+                                        CustomTaskView(
+                                            taskId: task.taskId,
+                                            title: title,
+                                            dueDate: task.dueDate ?? Date(),
+                                            isCompleted: task.completed ?? false,
+                                            priority: task.priority ?? "none",
+                                            viewModel: tasksVM
+                                        )
+                                        .onTapGesture {
+                                            selectedTask = task
+                                            isShowingEditSheet = true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        
                     case .completed:
-                        Text("Completed")
+                        VStack {
+                            let completedTasks = tasksVM.sortedTasksByDueDate().filter {
+                                if let completed = $0.completed {
+                                    return completed
+                                }
+                                return false
+                            }
+                            HStack {
+                                Text("\(completedTasks.count) Tasks")
+                                    .fontWeight(.bold)
+                                    .fontWidth(.expanded)
+                                    .font(.title3)
+                                    .padding(.leading, 5)
+                                Spacer()
+                            }
+
+                            VStack (spacing: 0){
+                                ForEach(completedTasks) { task in
+                                    if let title = task.title {
+                                        CustomTaskView(
+                                            taskId: task.taskId,
+                                            title: title,
+                                            dueDate: task.dueDate ?? Date(),
+                                            isCompleted: task.completed ?? false,
+                                            priority: task.priority ?? "none",
+                                            viewModel: tasksVM
+                                        )
+                                        .onTapGesture {
+                                            selectedTask = task
+                                            isShowingEditSheet = true
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 .padding()
             }
         }
         .sheet(isPresented: $showingAddTaskSheet, onDismiss: {
-            if let userId = userVM.user?.userId {
-                tasksVM.fetchTasks(for: userId)
-                tasksVM.tasks = tasksVM.sortedTasksByDueDate().reversed()
+            Task {
+                if let userId = userVM.user?.userId {
+                    tasksVM.fetchTasks(for: userId)
+                }
             }
+           
         }) {
             TaskAddView(showingAddTaskSheet: $showingAddTaskSheet, viewModel: tasksVM)
                 .presentationDetents([.height(420)])
@@ -194,7 +270,6 @@ struct TasksView: View {
         .task {
             if let userId = userVM.user?.userId {
                  tasksVM.fetchTasks(for: userId)
-                 tasksVM.tasks = tasksVM.sortedTasksByDueDate().reversed()
             }
         }
         .sheet(isPresented: $isShowingEditSheet) {
@@ -204,6 +279,10 @@ struct TasksView: View {
                     .presentationDragIndicator(.visible)
             }
         }
+        .onChange(of: tasksVM.tasks) { _ in
+            print("Tasks updated — UI will reflect changes")
+        }
+        
     }
 }
 

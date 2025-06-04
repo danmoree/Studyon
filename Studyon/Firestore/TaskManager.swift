@@ -9,7 +9,7 @@ import Foundation
 import Firebase
 import FirebaseFirestore
 
-struct UTask: Identifiable, Codable {
+struct UTask: Identifiable, Codable, Equatable {
     var taskId: String
     let title: String?
     let description: String?

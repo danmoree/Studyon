@@ -11,5 +11,6 @@ enum TasksFilter: String, CaseIterable {
     case all = "All"
     case today = "Today"
     case upcoming = "Upcoming"
+    case overDue = "Overdue"
     case completed = "Completed"
 }

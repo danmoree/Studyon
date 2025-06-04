@@ -60,15 +60,17 @@ struct CustomTaskView: View {
                 
                 // Flag background
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(priority.lowercased() == "none" || priority.isEmpty ? Color.gray : priorityColor.opacity(0.3))
-                    .frame(width: geometry.size.width - 16, height: 60)
-                    
-                HStack(spacing: 0) {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(.systemGray))
-                        .frame(width: geometry.size.width - 45, height: 60)
-                    Spacer(minLength: 0)
+                    .fill(completedState ? Color.gray.opacity(0.4) : (priority.lowercased() == "none" || priority.isEmpty ? Color.gray : priorityColor.opacity(0.3)))
+                    .frame(width: completedState ? geometry.size.width : geometry.size.width - 16, height: 60)
+                if !completedState {
+                    HStack(spacing: 0) {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.systemGray))
+                            .frame(width: geometry.size.width - 45, height: 60)
+                        Spacer(minLength: 0)
+                    }
                 }
+             
 
               
 
@@ -111,7 +113,7 @@ struct CustomTaskView: View {
                     Image(systemName: "flag.fill")
                         .resizable()
                         .frame(width: 20, height: 20)
-                        .foregroundColor(priorityColor)
+                        .foregroundColor(completedState ? Color.white : priorityColor)
                         .padding(.trailing, 14)
                 }
                 .fontWidth(.expanded)
@@ -126,5 +128,5 @@ struct CustomTaskView: View {
 
 
 #Preview {
-    CustomTaskView(taskId: "preview-task-id", title: "Finish ch3", dueDate: Date().addingTimeInterval(86400), isCompleted: false, priority: "", viewModel: TasksViewModel())
+    CustomTaskView(taskId: "preview-task-id", title: "Finish ch3", dueDate: Date().addingTimeInterval(86400), isCompleted: true, priority: "low", viewModel: TasksViewModel())
 }
