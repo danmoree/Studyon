@@ -10,6 +10,7 @@ import SwiftUI
 struct MainTabView: View {
     @Binding var isUserLoggedIn: Bool
     @State private var selectedTab: Tab = .home
+    @State private var hideTabBar = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,11 +20,9 @@ struct MainTabView: View {
                     TasksView(isUserLoggedIn: $isUserLoggedIn)
                     
                 case .rooms:
-                   StudyRoomsView(isUserLoggedIn: $isUserLoggedIn)
+                    StudyRoomsView(isUserLoggedIn: $isUserLoggedIn, hideTabBar: $hideTabBar)
                     //Text("Studyrooms")
                 case .home:
-                    //HomeView()
-                    //Text("Home")
                     HomeParentView(isUserLoggedIn: $isUserLoggedIn)
                 case .social:
                     //SocialFeedView()
@@ -31,8 +30,12 @@ struct MainTabView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            TabBarView(selectedTab: $selectedTab)
-                .padding(.bottom, 25)
+            
+            if !hideTabBar {
+                TabBarView(selectedTab: $selectedTab)
+                    .padding(.bottom, 25)
+            }
+            
         }
         .edgesIgnoringSafeArea(.bottom)
     }

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct StudyRoomCard: View {
+    @Binding var hideTabBar: Bool
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             
@@ -59,7 +60,7 @@ struct StudyRoomCard: View {
             VStack {
                 // bottom description
                 HStack {
-                   // Pomodoro
+                    // Pomodoro
                     Text("Pomodoro")
                         .foregroundColor(.black).opacity(0.5)
                         .fontWidth(.expanded)
@@ -121,19 +122,18 @@ struct StudyRoomCard: View {
                     
                     Spacer()
                     
-                    Button {
-                        ActualStudyRoomView()
-                    } label: {
-                        
+                    NavigationLink(destination: ActualStudyRoomView()
+                        .onAppear { hideTabBar = true}
+                        .onDisappear { hideTabBar = false}) {
                         Image(systemName: "arrow.up.circle.fill")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 25, height: 25)
                             .foregroundStyle(.black)
                     }
-
                     
-               
+                    
+                    
                 }
             }
         }
@@ -146,5 +146,5 @@ struct StudyRoomCard: View {
 }
 
 #Preview {
-    StudyRoomCard()
+    StudyRoomCard(hideTabBar: .constant(true))
 }
