@@ -122,7 +122,7 @@ struct StudyRoomCard: View {
                     Spacer()
                     
                     Button {
-                        
+                        ActualStudyRoomView()
                     } label: {
                         
                         Image(systemName: "arrow.up.circle.fill")
