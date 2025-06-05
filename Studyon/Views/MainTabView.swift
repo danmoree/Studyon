@@ -19,8 +19,8 @@ struct MainTabView: View {
                     TasksView(isUserLoggedIn: $isUserLoggedIn)
                     
                 case .rooms:
-                    //StudyRoomsView()
-                    Text("Rooms")
+                   StudyRoomsView(isUserLoggedIn: $isUserLoggedIn)
+                    //Text("Studyrooms")
                 case .home:
                     //HomeView()
                     //Text("Home")
@@ -40,4 +40,5 @@ struct MainTabView: View {
 
 #Preview {
     MainTabView(isUserLoggedIn: .constant(true))
+        .environmentObject(ProfileViewModel())
 }

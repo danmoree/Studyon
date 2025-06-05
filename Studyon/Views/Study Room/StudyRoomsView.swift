@@ -10,8 +10,11 @@ import SwiftUI
 struct StudyRoomsView: View {
     @State private var selectedFilter: StudyRoomsFilter = .all
     @State private var showCreateRoomSheet = false
+    @Binding var isUserLoggedIn: Bool
     var body: some View {
-        VStack(alignment: .leading, spacing: 16){
+        
+        VStack(alignment: .leading, spacing: 16) {
+            // header
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text("Study Rooms 📚")
@@ -35,74 +38,82 @@ struct StudyRoomsView: View {
             .fontWidth(.expanded)
             .padding(.horizontal, 23)
             .padding(.top, 20)
-        }
-        
-        
-        // Segmented Control - Top tab bar
-        HStack {
-            StudyRoomsSegmentedControl(selectedFilter: $selectedFilter)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        
-        
-        ScrollView {
-            VStack(spacing: 24) {
-                switch selectedFilter {
-                case .all:
-                    
-                    VStack {
-                        HStack {
-                            Text("Active Rooms")
-                                .fontWeight(.bold)
-                                .fontWidth(.expanded)
-                                .font(.title3)
-                                .padding(.leading, 5)
-                        Spacer()
-                        }
-                        
-                        VStack(spacing: 0) {
-                            
-                        }
-                    }
-                case .inProgress:
-                    VStack {
-                        HStack {
-                            Text("Active Rooms")
-                                .fontWeight(.bold)
-                                .fontWidth(.expanded)
-                                .font(.title3)
-                                .padding(.leading, 5)
-                        Spacer()
-                        }
-                        
-                        VStack(spacing: 0) {
-                            
-                        }
-                    }
-                case .upcoming:
-                    VStack {
-                        HStack {
-                            Text("Upcoming Rooms")
-                                .fontWeight(.bold)
-                                .fontWidth(.expanded)
-                                .font(.title3)
-                                .padding(.leading, 5)
-                        Spacer()
-                        }
-                        
-                        VStack(spacing: 0) {
-                            
-                        }
-                    }
-                    
-                }
+            
+            
+            
+            // Segmented Control - Top tab bar
+            HStack {
+                StudyRoomsSegmentedControl(selectedFilter: $selectedFilter)
             }
-            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            
+            ScrollView {
+                VStack(spacing: 24) {
+                    switch selectedFilter {
+                    case .all:
+                        
+                        VStack {
+                            HStack {
+                                Text("Active Rooms")
+                                    .fontWeight(.bold)
+                                    .fontWidth(.expanded)
+                                    .font(.title3)
+                                    .padding(.leading, 5)
+                                Spacer()
+                            }
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 25) {
+                                    StudyRoomCard()
+                                    StudyRoomCard()
+                                    StudyRoomCard()
+                                }
+                                .padding(.horizontal, 0)
+                            }
+                            .scrollClipDisabled()
+                        }
+                    case .inProgress:
+                        VStack {
+                            HStack {
+                                Text("Active Rooms")
+                                    .fontWeight(.bold)
+                                    .fontWidth(.expanded)
+                                    .font(.title3)
+                                    .padding(.leading, 5)
+                                Spacer()
+                            }
+                            
+                            VStack(spacing: 0) {
+                                
+                            }
+                        }
+                    case .upcoming:
+                        VStack {
+                            HStack {
+                                Text("Upcoming Rooms")
+                                    .fontWeight(.bold)
+                                    .fontWidth(.expanded)
+                                    .font(.title3)
+                                    .padding(.leading, 5)
+                                Spacer()
+                            }
+                            
+                            VStack(spacing: 0) {
+                                
+                            }
+                        }
+                        
+                    }
+                }
+                .padding()
+            }
         }
         
     }
 }
 
 #Preview {
-    StudyRoomsView()
+    StudyRoomsView(isUserLoggedIn: .constant(true))
+        .environmentObject(ProfileViewModel())
 }
