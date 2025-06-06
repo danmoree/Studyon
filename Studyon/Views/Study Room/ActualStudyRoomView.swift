@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ActualStudyRoomView: View {
+    let studyRoom: StudyRoom?
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -39,7 +40,7 @@ struct ActualStudyRoomView: View {
                     }
                     
                     HStack {
-                        Text("Daniel's Study \nRoom ☕️")
+                        Text("\(studyRoom.n)'s Study \nRoom ☕️")
                             .font(.title)
                             .fontWeight(.black)
                             .fontWidth(.expanded)
@@ -95,5 +96,7 @@ struct ActualStudyRoomView: View {
 }
 
 #Preview {
-    ActualStudyRoomView()
+    @Previewable var selectedRoom: StudyRoom?
+    
+    ActualStudyRoomView(studyRoom: selectedRoom ?? nil)
 }

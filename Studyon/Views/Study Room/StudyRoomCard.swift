@@ -9,45 +9,52 @@ import SwiftUI
 
 struct StudyRoomCard: View {
     @Binding var hideTabBar: Bool
+    
+    let title: String
+    let startTime: String
+    let endTime: String
+    let creatorUsername: String
+    let pomoDuration: Int
+    let pomoBreakDuration: Int
+    
+    let studyRoom: StudyRoom?
+    
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             
             HStack(alignment: .top) {
                 // top description, time
-                Text("Diff\u{00A0}eq\nHW")
+                Text(title)
                     .font(.footnote)
                     .foregroundColor(.black)
                     .fontWeight(.light)
                     .fontWidth(.expanded)
-                    .fixedSize(horizontal: true, vertical: true)
-                
-                GeometryReader { geo in
-                    HStack(spacing: 0) {
-                        Spacer()
-                        Rectangle()
-                            .fill(Color.black)
-                            .frame(width: 0.5, height: 30)
-                        Spacer()
-                    }
-                    .frame(width: geo.size.width / 0.8)
-                }
-                
+                    .lineLimit(2)            // up to two lines
+                    .fixedSize(horizontal: false, vertical: true)
+                    .layoutPriority(1)
+
+                Spacer(minLength: 8)
+
+                Rectangle()
+                    .fill(Color.black)
+                    .frame(width: 0.5, height: 30)
+
+                Spacer(minLength: 8)
+
                 (
-                    Text("8:00 ").font(.footnote) +
-                    Text("PM").font(.caption2) +
-                    Text(" - \n10:00 ").font(.footnote) +
-                    Text("PM").font(.caption2)
+                    Text(startTime).font(.footnote) +
+                    Text(" - \n\(endTime) ").font(.footnote)
                 )
                 .foregroundColor(.black)
                 .fontWidth(.expanded)
                 .fontWeight(.light)
                 .fixedSize()
-                
             }
-            
+            Spacer()
             HStack {
                 // creators room title
-                Text("Danmore's \nStudy Room 🤓")
+                Text("\(creatorUsername)'s \nStudy Room 🤓")
                     .font(.body)
                     .foregroundColor(.black)
                     .fontWeight(.bold)
@@ -70,7 +77,7 @@ struct StudyRoomCard: View {
                 }
                 HStack {
                     // study time amount
-                    Text("Study 30m")
+                    Text("Study \(pomoDuration / 60)m")
                         .foregroundColor(.black).opacity(0.5)
                         .fontWidth(.expanded)
                         .font(.footnote)
@@ -79,7 +86,7 @@ struct StudyRoomCard: View {
                 }
                 HStack {
                     // break time amount
-                    Text("Break 10m")
+                    Text("Break \(pomoBreakDuration / 60)m")
                         .foregroundColor(.black).opacity(0.5)
                         .fontWidth(.expanded)
                         .font(.footnote)
@@ -122,7 +129,7 @@ struct StudyRoomCard: View {
                     
                     Spacer()
                     
-                    NavigationLink(destination: ActualStudyRoomView()
+                    NavigationLink(destination: ActualStudyRoomView(studyRoom: studyRoom)
                         .onAppear { hideTabBar = true}
                         .onDisappear { hideTabBar = false}) {
                         Image(systemName: "arrow.up.circle.fill")
@@ -146,5 +153,7 @@ struct StudyRoomCard: View {
 }
 
 #Preview {
-    StudyRoomCard(hideTabBar: .constant(true))
+    @Previewable var selectedRoom: StudyRoom?
+    
+    StudyRoomCard(hideTabBar: .constant(true), title: "CS 471 Study", startTime: "11:00 AM", endTime: "1:00 PM", creatorUsername: "danmore", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
 }
