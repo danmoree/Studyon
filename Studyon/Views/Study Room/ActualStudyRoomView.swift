@@ -40,7 +40,7 @@ struct ActualStudyRoomView: View {
                     }
                     
                     HStack {
-                        Text("\(studyRoom.n)'s Study \nRoom ☕️")
+                        Text("\(studyRoom?.creatorId ?? "Unknown")'s Study \nRoom ☕️")
                             .font(.title)
                             .fontWeight(.black)
                             .fontWidth(.expanded)
@@ -48,7 +48,7 @@ struct ActualStudyRoomView: View {
                     
                     VStack(alignment: .leading) {
                         Text("Total Focused")
-                        Text("2h 42m")
+                        Text("2h 42m") // create func that adds up time studied
                             .fontWeight(.bold)
                     }
                     .fontWidth(.expanded)
@@ -59,7 +59,7 @@ struct ActualStudyRoomView: View {
                         VStack {
                             HStack {
                                 Spacer()
-                                Text("Pomodoro - 30 Minutes")
+                                Text("Pomodoro - \((studyRoom?.pomDurationSec ?? 0) * 60) Minutes")
                                     .fontWeight(.bold)
                                     .fontWidth(.expanded)
                                     .font(.footnote)
@@ -67,7 +67,7 @@ struct ActualStudyRoomView: View {
                             }
                             
                             HStack(alignment: .firstTextBaseline) {
-                                Text("11:23")
+                                Text("11:23") // calculate time left based on start time and current time
                                     .font(.system(size: 70, weight: .black))
                                     .fontWeight(.black)
                                     .fontWidth(.expanded)

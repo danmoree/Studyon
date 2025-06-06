@@ -13,7 +13,7 @@ struct StudyRoom: Identifiable, Codable {
     var roomId: String
     let title: String?
     let description: String?
-    let creatorId: String?
+    let creatorId: String? // userID
     let memberIds: [String]?
     let createdAt: Date?
     let startTime: Date?
