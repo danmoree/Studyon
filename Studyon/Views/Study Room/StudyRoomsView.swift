@@ -138,7 +138,13 @@ struct StudyRoomsView: View {
                     .padding()
                 }
             }
-        }.navigationBarHidden(true)
+        }
+        .navigationBarHidden(true)
+        .sheet(isPresented: $showCreateRoomSheet) {
+            CreateStudyRoomView(showCreateStudyRoom: $showCreateRoomSheet)
+                .presentationDetents([.height(340)])
+                .presentationDragIndicator(.visible)
+        }
         
         
     }
