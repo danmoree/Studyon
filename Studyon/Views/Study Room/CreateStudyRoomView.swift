@@ -10,6 +10,8 @@ import SwiftUI
 struct CreateStudyRoomView: View {
     @Binding var showCreateStudyRoom: Bool
     @State private var progress: Double = 0
+    @State private var showCreateStudyRoomSolo = false
+    
     var body: some View {
         VStack {
             VStack {
@@ -66,9 +68,9 @@ struct CreateStudyRoomView: View {
                 Spacer()
                 
                 Button {
-                    
+                    showCreateStudyRoomSolo = true
                 } label: {
-                    Text("Lets go")
+                    Text("Configure")
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, maxHeight: 1)
@@ -120,7 +122,7 @@ struct CreateStudyRoomView: View {
                 Button {
                     
                 } label: {
-                    Text("Lets go")
+                    Text("Configure")
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, maxHeight: 1)
@@ -139,6 +141,11 @@ struct CreateStudyRoomView: View {
         }
         .padding(.horizontal, 28)
         .padding(.top, 10)
+        .sheet(isPresented: $showCreateStudyRoomSolo) {
+            CreateStudyRoomSoloView(showCreateStudyRoomSolo: $showCreateStudyRoomSolo)
+                .presentationDetents([.height(400)])
+                .presentationDragIndicator(.visible)
+        }
         
     }
 }
