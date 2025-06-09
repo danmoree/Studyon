@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CreateStudyRoomView: View {
     @Binding var showCreateStudyRoom: Bool
+    @State private var progress: Double = 0
     var body: some View {
         VStack {
             VStack {
@@ -99,8 +100,14 @@ struct CreateStudyRoomView: View {
                 Spacer()
                 
                 Image(systemName: "person.3.fill")
-                    .resizable()
-                    .frame(width: 60, height: 30)
+                  .resizable()
+                  .frame(width: 60, height: 30)
+                  .symbolRenderingMode(.hierarchical)
+                  .symbolEffect(
+                    .variableColor.cumulative.dimInactiveLayers.reversing,
+                    options: .repeat(.continuous),
+                    isActive: true   
+                  )
                 
                 Text("With friends")
                     .fontWeight(.light)
