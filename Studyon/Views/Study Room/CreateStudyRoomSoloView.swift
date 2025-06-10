@@ -11,6 +11,7 @@ struct CreateStudyRoomSoloView: View {
     @Binding var showCreateStudyRoomSolo: Bool
     @State private var pomDuration: Int = 25 * 60 // min to seconds
     @State private var pomBreakDuration: Int = 5 * 60
+    @State private var newSoloRoom: SoloStudyRoom? = nil
     var body: some View {
         VStack {
             
@@ -98,6 +99,9 @@ struct CreateStudyRoomSoloView: View {
             
            
             Button {
+                // init room
+                newSoloRoom = SoloStudyRoom(createAt: Date(), pomIsRunning: true, pomDurationSec: pomDuration, pomBreakDurationSec: pomBreakDuration)
+                
                 
             } label: {
                 Text("Start")
@@ -112,6 +116,9 @@ struct CreateStudyRoomSoloView: View {
             
         }
         .padding(.horizontal, 23)
+        .fullScreenCover(item: $newSoloRoom) { room in
+            SoloStudyRoomView(studyRoom: room)
+        }
     }
     
 }
