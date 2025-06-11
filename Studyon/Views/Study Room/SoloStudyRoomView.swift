@@ -67,7 +67,7 @@ struct SoloStudyRoomView: View {
                         VStack {
                             HStack {
                                 Spacer()
-                                Text("Pomodoro - \(studyRoom.pomDurationSec / 60) Minutes")
+                                Text(viewModel.isOnBreak ? "Break - \(studyRoom.pomBreakDurationSec / 60) Minutes" : "Pomodoro - \(studyRoom.pomDurationSec / 60) Minutes")
                                     .fontWeight(.bold)
                                     .fontWidth(.expanded)
                                     .font(.footnote)

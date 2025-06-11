@@ -60,8 +60,8 @@ struct CreateStudyRoomSoloView: View {
                         get: { Double(pomDuration / 60)},
                         set: { newValue in pomDuration = Int(newValue) * 60 }
                     ),
-                    in: 15...60,
-                    step: 10
+                    in: 1...60,
+                    step: 5
                 )
                 .accentColor(.black)
             }
