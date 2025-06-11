@@ -116,6 +116,7 @@ struct TimeSpentCard: View {
 
 struct ActiveRoomsPreviewView: View {
     var body: some View {
+        
         VStack(alignment: .leading) {
 
             VStack {
@@ -214,6 +215,7 @@ struct ActiveRoomsPreviewView: View {
             .padding()
             .background(Color(red: 105/255, green: 169/255, blue: 98/255)) // dark green
             .cornerRadius(16)
+            
         }
         .fontWidth(.expanded)
     }

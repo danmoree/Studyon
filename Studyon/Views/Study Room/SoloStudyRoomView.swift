@@ -51,11 +51,11 @@ struct SoloStudyRoomView: View {
                     }
                     
                     HStack {
-                        if let user = userVM.user {
-                            Text("\(user.fullName ?? "User's")'s Study \nRoom ☕️")
-                                .font(.title)
-                                .fontWeight(.black)
-                                .fontWidth(.expanded)
+    if let user = userVM.user {
+        Text("\(user.fullName?.split(separator: " ").first.map(String.init) ?? "User")'s Study \nRoom ☕️")
+            .font(.title)
+            .fontWeight(.black)
+            .fontWidth(.expanded)
                         }
                         
                     }

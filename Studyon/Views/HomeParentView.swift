@@ -34,7 +34,7 @@ struct HomeParentView: View {
                     
                     VStack(alignment: .leading, spacing: 2) {
                         if let user = userVM.user {
-                            Text("Hi, \(user.fullName ?? "there") ☕️")
+                            Text("Hi, \(user.fullName?.split(separator: " ").first.map(String.init) ?? "there") ☕️")
                                 .font(.title)
                                 .bold()
                         } else {
@@ -66,6 +66,7 @@ struct HomeParentView: View {
             .fontWidth(.expanded)
             .padding(.horizontal, 23)
             .padding(.top, 20)
+            
 
             // Segmented Control - Top tab bar
             HStack {
@@ -91,7 +92,7 @@ struct HomeParentView: View {
                                 
                                 HStack {
                                     TodayTasks()
-                                        .padding(.trailing,10)
+                                    Spacer()
                                     TimeSpentCard()
                                 }
                             }
@@ -107,7 +108,6 @@ struct HomeParentView: View {
                                 
                                 Spacer()
                             }
-                            ActiveRoomsPreviewView()
                         }
                        
                         
