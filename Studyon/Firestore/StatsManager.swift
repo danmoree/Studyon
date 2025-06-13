@@ -108,6 +108,6 @@ final class UserStatsManager {
         ]
         
         // update
-        try await statsDocument(userId: userId).updateData(data)
+        try await statsDocument(userId: userId).setData(data, merge: true)
     }
 }

@@ -40,7 +40,10 @@ final class SoloStudyRoomViewModel: ObservableObject {
         if remainingTime > 0 {
             // Countdown normally
             remainingTime -= 1
-            secondsStudied += 1
+            if !isOnBreak {
+                secondsStudied += 1
+            }
+           
         } else {
             // Time reached zero
             if !isOnBreak {
