@@ -69,3 +69,45 @@ struct UserStats: Codable {
         try container.encode(longestSession, forKey: .longestSession)
     }
 }
+
+final class UserStatsManager {
+    
+    static let shared = UserStatsManager()
+    private init() {}
+    
+    private let statsCollection = Firestore.firestore().collection("users_stats")
+    
+    private func statsDocument(userId: String) -> DocumentReference {
+        statsCollection.document(userId)
+    }
+    
+    func fetchStats(userId: String) async throws -> UserStats {
+        try await statsDocument(userId: userId).getDocument(as: UserStats.self)
+    }
+    
+    func setStats(userId: String, stats: UserStats) async throws {
+        try statsDocument(userId: userId).setData(from: stats, merge: true)
+    }
+    
+    func incrementXP(userId: String, by points: Int) async throws {
+        let data: [String: Any] = [ UserStats.CodingKeys.xp.rawValue: FieldValue.increment(Int64(points)) ]
+        try await statsDocument(userId: userId).updateData(data)
+    }
+    
+    func recordStudyTime(userId: String, date: Date, seconds: TimeInterval) async throws {
+        // key ISO8601 date (yyyy-MM-dd)
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate]
+        let dateKey = formatter.string(from: date)
+        
+        // target the nested field
+        let field = "\(UserStats.CodingKeys.timeStudiedByDate.rawValue).\(dateKey)"
+        // increment payload
+        let data: [String: Any] = [
+            field: FieldValue.increment(Int64(seconds))
+        ]
+        
+        // update
+        try await statsDocument(userId: userId).updateData(data)
+    }
+}

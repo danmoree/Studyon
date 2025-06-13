@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import FirebaseAuth
 
 final class SoloStudyRoomViewModel: ObservableObject {
     @Published var remainingTime: Int
@@ -16,6 +17,8 @@ final class SoloStudyRoomViewModel: ObservableObject {
 
     private var timer: AnyCancellable?
     let studyRoom: SoloStudyRoom
+    private let statsManager = UserStatsManager.shared
+    private var secondsStudied = 0
 
     init(studyRoom: SoloStudyRoom) {
         self.studyRoom = studyRoom
@@ -37,9 +40,11 @@ final class SoloStudyRoomViewModel: ObservableObject {
         if remainingTime > 0 {
             // Countdown normally
             remainingTime -= 1
+            secondsStudied += 1
         } else {
             // Time reached zero
             if !isOnBreak {
+                recordWorkSession()
                 // Work phase ended
                 if autoStart {
                     // Automatically begin break
@@ -65,6 +70,10 @@ final class SoloStudyRoomViewModel: ObservableObject {
 
     
     func pauseToggle() {
+        if !isOnBreak && remainingTime > 0 && !isPaused {
+          // User is pausing *during* a work session:
+          recordWorkSession()
+        }
         // If paused because work just ended
         if isPaused && remainingTime == 0 && !isOnBreak {
             isOnBreak = true
@@ -84,6 +93,21 @@ final class SoloStudyRoomViewModel: ObservableObject {
         return String(format: "%02d:%02d", m, s)
     }
 
+    func recordWorkSession() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let seconds = TimeInterval(secondsStudied)
+        secondsStudied = 0 // reset
+        Task {
+            do {
+                try await statsManager.recordStudyTime(userId: userId, date: Date(), seconds: seconds)
+            } catch {
+                print("Failed to record study time:", error)
+            }
+        }
+    }
+
+    
+    
     deinit {
         timer?.cancel()
     }

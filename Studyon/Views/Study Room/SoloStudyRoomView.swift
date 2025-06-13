@@ -28,6 +28,7 @@ struct SoloStudyRoomView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
                         Button {
+                            viewModel.recordWorkSession()
                             dismiss()
                         } label: {
                             Image(systemName: "chevron.left")
