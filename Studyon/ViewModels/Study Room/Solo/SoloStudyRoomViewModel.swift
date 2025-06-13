@@ -16,13 +16,16 @@ final class SoloStudyRoomViewModel: ObservableObject {
     @Published var autoStart: Bool = false // auto start countdown
 
     private var timer: AnyCancellable?
+    private var sessionStart: Date?
+    private var sessionEnd: Date?
     let studyRoom: SoloStudyRoom
     private let statsManager = UserStatsManager.shared
-    private var secondsStudied = 0
 
     init(studyRoom: SoloStudyRoom) {
         self.studyRoom = studyRoom
         self.remainingTime = studyRoom.pomDurationSec
+        sessionStart = Date() // start time
+        sessionEnd = sessionStart!.addingTimeInterval(TimeInterval(studyRoom.pomDurationSec)) // pom sesh should end at this time
         startTimer()
     }
 
@@ -36,36 +39,39 @@ final class SoloStudyRoomViewModel: ObservableObject {
     }
 
     private func tick() {
-        guard !isPaused else { return }
-        if remainingTime > 0 {
-            // Countdown normally
-            remainingTime -= 1
+        guard !isPaused, let end = sessionEnd else { return }
+        let secondsLeft = Int(max(0, end.timeIntervalSinceNow))
+        remainingTime = secondsLeft
+
+        if secondsLeft == 0 {
+            timer?.cancel()
             if !isOnBreak {
-                secondsStudied += 1
-            }
-           
-        } else {
-            // Time reached zero
-            if !isOnBreak {
+                // Work session ended
                 recordWorkSession()
-                // Work phase ended
                 if autoStart {
-                    // Automatically begin break
+                    // begin break
                     isOnBreak = true
+                    sessionStart = nil
+                    sessionEnd = Date().addingTimeInterval(TimeInterval(studyRoom.pomBreakDurationSec))
                     remainingTime = studyRoom.pomBreakDurationSec
+                    startTimer()
                 } else {
-                    // Pause until user starts break
                     isPaused = true
+                    sessionStart = nil
+                    sessionEnd = nil
                 }
             } else {
-                // Break phase ended
+                // Break ended
                 if autoStart {
-                    // Automatically begin next work phase
                     isOnBreak = false
+                    sessionStart = Date()
+                    sessionEnd = Date().addingTimeInterval(TimeInterval(studyRoom.pomDurationSec))
                     remainingTime = studyRoom.pomDurationSec
+                    startTimer()
                 } else {
-                    // Pause until user restarts work
                     isPaused = true
+                    sessionStart = nil
+                    sessionEnd = nil
                 }
             }
         }
@@ -74,18 +80,24 @@ final class SoloStudyRoomViewModel: ObservableObject {
     
     func pauseToggle() {
         if !isOnBreak && remainingTime > 0 && !isPaused {
-          // User is pausing *during* a work session:
-          recordWorkSession()
+            recordWorkSession()
         }
-        // If paused because work just ended
+
         if isPaused && remainingTime == 0 && !isOnBreak {
             isOnBreak = true
+            sessionStart = Date()
+            sessionEnd = Date().addingTimeInterval(TimeInterval(studyRoom.pomBreakDurationSec))
             remainingTime = studyRoom.pomBreakDurationSec
+            startTimer()
         }
         else if isPaused && remainingTime == 0 && isOnBreak {
             isOnBreak = false
+            sessionStart = Date()
+            sessionEnd = Date().addingTimeInterval(TimeInterval(studyRoom.pomDurationSec))
             remainingTime = studyRoom.pomDurationSec
+            startTimer()
         }
+
         isPaused.toggle()
     }
     
@@ -98,8 +110,8 @@ final class SoloStudyRoomViewModel: ObservableObject {
 
     func recordWorkSession() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
-        let seconds = TimeInterval(secondsStudied)
-        secondsStudied = 0 // reset
+        guard let start = sessionStart else { return }
+        let seconds = Date().timeIntervalSince(start)
         Task {
             do {
                 try await statsManager.recordStudyTime(userId: userId, date: Date(), seconds: seconds)
