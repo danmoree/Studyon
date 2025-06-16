@@ -95,19 +95,28 @@ final class UserStatsManager {
     }
     
     func recordStudyTime(userId: String, date: Date, seconds: TimeInterval) async throws {
-        // key ISO8601 date (yyyy-MM-dd)
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate]
-        let dateKey = formatter.string(from: date)
+        // 1) Format the date key (yyyy-MM-dd)
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        df.timeZone = .current
+        let dateKey = df.string(from: date)
         
-        // target the nested field
-        let field = "\(UserStats.CodingKeys.timeStudiedByDate.rawValue).\(dateKey)"
-        // increment payload
-        let data: [String: Any] = [
-            field: FieldValue.increment(Int64(seconds))
+        // 2) Paths for mapField and nested entry
+        let mapField = UserStats.CodingKeys.timeStudiedByDate.rawValue
+        let nestedPath = "\(mapField).\(dateKey)"
+        let incrementData: [String: Any] = [
+            nestedPath: FieldValue.increment(Int64(seconds))
         ]
         
-        // update
-        try await statsDocument(userId: userId).setData(data, merge: true)
+        do {
+            // Try to increment existing day entry
+            try await statsDocument(userId: userId).updateData(incrementData)
+        } catch {
+            // Fallback: first-time write, create the map with this date
+            let initialData: [String: Any] = [
+                mapField: [ dateKey: seconds ]
+            ]
+            try await statsDocument(userId: userId).setData(initialData, merge: true)
+        }
     }
 }
