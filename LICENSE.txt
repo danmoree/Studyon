@@ -1,0 +1,9 @@
+Copyright (c) 2025 Daniel Moreno. All rights reserved.
+
+This software and its associated source code are the exclusive property of Daniel Moreno and are protected under international copyright law.
+
+This repository is intended solely for demonstration purposes (e.g., for job applications, code samples, or technical interviews). No part of this codebase may be used, reproduced, modified, distributed, or sold without the express written permission of the author.
+
+Unauthorized use, distribution, or duplication of this software, in whole or in part, is strictly prohibited and may result in legal action.
+
+For licensing inquiries or collaboration requests, contact: danmore0101@gmail.com
