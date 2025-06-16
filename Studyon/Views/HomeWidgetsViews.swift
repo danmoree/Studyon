@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-struct HomeAll: View {
+struct HomeWidgetsViews: View {
     var body: some View {
         Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
     }
@@ -221,8 +221,39 @@ struct ActiveRoomsPreviewView: View {
     }
 }
 
+struct StudiedTimeTodayView: View {
+    let studiedTimeToday: TimeInterval
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Time Studied")
+                    .fontWidth(.expanded)
+                    .foregroundColor(.white)
+                
+                Spacer()
+            }
+            Text("Today")
+                .foregroundColor(.white)
+            Text("\(studiedTimeToday / 60, specifier: "%.0f") Minutes")
+                .foregroundColor(.white)
+                .font(.title)
+            
+            
+        }
+        .padding(.top, -30)
+        .padding(.trailing, -12)
+        .padding()
+        .frame(width: 170, height: 170)
+        .background(Color(.systemGray))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
 #Preview {
     TodayTasks()
     TimeSpentCard()
-    ActiveRoomsPreviewView()
+    //ActiveRoomsPreviewView()
+    StudiedTimeTodayView(studiedTimeToday: 123)
+    
 }

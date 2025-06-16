@@ -10,13 +10,13 @@ import Firebase
 import FirebaseFirestore
 
 struct UserStats: Codable {
-    let xp: Int
-    let dayStreak: Int
+    let xp: Int?
+    let dayStreak: Int?
     let totalTimeStudied: TimeInterval // fancy named double
     var timeStudiedByDate: [String: TimeInterval]?
     let lastStudyDate: Date?
     var sessionCountByDate: [String: Int]?
-    let longestSession: TimeInterval
+    let longestSession: TimeInterval?
     
     init(
         xp: Int = 0,
@@ -49,13 +49,13 @@ struct UserStats: Codable {
     // from firestore
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.xp = try container.decode(Int.self, forKey: .xp)
-        self.dayStreak = try container.decode(Int.self, forKey: .dayStreak)
-        self.totalTimeStudied = try container.decode(TimeInterval.self, forKey: .totalTimeStudied)
+        self.xp = try container.decodeIfPresent(Int.self, forKey: .xp)
+        self.dayStreak = try container.decodeIfPresent(Int.self, forKey: .dayStreak)
+        self.totalTimeStudied = try container.decodeIfPresent(TimeInterval.self, forKey: .totalTimeStudied) ?? 0
         self.timeStudiedByDate = try container.decodeIfPresent([String : TimeInterval].self, forKey: .timeStudiedByDate)
         self.lastStudyDate = try container.decodeIfPresent(Date.self, forKey: .lastStudyDate)
         self.sessionCountByDate = try container.decodeIfPresent([String : Int].self, forKey: .sessionCountByDate)
-        self.longestSession = try container.decode(TimeInterval.self, forKey: .longestSession)
+        self.longestSession = try container.decodeIfPresent(TimeInterval.self, forKey: .longestSession)
     }
     
    func encode(to encoder: Encoder) throws {

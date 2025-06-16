@@ -115,6 +115,7 @@ final class SoloStudyRoomViewModel: ObservableObject {
         Task {
             do {
                 try await statsManager.recordStudyTime(userId: userId, date: Date(), seconds: seconds)
+                try await statsManager.incrementXP(userId: userId, by: 20)
             } catch {
                 print("Failed to record study time:", error)
             }

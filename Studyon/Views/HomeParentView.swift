@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct HomeParentView: View {
     @State private var selectedFilter: HomeFilter = .all
     @State private var showingSettings = false
     @Binding var isUserLoggedIn: Bool
     @EnvironmentObject var userVM: ProfileViewModel
+    @StateObject private var widgetVM =  HomeWidgetsViewModel()
 
     var body: some View {
         
@@ -93,7 +95,7 @@ struct HomeParentView: View {
                                 HStack {
                                     TodayTasks()
                                     Spacer()
-                                    TimeSpentCard()
+                                    StudiedTimeTodayView(studiedTimeToday: widgetVM.secondsStudiedToday)
                                 }
                             }
                             .padding(.bottom)
@@ -122,6 +124,12 @@ struct HomeParentView: View {
                     }
                 }
                 .padding()
+            }
+            .task {
+                if let uid = Auth.auth().currentUser?.uid {
+                    print("fethcing tasks")
+                    await widgetVM.loadAllStats(for: uid)
+                }
             }
         }
     }
