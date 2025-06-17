@@ -51,7 +51,7 @@ struct HomeParentView: View {
                             
                         
                         HStack(spacing: 10) {
-                            Text("🔥 3 Days")
+                            Text("🔥 \(widgetVM.dayStreak) Days")
                                 .padding(.vertical, 4)
                                 .padding(.horizontal, 8)
                                 .background(Color.orange.opacity(0.2))

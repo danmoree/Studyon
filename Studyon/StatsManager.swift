@@ -16,12 +16,13 @@ import FirebaseFirestore
 
 struct UserStats: Codable {
     let xp: Int?
-    let dayStreak: Int?
+    var dayStreak: Int?
     let totalTimeStudied: TimeInterval // fancy named double
     var timeStudiedByDate: [String: TimeInterval]?
-    let lastStudyDate: Date?
-    var sessionCountByDate: [String: Int]?
-    let longestSession: TimeInterval?
+    let lastStudyDate: Date? // yet to implement
+    var sessionCountByDate: [String: Int]? // yet to implement
+    let longestSession: TimeInterval? // yet to implement
+    var lastLoginDate: Date?
     
     init(
         xp: Int = 0,
@@ -30,7 +31,8 @@ struct UserStats: Codable {
         timeStudiedByDate: [String: TimeInterval]? = [:],
         lastStudyDate: Date? = nil,
         sessionCountByDate: [String: Int]? = [:],
-        longestSession: TimeInterval = 0
+        longestSession: TimeInterval = 0,
+        lastLoginDate: Date? = nil
     ) {
         self.xp = xp
         self.dayStreak = dayStreak
@@ -39,6 +41,7 @@ struct UserStats: Codable {
         self.lastStudyDate = lastStudyDate
         self.sessionCountByDate = sessionCountByDate
         self.longestSession = longestSession
+        self.lastLoginDate = lastLoginDate
     }
     
     enum CodingKeys: String, CodingKey {
@@ -49,6 +52,7 @@ struct UserStats: Codable {
         case lastStudyDate = "last_study_date"
         case sessionCountByDate = "session_count_by_date"
         case longestSession = "longest_session"
+        case lastLoginDate = "last_login_date"
     }
     
     // from firestore
@@ -61,6 +65,7 @@ struct UserStats: Codable {
         self.lastStudyDate = try container.decodeIfPresent(Date.self, forKey: .lastStudyDate)
         self.sessionCountByDate = try container.decodeIfPresent([String : Int].self, forKey: .sessionCountByDate)
         self.longestSession = try container.decodeIfPresent(TimeInterval.self, forKey: .longestSession)
+        self.lastLoginDate  = try container.decodeIfPresent(Date.self, forKey: .lastLoginDate)
     }
     
    func encode(to encoder: Encoder) throws {
@@ -72,6 +77,7 @@ struct UserStats: Codable {
         try container.encodeIfPresent(lastStudyDate, forKey: .lastStudyDate)
         try container.encodeIfPresent(sessionCountByDate, forKey: .sessionCountByDate)
         try container.encode(longestSession, forKey: .longestSession)
+        try container.encode(lastLoginDate, forKey: .lastLoginDate)
     }
 }
 
@@ -123,5 +129,35 @@ final class UserStatsManager {
             ]
             try await statsDocument(userId: userId).setData(initialData, merge: true)
         }
+    }
+    
+    func checkAndUpdateLoginStreak(userId: String) async throws {
+        var stats = try await fetchStats(userId: userId)
+
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        guard let lastLogin = stats.lastLoginDate.map({ calendar.startOfDay(for: $0) }) else {
+            // first time login, set today and dayStreak = 1
+            stats.lastLoginDate = today
+            stats.dayStreak = 1
+            try await setStats(userId: userId, stats: stats)
+            return
+        }
+
+        // aleady logged in today — do nothing
+        if calendar.isDateInToday(lastLogin) {
+            return
+        }
+
+        //
+        if calendar.isDate(today, inSameDayAs: calendar.date(byAdding: .day, value: 1, to: lastLogin)!) {
+            stats.dayStreak = (stats.dayStreak ?? 0) + 1
+        } else {
+            stats.dayStreak = 1
+        }
+
+        stats.lastLoginDate = today
+        try await setStats(userId: userId, stats: stats)
     }
 }

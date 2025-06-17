@@ -31,9 +31,12 @@ final class HomeWidgetsViewModel: ObservableObject {
           xp = stats.xp ?? 0
           dayStreak = stats.dayStreak ?? 0
 
-          // today’s time
-           let key = isoFormatter.string(from: Date())
-           secondsStudiedToday = stats.timeStudiedByDate?[key] ?? 0
+           // today’s time
+           let df = DateFormatter()
+           df.dateFormat = "yyyy-MM-dd"
+           df.timeZone = .current
+           let dateKey = df.string(from: Date())
+           secondsStudiedToday = stats.timeStudiedByDate?[dateKey] ?? 0
          
             print("Fetched map:", stats.timeStudiedByDate as Any)
             //print("Looking up:", key)

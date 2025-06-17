@@ -18,6 +18,10 @@ final class ProfileViewModel: ObservableObject {
     func loadCurrentUser() async throws {
         let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
         let fetchedUser = try await UserManager.shared.getUser(userId: authDataResult.uid)
+        
+        // day streak check
+        try await UserStatsManager.shared.checkAndUpdateLoginStreak(userId: fetchedUser.userId)
+        
         await MainActor.run {
             self.user = fetchedUser
         }

@@ -44,9 +44,11 @@ struct TabBarView: View {
             }
         }
         .padding(.vertical, 12)
-        .background(Color(.systemGray6))
+        //.background(Color(.systemGray6))
         .clipShape(Capsule())
+        .background(Color.clear)
         .padding(.horizontal)
+        .ignoresSafeArea(edges: .bottom)
     }
 }
 

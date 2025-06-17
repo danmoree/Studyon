@@ -251,6 +251,7 @@ struct StudiedTimeTodayView: View {
         .padding()
         .frame(width: 170, height: 170)
         .background(Color(.systemGray))
+        //.background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 }
