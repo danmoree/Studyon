@@ -57,7 +57,7 @@ struct HomeParentView: View {
                                 .background(Color.orange.opacity(0.2))
                                 .cornerRadius(20)
                                 .font(.footnote)
-                            Text("🟢 LVL 12")
+                            Text(widgetVM.getLevel(from: widgetVM.xp))
                                 .padding(.vertical, 4)
                                 .padding(.horizontal, 8)
                                 .background(Color.green.opacity(0.2))
@@ -107,11 +107,11 @@ struct HomeParentView: View {
                             
                             // Active rooms sections
                             HStack {
-                                Text("Active Rooms!!")
-                                    .fontWeight(.bold)
-                                    .fontWidth(.expanded)
-                                    .font(.title3)
-                                    .padding(.leading, 5)
+                               // Text("Active Rooms!!")
+//                                    .fontWeight(.bold)
+//                                    .fontWidth(.expanded)
+//                                    .font(.title3)
+//                                    .padding(.leading, 5)
                                 
                                 Spacer()
                             }

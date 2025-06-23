@@ -48,4 +48,30 @@ final class HomeWidgetsViewModel: ObservableObject {
         }
       }
     
+    
+    func getLevel(from xp: Int) -> String {
+        switch xp {
+        case 0..<100:
+            return "🐥 LVL 1"
+        case 100..<300:
+            return "🍎 LVL 2"
+        case 300..<600:
+            return "🤓 LVL 3"
+        case 600..<1000:
+            return "🎒 LVL 4"
+        case 1000..<1500:
+            return "📚 LVL 5"
+        case 1500..<2100:
+            return "✏️ LVL 6"
+        case 2100..<2800:
+            return "👨‍🎓 LVL 7"
+        case 2800..<3600:
+            return "🧠 LVL 8"
+        case 3600..<4500:
+            return "🧠 LVL 9"
+        default:
+            return "🧠 LVL Legend"
+        }
+    }
+    
 }
