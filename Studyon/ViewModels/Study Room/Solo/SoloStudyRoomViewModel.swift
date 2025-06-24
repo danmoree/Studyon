@@ -109,6 +109,7 @@ final class SoloStudyRoomViewModel: ObservableObject {
     }
 
     func recordWorkSession() {
+        if isOnBreak { return }
         guard let userId = Auth.auth().currentUser?.uid else { return }
         guard let start = sessionStart else { return }
         let seconds = Date().timeIntervalSince(start)
