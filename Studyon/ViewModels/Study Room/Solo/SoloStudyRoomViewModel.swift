@@ -21,6 +21,7 @@ final class SoloStudyRoomViewModel: ObservableObject {
     private var sessionEnd: Date?
     let studyRoom: SoloStudyRoom
     private let statsManager = UserStatsManager.shared
+    private let minRecordableSessionSeconds: TimeInterval = 10 // Threashold for calling recordWorkSession()
 
     init(studyRoom: SoloStudyRoom) {
         self.studyRoom = studyRoom
@@ -87,6 +88,7 @@ final class SoloStudyRoomViewModel: ObservableObject {
     func pauseToggle() {
         if !isOnBreak && remainingTime > 0 && !isPaused {
             recordWorkSession()
+            sessionStart = nil
         }
 
         if isPaused && remainingTime == 0 && !isOnBreak {
@@ -104,6 +106,13 @@ final class SoloStudyRoomViewModel: ObservableObject {
             startTimer()
         }
 
+        // When resuming from pause (playing), reset sessionStart and sessionEnd so new time is counted only
+        // This prevents overlapping or repeated study segments from being logged
+        if isPaused == true && remainingTime > 0 && !isOnBreak {
+            sessionStart = Date()
+            sessionEnd = Date().addingTimeInterval(TimeInterval(remainingTime))
+        }
+
         isPaused.toggle()
     }
     
@@ -119,6 +128,8 @@ final class SoloStudyRoomViewModel: ObservableObject {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         guard let start = sessionStart else { return }
         let seconds = Date().timeIntervalSince(start)
+        // Prevent spamming pause/play to exploit study session logging
+        guard seconds >= minRecordableSessionSeconds else { return }
         Task {
             do {
                 try await statsManager.recordStudyTime(userId: userId, date: Date(), seconds: seconds)
@@ -135,3 +146,4 @@ final class SoloStudyRoomViewModel: ObservableObject {
         timer?.cancel()
     }
 }
+
