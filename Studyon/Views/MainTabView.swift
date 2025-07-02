@@ -16,6 +16,7 @@ struct MainTabView: View {
     @Binding var isUserLoggedIn: Bool
     @State private var selectedTab: Tab = .home
     @State private var hideTabBar = false
+    @StateObject private var tasksVM = TasksViewModel()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,12 +24,14 @@ struct MainTabView: View {
                 switch selectedTab {
                 case .tasks:
                     TasksView(isUserLoggedIn: $isUserLoggedIn)
+                        .environmentObject(tasksVM)
                     
                 case .rooms:
                     StudyRoomsView(isUserLoggedIn: $isUserLoggedIn, hideTabBar: $hideTabBar)
                     //Text("Studyrooms")
                 case .home:
                     HomeParentView(isUserLoggedIn: $isUserLoggedIn)
+                        .environmentObject(tasksVM)
                 case .social:
                     //SocialFeedView()
                     Text("Social")

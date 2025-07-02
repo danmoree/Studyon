@@ -19,6 +19,7 @@ struct HomeParentView: View {
     @Binding var isUserLoggedIn: Bool
     @EnvironmentObject var userVM: ProfileViewModel
     @StateObject private var widgetVM =  HomeWidgetsViewModel()
+    @EnvironmentObject var tasksVM: TasksViewModel
 
     var body: some View {
         
@@ -99,6 +100,8 @@ struct HomeParentView: View {
                                 
                                 HStack {
                                     TodayTasks()
+                                        .environmentObject(tasksVM)
+                                        .environmentObject(userVM)
                                     Spacer()
                                     StudiedTimeTodayView(studiedTimeToday: widgetVM.secondsStudiedToday)
                                 }

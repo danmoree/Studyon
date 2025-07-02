@@ -19,7 +19,7 @@ struct TasksView: View {
     @State private var selectedTask: UTask? = nil
     @Binding var isUserLoggedIn: Bool
     @EnvironmentObject var userVM: ProfileViewModel
-    @StateObject private var tasksVM = TasksViewModel()
+    @EnvironmentObject var tasksVM: TasksViewModel
 
     var body: some View {
         

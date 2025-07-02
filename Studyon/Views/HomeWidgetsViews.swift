@@ -20,19 +20,23 @@ struct HomeWidgetsViews: View {
 }
 
 struct TodayTasks: View {
-    @State var tasks: [UserTask] = [
-        UserTask(title: "Study linear", isCompleted: true, dueData: Date(), description: "", priority: 1),
-        UserTask(title: "Finish bio hw", isCompleted: false, dueData: Date(), description: "", priority: 2),
-        UserTask(title: "Read software ch 4", isCompleted: false, dueData: Date(), description: "", priority: 3)
-    ]
+    @EnvironmentObject var tasksVM: TasksViewModel
+    @EnvironmentObject var userVM: ProfileViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            let todayTasks = tasksVM.sortedTasksByDueDate().filter {
+                if let dueDate = $0.dueDate {
+                    return Calendar.current.isDateInToday(dueDate) && ($0.completed ?? false) == false
+                }
+                return false
+            }
+            
             HStack {
                 Text("Today")
                     .fontWidth(.expanded)
                     .foregroundColor(.white)
-                Text(String(tasks.count))
+                Text(String(todayTasks.count))
                     .fontWidth(.expanded)
                     .fontWeight(.thin)
                     .font(.footnote)
@@ -48,15 +52,16 @@ struct TodayTasks: View {
                 }
                 .padding(.trailing, 5)
             }
-
             VStack(alignment: .leading, spacing: 6) {
-                ForEach(tasks.indices, id: \.self) { index in
+                ForEach(todayTasks) { task in
                     Button(action: {
-                        tasks[index].isCompleted.toggle()
+                        // mark as complete
+                        
+                        
                     }) {
                         Label(
-                            tasks[index].title,
-                            systemImage: tasks[index].isCompleted ? "checkmark.square.fill" : "square"
+                            task.title ?? "NULL",
+                            systemImage: task.completed ?? false ? "checkmark.square.fill" : "square"
                         )
                         .foregroundColor(.white)
                     }
@@ -66,14 +71,26 @@ struct TodayTasks: View {
             .fontWidth(.expanded)
             .fontWeight(.light)
         }
-        .padding(.top, -30)
-        .padding(.trailing, -12)
+        .task {
+            print("task in widget")
+            if let userId = userVM.user?.userId {
+                 tasksVM.fetchTasks(for: userId)
+            }
+        }
+        .onChange(of: userVM.user?.userId) { newUserId in
+            if let userId = newUserId {
+                tasksVM.fetchTasks(for: userId)
+            }
+        }
+        .padding(.top, 4)
+        .padding(.trailing, 4)
         .padding()
-        .frame(width: 170, height: 170)
+        .frame(width: 170, height: 170, alignment: .top)
         .background(Color(.systemGray))
         .clipShape(RoundedRectangle(cornerRadius: 20))
         
     }
+       
 }
 
 struct TimeSpentCard: View {
@@ -263,3 +280,4 @@ struct StudiedTimeTodayView: View {
     StudiedTimeTodayView(studiedTimeToday: 123)
     
 }
+
