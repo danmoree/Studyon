@@ -11,6 +11,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 
 struct HomeWidgetsViews: View {
@@ -22,6 +23,7 @@ struct HomeWidgetsViews: View {
 struct TodayTasks: View {
     @EnvironmentObject var tasksVM: TasksViewModel
     @EnvironmentObject var userVM: ProfileViewModel
+    @State var showingAddTaskSheet = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -46,6 +48,8 @@ struct TodayTasks: View {
                 
                 Button {
                     print("Add task")
+                    showingAddTaskSheet = true
+                    
                 } label: {
                     Image(systemName: "plus")
                         .foregroundColor(.white)
@@ -56,7 +60,16 @@ struct TodayTasks: View {
                 ForEach(todayTasks) { task in
                     Button(action: {
                         // mark as complete
-                        
+                        Task {
+                            guard let userId = Auth.auth().currentUser?.uid else { return }
+                            let newCompletedValue = !(task.completed ?? false)
+                            do {
+                                try await TaskManager.shared.updateTaskCompletion(for: userId , taskId: task.taskId, isCompleted: newCompletedValue)
+                                tasksVM.fetchTasks(for: userId)
+                            } catch {
+                                print("Error updating task completion:", error.localizedDescription)
+                            }
+                        }
                         
                     }) {
                         Label(
@@ -88,6 +101,18 @@ struct TodayTasks: View {
         .frame(width: 170, height: 170, alignment: .top)
         .background(Color(.systemGray))
         .clipShape(RoundedRectangle(cornerRadius: 20))
+        .sheet(isPresented: $showingAddTaskSheet, onDismiss: {
+            Task {
+                if let userId = userVM.user?.userId {
+                    tasksVM.fetchTasks(for: userId)
+                }
+            }
+           
+        }) {
+            TaskAddView(showingAddTaskSheet: $showingAddTaskSheet, viewModel: tasksVM)
+                .presentationDetents([.height(420)])
+                .presentationDragIndicator(.visible)
+        }
         
     }
        
