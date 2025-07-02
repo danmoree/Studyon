@@ -27,21 +27,34 @@ struct SoloStudyRoomView: View {
     
     var body: some View {
         GeometryReader { geo in
+            let capsuleHeight = geo.size.height * 1.6
+            let topY = -capsuleHeight / 2
+            let bottomY = geo.size.height - capsuleHeight / 2
+            let capsuleY = topY + (bottomY - topY) * (viewModel.progress * 1.12)
+            
             ZStack {
                 Color(red: 250/255, green: 201/255, blue: 184/255)
                 
+                Capsule()
+                    .fill(Color.white)
+                    .frame(width: geo.size.width * 1.18, height: capsuleHeight)
+                    .position(x: geo.size.width / 2, y: capsuleY)
+                    .animation(.easeInOut, value: viewModel.progress)
+                    .shadow(radius: 22, y: 12)
+                
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        Button {
-                            viewModel.recordWorkSession()
-                            dismiss()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 25, height: 25)
-                                .foregroundStyle(.black)
-                        }
+                            Button {
+                                viewModel.recordWorkSession()
+                                dismiss()
+                            } label: {
+                                Image(systemName: "chevron.left")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 25, height: 25)
+                                    .foregroundStyle(.black)
+                            }
+                        
                         
                         Spacer()
                         
@@ -130,3 +143,4 @@ struct SoloStudyRoomView: View {
     )
     .environmentObject(ProfileViewModel())
 }
+

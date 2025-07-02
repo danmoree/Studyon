@@ -11,6 +11,7 @@ import FirebaseAuth
 
 final class SoloStudyRoomViewModel: ObservableObject {
     @Published var remainingTime: Int
+    @Published var progress: Double = 0.0 // 0 = top, 1 = bottom
     @Published var isPaused: Bool = false
     @Published var isOnBreak: Bool = false
     @Published var autoStart: Bool = false // auto start countdown
@@ -24,6 +25,7 @@ final class SoloStudyRoomViewModel: ObservableObject {
     init(studyRoom: SoloStudyRoom) {
         self.studyRoom = studyRoom
         self.remainingTime = studyRoom.pomDurationSec
+        self.progress = 0.0
         sessionStart = Date() // start time
         sessionEnd = sessionStart!.addingTimeInterval(TimeInterval(studyRoom.pomDurationSec)) // pom sesh should end at this time
         startTimer()
@@ -42,6 +44,10 @@ final class SoloStudyRoomViewModel: ObservableObject {
         guard !isPaused, let end = sessionEnd else { return }
         let secondsLeft = Int(max(0, end.timeIntervalSinceNow))
         remainingTime = secondsLeft
+        
+        let total = isOnBreak ? studyRoom.pomBreakDurationSec : studyRoom.pomDurationSec
+        progress = 1.0 - Double(secondsLeft) / Double(total)
+        progress = min(max(progress, 0.0), 1.0)
 
         if secondsLeft == 0 {
             timer?.cancel()
