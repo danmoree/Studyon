@@ -21,6 +21,7 @@ struct MainTabView: View {
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
+                AnimatedCloudsView()
                 switch selectedTab {
                 case .tasks:
                     TasksView(isUserLoggedIn: $isUserLoggedIn)
