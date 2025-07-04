@@ -29,11 +29,14 @@ struct ContentView: View {
                     ProfileSetupView(userID: uid, needsProfileSetup: $needsProfileSetup)
                         .environmentObject(userVM)
                 } else {
-                    MainTabView(isUserLoggedIn: $isUserLoggedIn)
-                        .task {
-                            try? await userVM.loadCurrentUser()
-                        }
-                        .environmentObject(userVM)
+                    ZStack {
+                        Color.softWhite.ignoresSafeArea()
+                        MainTabView(isUserLoggedIn: $isUserLoggedIn)
+                            .task {
+                                try? await userVM.loadCurrentUser()
+                            }
+                            .environmentObject(userVM)
+                    }
                 }
             } else if isUserLoggedIn && !hasCheckedProfile {
                 ProgressView("Loading profile...")
@@ -86,6 +89,10 @@ struct ContentView: View {
             self.isUserLoggedIn = true
         }
     }
+}
+
+extension Color {
+    static let softWhite = Color(red: 245/255, green: 245/255, blue: 245/255)
 }
 
 #Preview {

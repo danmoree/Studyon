@@ -37,12 +37,12 @@ struct TodayTasks: View {
             HStack {
                 Text("Today")
                     .fontWidth(.expanded)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                 Text(String(todayTasks.count))
                     .fontWidth(.expanded)
                     .fontWeight(.thin)
                     .font(.footnote)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.black.opacity(0.8))
                 
                 Spacer()
                 
@@ -52,7 +52,7 @@ struct TodayTasks: View {
                     
                 } label: {
                     Image(systemName: "plus")
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                 }
                 .padding(.trailing, 5)
             }
@@ -76,7 +76,7 @@ struct TodayTasks: View {
                             task.title ?? "NULL",
                             systemImage: task.completed ?? false ? "checkmark.square.fill" : "square"
                         )
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     }
@@ -101,8 +101,9 @@ struct TodayTasks: View {
         .padding(.trailing, 4)
         .padding()
         .frame(width: 170, height: 170, alignment: .top)
-        .background(Color(.systemGray))
+        .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
         .sheet(isPresented: $showingAddTaskSheet, onDismiss: {
             Task {
                 if let userId = userVM.user?.userId {
@@ -278,14 +279,14 @@ struct StudiedTimeTodayView: View {
             HStack {
                 Text("Time Studied")
                     .fontWidth(.expanded)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                 
                 Spacer()
             }
             Text("Today")
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             Text("\(studiedTimeToday / 60, specifier: "%.0f") Minutes")
-                .foregroundColor(.white)
+                .foregroundColor(.black)
                 .font(.title)
             
             
@@ -294,9 +295,11 @@ struct StudiedTimeTodayView: View {
         .padding(.trailing, -12)
         .padding()
         .frame(width: 170, height: 170)
-        .background(Color(.systemGray))
+        .background(Color.white)
+        //.background(Color(.systemGray))
         //.background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 }
 

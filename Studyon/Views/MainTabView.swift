@@ -20,7 +20,7 @@ struct MainTabView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ZStack {
+            ZStack(alignment: .bottom) {
                 AnimatedCloudsView()
                 switch selectedTab {
                 case .tasks:
@@ -37,13 +37,15 @@ struct MainTabView: View {
                     //SocialFeedView()
                     Text("Social")
                 }
+                
+                if !hideTabBar {
+                    TabBarView(selectedTab: $selectedTab)
+                        .padding(.bottom, 25)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            if !hideTabBar {
-                TabBarView(selectedTab: $selectedTab)
-                    .padding(.bottom, 25)
-            }
+           
             
         }
         .edgesIgnoringSafeArea(.bottom)

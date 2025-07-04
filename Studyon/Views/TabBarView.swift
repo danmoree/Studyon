@@ -44,8 +44,9 @@ struct TabBarView: View {
             }
         }
         .padding(.vertical, 12)
-        //.background(Color(.systemGray6))
+        .background(Color.white)
         .clipShape(Capsule())
+        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
         .background(Color.clear)
         .padding(.horizontal)
         .ignoresSafeArea(edges: .bottom)

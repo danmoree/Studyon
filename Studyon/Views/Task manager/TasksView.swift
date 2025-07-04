@@ -253,6 +253,7 @@ struct TasksView: View {
                 }
                 .padding()
             }
+            .padding(.bottom, 55)
         }
         .sheet(isPresented: $showingAddTaskSheet, onDismiss: {
             Task {

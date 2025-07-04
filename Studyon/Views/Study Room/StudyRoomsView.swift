@@ -22,6 +22,7 @@ struct StudyRoomsView: View {
         ZStack {
             NavigationStack {
                 ZStack {
+                    Color.softWhite.ignoresSafeArea()
                     AnimatedCloudsView()
                     VStack(alignment: .leading, spacing: 16) {
                         // header
@@ -145,9 +146,11 @@ struct StudyRoomsView: View {
                             }
                             .padding()
                         }
+                        .padding(.bottom, 25)
                     }
                 }
             }
+            .ignoresSafeArea()
             .background(Color.clear)
             .navigationBarHidden(true)
             .sheet(isPresented: $showCreateRoomSheet) {
@@ -160,6 +163,7 @@ struct StudyRoomsView: View {
         
     }
 }
+
 
 #Preview {
     StudyRoomsView(isUserLoggedIn: .constant(true), hideTabBar: .constant(true))
