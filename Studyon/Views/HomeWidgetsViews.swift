@@ -77,6 +77,8 @@ struct TodayTasks: View {
                             systemImage: task.completed ?? false ? "checkmark.square.fill" : "square"
                         )
                         .foregroundColor(.white)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                     }
                 }
             }

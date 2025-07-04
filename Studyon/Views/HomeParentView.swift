@@ -32,6 +32,7 @@ struct HomeParentView: View {
                     } label: {
                         Image(systemName: "person.crop.circle.fill")
                             .resizable()
+                            .foregroundStyle(.black)
                             .frame(width: 60, height: 60)
                     }
                     .sheet(isPresented: $showingSettings) {
@@ -77,10 +78,10 @@ struct HomeParentView: View {
             
 
             // Segmented Control - Top tab bar
-            HStack {
-                HomeSegmentedControl(selectedFilter: $selectedFilter)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+           // HStack {
+           //     HomeSegmentedControl(selectedFilter: $selectedFilter)
+           //}
+           // .frame(maxWidth: .infinity, alignment: .leading)
 
             // Scrollable content
             ScrollView {
@@ -109,15 +110,16 @@ struct HomeParentView: View {
                             .padding(.bottom)
                             
                             // Active rooms sections
-                            HStack {
-                               // Text("Active Rooms!!")
+//                            HStack {
+//                               Text("Active Rooms!!")
 //                                    .fontWeight(.bold)
 //                                    .fontWidth(.expanded)
 //                                    .font(.title3)
 //                                    .padding(.leading, 5)
-                                
-                                Spacer()
-                            }
+//                                
+//                                Spacer()
+//                            }
+//                            ActiveRoomsPreviewView()
                         }
                        
                         

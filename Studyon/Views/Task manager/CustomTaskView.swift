@@ -104,6 +104,8 @@ struct CustomTaskView: View {
 
                             
                             Text(title)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
                                 .font(.headline)
                                 .foregroundColor(.white)
                         }
