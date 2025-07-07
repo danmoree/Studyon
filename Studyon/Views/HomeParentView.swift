@@ -106,6 +106,7 @@ struct HomeParentView: View {
                                     Spacer()
                                     StudiedTimeTodayView(studiedTimeToday: widgetVM.secondsStudiedToday)
                                 }
+                                QuickStartStudyRoomView()
                             }
                             .padding(.bottom)
                             

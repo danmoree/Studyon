@@ -297,20 +297,157 @@ struct StudiedTimeTodayView: View {
         .padding()
         .frame(width: 170, height: 170)
         .background(Color.white)
-        //.background(Color(.systemGray))
-        //.background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
     }
 }
 
+struct QuickStartStudyRoomView: View {
+    var body: some View {
+        GeometryReader { geometry in
+            VStack(alignment: .leading) {
+                
+                HStack {
+                    Text("Quick Study ⏳")
+                        .fontWidth(.expanded)
+                        .foregroundColor(.black)
+                    Spacer()
+                }
+                
+                // blocks
+                HStack {
+                    
+                    // block 1
+                    VStack {
+                        
+                        HStack {
+                            Spacer()
+                            Text("⚡️")
+                        }
+                        
+                        
+                        HStack {
+                            Text("Focus\nSprint")
+                                .multilineTextAlignment(.leading)
+                                .font(.caption)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .fontWidth(.expanded)
+                                .fontWeight(.light)
+                        }
+                        
+                        
+                        
+                        HStack {
+                            Text("15m")
+                                .font(.title)
+                            
+                            Spacer()
+                        }
+                        
+                    }
+                    .padding(.horizontal, 10)
+                    .frame(width: 100, height: 100)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+                    
+                    Spacer()
+                    
+                    // block 2
+                    VStack {
+                        
+                        HStack {
+                            Spacer()
+                            Text("🎯")
+                        }
+                        
+                        
+                        HStack {
+                            Text("Deep\nWork")
+                                .multilineTextAlignment(.leading)
+                                .font(.caption)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .fontWidth(.expanded)
+                                .fontWeight(.light)
+                        }
+                        
+                        
+                        
+                        HStack {
+                            Text("25m")
+                                .font(.title)
+                            
+                            Spacer()
+                        }
+                        
+                    }
+                    .padding(.horizontal, 10)
+                    .frame(width: 100, height: 100)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+                    
+                    Spacer()
+                    
+                    // block 3
+                    VStack {
+                        
+                        HStack {
+                            Spacer()
+                            Text("🧠")
+                        }
+                        
+                        
+                        HStack {
+                            Text("Power\nBlock")
+                                .multilineTextAlignment(.leading)
+                                .font(.caption)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .fontWidth(.expanded)
+                                .fontWeight(.light)
+                        }
+                        
+                        
+                        
+                        HStack {
+                            Text("50m")
+                                .font(.title)
+                            
+                            Spacer()
+                        }
+                        
+                    }
+                    .padding(.horizontal, 10)
+                    .frame(width: 100, height: 100)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+                    
+                    
+                    
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                
+                
+            }
+            //.padding(.top, -30)
+            .padding()
+            .frame(width: geometry.size.width, height: 170)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
+        }
+    }
+}
+
 #Preview {
-    TodayTasks()
-        .environmentObject(TasksViewModel())
-        .environmentObject(ProfileViewModel())
-    TimeSpentCard()
+    //TodayTasks()
+    //    .environmentObject(TasksViewModel())
+    //    .environmentObject(ProfileViewModel())
+    //TimeSpentCard()
     //ActiveRoomsPreviewView()
     StudiedTimeTodayView(studiedTimeToday: 123)
+    QuickStartStudyRoomView()
     
 }
 
