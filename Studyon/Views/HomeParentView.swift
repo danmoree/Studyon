@@ -91,7 +91,7 @@ struct HomeParentView: View {
                         VStack {
                             VStack {
                                 HStack {
-                                    Text("Summary")
+                                    Text("Today's Focus")
                                         .fontWeight(.bold)
                                         .fontWidth(.expanded)
                                         .font(.title3)

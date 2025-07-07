@@ -103,7 +103,8 @@ struct TodayTasks: View {
         .frame(width: 170, height: 170, alignment: .top)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+        //.shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
         .sheet(isPresented: $showingAddTaskSheet, onDismiss: {
             Task {
                 if let userId = userVM.user?.userId {
@@ -299,12 +300,14 @@ struct StudiedTimeTodayView: View {
         //.background(Color(.systemGray))
         //.background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
     }
 }
 
 #Preview {
     TodayTasks()
+        .environmentObject(TasksViewModel())
+        .environmentObject(ProfileViewModel())
     TimeSpentCard()
     //ActiveRoomsPreviewView()
     StudiedTimeTodayView(studiedTimeToday: 123)
