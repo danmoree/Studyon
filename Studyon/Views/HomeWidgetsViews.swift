@@ -475,6 +475,47 @@ struct QuickStartStudyRoomView: View {
         }
     }
 
+struct DailyGoalProgressView: View {
+    var body: some View {
+        VStack(alignment: .center) {
+            Text("Daily Goal")
+                .fontWidth(.expanded)
+                .foregroundColor(.black)
+            Text("You're halfway to your goal. Keep up the \nmomentum!")
+                .font(.caption)
+                .fontWeight(.thin)
+                .fontWidth(.expanded)
+                .foregroundColor(.black)
+                .multilineTextAlignment(.center)
+                Spacer()
+            ZStack {
+                HalfCircleProgress(progress: 280, totalSteps: 500, minValue: 0, maxValue: 500)
+                
+                VStack {
+                  Text("27:00")
+                        .font(.title)
+                        .fontWeight(.medium)
+                        .fontWidth(.expanded)
+                        .padding(.top, -20)
+                    Text("of your 50-minute focus goal")
+                        .font(.caption)
+                        .fontWeight(.thin)
+                        .fontWidth(.expanded)
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 5)
+                }
+                
+            }
+        }
+        .padding(.top)
+        .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 200)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
+        
+    }
+}
 
 #Preview {
     //TodayTasks()
@@ -482,8 +523,9 @@ struct QuickStartStudyRoomView: View {
     //    .environmentObject(ProfileViewModel())
     //TimeSpentCard()
     //ActiveRoomsPreviewView()
-    StudiedTimeTodayView(studiedTimeToday: 123)
-    QuickStartStudyRoomView()
+    //StudiedTimeTodayView(studiedTimeToday: 123)
+    //QuickStartStudyRoomView()
+    DailyGoalProgressView()
     
 }
 

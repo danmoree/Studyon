@@ -107,6 +107,8 @@ struct HomeParentView: View {
                                     StudiedTimeTodayView(studiedTimeToday: widgetVM.secondsStudiedToday)
                                 }
                                 QuickStartStudyRoomView()
+                                    .padding(.vertical, 10)
+                                DailyGoalProgressView()
                             }
                             .padding(.bottom)
                             
@@ -136,6 +138,7 @@ struct HomeParentView: View {
                 }
                 .padding()
             }
+            .padding(.bottom, 55)
             .task {
                 if let uid = Auth.auth().currentUser?.uid {
                     print("fethcing tasks")
@@ -149,4 +152,5 @@ struct HomeParentView: View {
 #Preview {
     HomeParentView(isUserLoggedIn: .constant(true))
         .environmentObject(ProfileViewModel())
+        .environmentObject(TasksViewModel())
 }
