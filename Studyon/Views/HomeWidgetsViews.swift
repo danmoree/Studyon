@@ -303,8 +303,10 @@ struct StudiedTimeTodayView: View {
 }
 
 struct QuickStartStudyRoomView: View {
+    @State private var newSoloRoom: SoloStudyRoom? = nil
+    
     var body: some View {
-        GeometryReader { geometry in
+        
             VStack(alignment: .leading) {
                 
                 HStack {
@@ -318,110 +320,141 @@ struct QuickStartStudyRoomView: View {
                 HStack {
                     
                     // block 1
-                    VStack {
+                    Button {
+                        print("Created new room")
+                        newSoloRoom = SoloStudyRoom(createAt: Date(), pomIsRunning: true, pomDurationSec: 15 * 60, pomBreakDurationSec: 5 * 60)
                         
-                        HStack {
-                            Spacer()
-                            Text("⚡️")
-                        }
+                    } label: {
                         
-                        
-                        HStack {
-                            Text("Focus\nSprint")
-                                .multilineTextAlignment(.leading)
-                                .font(.caption)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .fontWidth(.expanded)
-                                .fontWeight(.light)
-                        }
-                        
-                        
-                        
-                        HStack {
-                            Text("15m")
-                                .font(.title)
+                        VStack {
                             
-                            Spacer()
+                            HStack {
+                                Spacer()
+                                Text("⚡️")
+                            }
+                            
+                            
+                            HStack {
+                                Text("Focus\nSprint")
+                                    .multilineTextAlignment(.leading)
+                                    .font(.caption)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .fontWidth(.expanded)
+                                    .fontWeight(.light)
+                            }
+                            
+                            
+                            
+                            HStack {
+                                Text("15m")
+                                    .font(.title)
+                                
+                                Spacer()
+                            }
+                            
                         }
+                        .padding(.horizontal, 10)
+                        .frame(width: 100, height: 100)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+                        .foregroundStyle(.black)
                         
                     }
-                    .padding(.horizontal, 10)
                     .frame(width: 100, height: 100)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+
+                   
                     
                     Spacer()
                     
                     // block 2
-                    VStack {
-                        
-                        HStack {
-                            Spacer()
-                            Text("🎯")
-                        }
-                        
-                        
-                        HStack {
-                            Text("Deep\nWork")
-                                .multilineTextAlignment(.leading)
-                                .font(.caption)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .fontWidth(.expanded)
-                                .fontWeight(.light)
-                        }
-                        
-                        
-                        
-                        HStack {
-                            Text("25m")
-                                .font(.title)
+                    Button {
+                        print("Created new room")
+                        newSoloRoom = SoloStudyRoom(createAt: Date(), pomIsRunning: true, pomDurationSec: 25 * 60, pomBreakDurationSec: 5 * 60)
+                    } label: {
+                        VStack {
                             
-                            Spacer()
+                            HStack {
+                                Spacer()
+                                Text("🎯")
+                            }
+                            
+                            
+                            HStack {
+                                Text("Deep\nWork")
+                                    .multilineTextAlignment(.leading)
+                                    .font(.caption)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .fontWidth(.expanded)
+                                    .fontWeight(.light)
+                            }
+                            
+                            
+                            
+                            HStack {
+                                Text("25m")
+                                    .font(.title)
+                                
+                                Spacer()
+                            }
+                            
                         }
-                        
+                        .padding(.horizontal, 10)
+                        .frame(width: 100, height: 100)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+                        .foregroundStyle(.black)
                     }
-                    .padding(.horizontal, 10)
                     .frame(width: 100, height: 100)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+
+                   
                     
                     Spacer()
                     
                     // block 3
-                    VStack {
-                        
-                        HStack {
-                            Spacer()
-                            Text("🧠")
-                        }
-                        
-                        
-                        HStack {
-                            Text("Power\nBlock")
-                                .multilineTextAlignment(.leading)
-                                .font(.caption)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .fontWidth(.expanded)
-                                .fontWeight(.light)
-                        }
-                        
-                        
-                        
-                        HStack {
-                            Text("50m")
-                                .font(.title)
+                    Button {
+                        print("Created new room")
+                        newSoloRoom = SoloStudyRoom(createAt: Date(), pomIsRunning: true, pomDurationSec: 50 * 60, pomBreakDurationSec: 5 * 60)
+                    } label: {
+                        VStack {
                             
-                            Spacer()
+                            HStack {
+                                Spacer()
+                                Text("🧠")
+                            }
+                            
+                            
+                            HStack {
+                                Text("Power\nBlock")
+                                    .multilineTextAlignment(.leading)
+                                    .font(.caption)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .fontWidth(.expanded)
+                                    .fontWeight(.light)
+                            }
+                            
+                            
+                            
+                            HStack {
+                                Text("50m")
+                                    .font(.title)
+                                
+                                Spacer()
+                            }
+                            
                         }
+                        .padding(.horizontal, 10)
+                        .frame(width: 100, height: 100)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+                        .foregroundStyle(.black)
                         
                     }
-                    .padding(.horizontal, 10)
                     .frame(width: 100, height: 100)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+
+                    
                     
                     
                     
@@ -432,13 +465,16 @@ struct QuickStartStudyRoomView: View {
             }
             //.padding(.top, -30)
             .padding()
-            .frame(width: geometry.size.width, height: 170)
+            .frame(maxWidth: .infinity, minHeight: 170, maxHeight: 170)
             .background(Color.white)
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
+            .fullScreenCover(item: $newSoloRoom) { room in
+                SoloStudyRoomView(studyRoom: room)
+            }
         }
     }
-}
+
 
 #Preview {
     //TodayTasks()
