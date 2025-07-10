@@ -16,7 +16,8 @@ final class HomeWidgetsViewModel: ObservableObject {
     @Published var xp: Int = 0
     @Published var dayStreak : Int = 0
     @Published var secondsStudiedToday: TimeInterval = 0
-    
+    @Published var userStats: UserStats? = nil
+
     private let statsManager = UserStatsManager.shared
       private let isoFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
@@ -38,6 +39,8 @@ final class HomeWidgetsViewModel: ObservableObject {
            let dateKey = df.string(from: Date())
            secondsStudiedToday = stats.timeStudiedByDate?[dateKey] ?? 0
          
+            self.userStats = stats
+            
             print("Fetched map:", stats.timeStudiedByDate as Any)
             //print("Looking up:", key)
             print("xp:", xp)

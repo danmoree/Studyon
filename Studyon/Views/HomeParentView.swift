@@ -104,7 +104,7 @@ struct HomeParentView: View {
                                         .environmentObject(tasksVM)
                                         .environmentObject(userVM)
                                     Spacer()
-                                    StudiedTimeTodayView(studiedTimeToday: widgetVM.secondsStudiedToday)
+                                    StudyTimeBarChartView(timeStudiedByDate: widgetVM.userStats?.timeStudiedByDate ?? [:])
                                 }
                                 QuickStartStudyRoomView()
                                     .padding(.vertical, 10)

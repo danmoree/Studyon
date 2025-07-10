@@ -544,6 +544,68 @@ struct DailyGoalProgressView: View {
     }
 }
 
+struct StudyTimeBarChartView: View {
+    // Dummy data: last 7 days, where key is ISO date string
+    var timeStudiedByDate: [String: TimeInterval]
+    
+    private var last7Days: [(date: Date, label: String, minutes: Int)] {
+        let calendar = Calendar.current
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        // Removed displayFormatter and its use
+        return (0..<7).reversed().compactMap { offset in
+            let day = calendar.date(byAdding: .day, value: -offset, to: calendar.startOfDay(for: Date()))!
+            let key = dateFormatter.string(from: day)
+            let minutes = Int((timeStudiedByDate[key] ?? 0) / 60)
+            return (date: day, label: String(Calendar.current.shortWeekdaySymbols[Calendar.current.component(.weekday, from: day) - 1].prefix(1)), minutes: minutes)
+        }
+    }
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Text("Time Studied")
+                    .fontWidth(.expanded)
+                    .foregroundColor(.black)
+                
+                Spacer()
+            }
+ 
+            GeometryReader { geo in
+                let maxMinutes = max(Double(last7Days.map { $0.minutes }.max() ?? 1), 60.0)
+                let barWidth = geo.size.width / CGFloat(Double(last7Days.count) * 2.5)
+                HStack(alignment: .bottom, spacing:12 ) {
+                    ForEach(last7Days, id: \.date) { day in
+                        VStack(spacing: 6) {
+                            ZStack(alignment: .bottom) {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .frame(width: barWidth, height: geo.size.height * 0.80)
+                                    .foregroundColor(Color(.systemGray5))
+                                RoundedRectangle(cornerRadius: 10)
+                                    .frame(width: barWidth, height: CGFloat(day.minutes) / CGFloat(maxMinutes) * geo.size.height * 0.80)
+                                    .foregroundColor(Color(red: 105/255, green: 169/255, blue: 98/255))
+                            }
+                            Text(day.label)
+                                .font(.caption2)
+                                .foregroundColor(.black)
+                        }
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.vertical, 4)
+                .background(Color.white)
+            }
+        }
+        .padding()
+        .frame(width: 170, height: 170)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
+    }
+}
+
+
 #Preview {
     //TodayTasks()
     //    .environmentObject(TasksViewModel())
@@ -553,6 +615,7 @@ struct DailyGoalProgressView: View {
     //StudiedTimeTodayView(studiedTimeToday: 123)
     //QuickStartStudyRoomView()
     DailyGoalProgressView(studiedTimeToday: 10, goalAmount: 50)
+    StudyTimeBarChartView(timeStudiedByDate: ["2025-07-03": 60 * 60, "2025-07-04": 80 * 60, "2025-07-05": 30 * 60, "2025-07-06": 0, "2025-07-07": 45 * 60, "2025-07-08": 100 * 60, "2025-07-09": 110 * 60])
     
 }
 
