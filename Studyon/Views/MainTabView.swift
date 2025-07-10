@@ -34,8 +34,7 @@ struct MainTabView: View {
                     HomeParentView(isUserLoggedIn: $isUserLoggedIn)
                         .environmentObject(tasksVM)
                 case .social:
-                    //SocialFeedView()
-                    Text("Social")
+                   SocialView()
                 }
                 
                 if !hideTabBar {
