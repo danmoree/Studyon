@@ -23,6 +23,7 @@ struct DBUser: Codable {
     let fullName: String?
     let username: String?
     let dateOfBirth: Date?
+    let dailyStudyGoal: TimeInterval?
     
     
     init(auth: AuthDataResultModel) {
@@ -34,6 +35,7 @@ struct DBUser: Codable {
         self.fullName = nil
         self.username = nil
         self.dateOfBirth = nil
+        self.dailyStudyGoal = nil
     }
     
     init(
@@ -44,7 +46,8 @@ struct DBUser: Codable {
         isPremium: Bool? = nil,
         fullName: String? = nil,
         username: String? = nil,
-        dateOfBirth: Date? = nil
+        dateOfBirth: Date? = nil,
+        dailyStudyGoal: TimeInterval? = nil
     ) {
         self.userId = userId
         self.email = email
@@ -54,6 +57,7 @@ struct DBUser: Codable {
         self.fullName = fullName
         self.username = username
         self.dateOfBirth = dateOfBirth
+        self.dailyStudyGoal = dailyStudyGoal
     }
     
 //    func toggleIsPremiumStatus() -> DBUser {
@@ -76,6 +80,7 @@ struct DBUser: Codable {
         case fullName = "full_name"
         case username = "username"
         case dateOfBirth = "date_of_birth"
+        case dailyStudyGoal = "daily_study_goal"
     }
     
     // download from firestore
@@ -89,6 +94,7 @@ struct DBUser: Codable {
         self.fullName = try container.decodeIfPresent(String.self, forKey: .fullName)
         self.username = try container.decodeIfPresent(String.self, forKey: .username)
         self.dateOfBirth = try container.decodeIfPresent(Date.self, forKey: .dateOfBirth)
+        self.dailyStudyGoal = try container.decodeIfPresent(TimeInterval.self, forKey: .dailyStudyGoal)
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -101,6 +107,7 @@ struct DBUser: Codable {
         try container.encodeIfPresent(self.fullName, forKey: .fullName)
         try container.encodeIfPresent(self.username, forKey: .username)
         try container.encodeIfPresent(self.dateOfBirth, forKey: .dateOfBirth)
+        try container.encodeIfPresent(self.dailyStudyGoal, forKey: .dailyStudyGoal)
     }
     
  
@@ -186,6 +193,13 @@ final class UserManager {
             DBUser.CodingKeys.fullName.rawValue: fullName,
             DBUser.CodingKeys.username.rawValue: username,
             DBUser.CodingKeys.dateOfBirth.rawValue: Timestamp(date: dateOfBirth)
+        ]
+        try await userDocument(userId: userId).setData(data, merge: true)
+    }
+    
+    func updateUserDailyStudyGoal(userId: String, goal: TimeInterval) async throws {
+        let data: [String: Any] = [
+            DBUser.CodingKeys.dailyStudyGoal.rawValue: goal
         ]
         try await userDocument(userId: userId).setData(data, merge: true)
     }

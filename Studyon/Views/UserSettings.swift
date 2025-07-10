@@ -20,6 +20,8 @@ struct UserSettings: View {
     
     @EnvironmentObject var viewModel: ProfileViewModel
     
+    @State private var selectedGoalMinutes: Int = 30
+    
     var body: some View {
         VStack(spacing: 20) {
             Text("User Settings")
@@ -55,15 +57,37 @@ struct UserSettings: View {
                 } label: {
                     Text("User is premium: \((user.isPremium ?? false).description.capitalized)")
                 }
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    Picker("Daily Study Goal (minutes)", selection: $selectedGoalMinutes) {
+                        ForEach(0...240, id: \.self) { minute in
+                            Text("\(minute)")
+                        }
+                    }
+                    .pickerStyle(WheelPickerStyle())
+                    .frame(height: 100)
+                    
+                    Button("Save Goal") {
+                        viewModel.updateDailyStudyGoal(amount: Double(selectedGoalMinutes) * 60)
+                    }
+                    .padding(.top, 5)
+                }
+                .padding(.top, 20)
             }
             
        
 
         }
         .padding()
+        .onAppear {
+            if let user = viewModel.user {
+                selectedGoalMinutes = Int((user.dailyStudyGoal ?? 1800) / 60)
+            }
+        }
     }
 }
 
 #Preview {
     UserSettings(isUserLoggedIn: .constant(true))
+        .environmentObject(ProfileViewModel())
 }

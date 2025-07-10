@@ -41,5 +41,18 @@ final class ProfileViewModel: ObservableObject {
         
     }
     
+    func updateDailyStudyGoal(amount: TimeInterval) {
+        guard let user else { return }
+        
+        Task {
+            try await UserManager.shared.updateUserDailyStudyGoal(userId: user.userId, goal: amount)
+            let refreshedUser = try await UserManager.shared.getUser(userId: user.userId)
+            await MainActor.run {
+                self.user = refreshedUser
+            }
+        }
+        
+    }
+    
     
 }
