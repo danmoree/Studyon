@@ -108,7 +108,7 @@ struct HomeParentView: View {
                                 }
                                 QuickStartStudyRoomView()
                                     .padding(.vertical, 10)
-                                DailyGoalProgressView()
+                                DailyGoalProgressView(studiedTimeToday: widgetVM.secondsStudiedToday, goalAmount: 50 * 60) // min to seconds
                             }
                             .padding(.bottom)
                             

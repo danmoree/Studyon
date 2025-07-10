@@ -476,28 +476,49 @@ struct QuickStartStudyRoomView: View {
     }
 
 struct DailyGoalProgressView: View {
+    let studiedTimeToday: TimeInterval
+    let goalAmount: Int
+    
+    @State var displayedProgress: CGFloat = 0
+    var goalMessage: String {
+        let progress = studiedTimeToday / Double(goalAmount)
+        
+        switch progress {
+        case 0.0:
+            return "Ready when you are. Let the focus flow."
+        case 0.01...0.25:
+            return "A little progress goes a long way - Keep \n it up!"
+        case 0.25...0.50:
+            return "You're making steady progress - Stay focused!"
+        case 0.5..<1.0:
+            return "You're halfway to your goal. Keep up the \nmomentum!"
+        default:
+            return "Goal crushed! Be proud of your focus today."
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .center) {
             Text("Daily Goal")
                 .fontWidth(.expanded)
                 .foregroundColor(.black)
-            Text("You're halfway to your goal. Keep up the \nmomentum!")
+            Text(goalMessage)
                 .font(.caption)
                 .fontWeight(.thin)
                 .fontWidth(.expanded)
                 .foregroundColor(.black)
                 .multilineTextAlignment(.center)
-                Spacer()
+
+            Spacer()
             ZStack {
-                HalfCircleProgress(progress: 280, totalSteps: 500, minValue: 0, maxValue: 500)
-                
+                HalfCircleProgress(progress: CGFloat(studiedTimeToday / 60), totalSteps: goalAmount / 60, minValue: 0, maxValue: CGFloat(goalAmount / 60))
                 VStack {
-                  Text("27:00")
+                    Text(timeString(from: studiedTimeToday))
                         .font(.title)
                         .fontWeight(.medium)
                         .fontWidth(.expanded)
                         .padding(.top, -20)
-                    Text("of your 50-minute focus goal")
+                    Text("of your \(goalAmount / 60)-minute focus goal")
                         .font(.caption)
                         .fontWeight(.thin)
                         .fontWidth(.expanded)
@@ -505,7 +526,6 @@ struct DailyGoalProgressView: View {
                         .multilineTextAlignment(.center)
                         .padding(.top, 5)
                 }
-                
             }
         }
         .padding(.top)
@@ -513,7 +533,14 @@ struct DailyGoalProgressView: View {
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
-        
+    }
+    
+    
+    
+    private func timeString(from interval: TimeInterval) -> String {
+        let minutes = Int(interval) / 60
+        let seconds = Int(interval) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 }
 
@@ -525,7 +552,7 @@ struct DailyGoalProgressView: View {
     //ActiveRoomsPreviewView()
     //StudiedTimeTodayView(studiedTimeToday: 123)
     //QuickStartStudyRoomView()
-    DailyGoalProgressView()
+    DailyGoalProgressView(studiedTimeToday: 10, goalAmount: 50)
     
 }
 

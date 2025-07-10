@@ -12,6 +12,7 @@ struct HalfCircleProgress: View {
     var totalSteps: Int
     var minValue: CGFloat
     var maxValue: CGFloat
+    @State private var animatedProgress: CGFloat = 0
     var body: some View {
         ZStack {
             HalfCircleShape()
@@ -33,11 +34,21 @@ struct HalfCircleProgress: View {
                 )
                 .frame(width: 150, height: 75)
         }
-
+        .onAppear {
+            animatedProgress = 0
+            withAnimation(.easeOut(duration: 1.0)) {
+                animatedProgress = progress
+            }
+        }
+        .onChange(of: progress) { newValue in
+            withAnimation(.easeOut(duration: 1.0)) {
+                animatedProgress = newValue
+            }
+        }
     }
     
     private var normalizedProgress: CGFloat {
-        (progress - minValue) / (maxValue - minValue)
+        (animatedProgress - minValue) / (maxValue - minValue)
     }
     
     private var remainingSteps: Int {
