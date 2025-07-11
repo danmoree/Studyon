@@ -13,6 +13,7 @@
 import SwiftUI
 
 struct SocialView: View {
+    @State private var showingAddFriendSheet = false
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
@@ -25,7 +26,7 @@ struct SocialView: View {
                     Spacer()
                     
                     Button {
-                        
+                        showingAddFriendSheet = true
                     } label: {
                         ZStack {
                             HStack {
@@ -58,6 +59,9 @@ struct SocialView: View {
                 .padding(.top, 10)
             }
             .padding(.bottom, 55)
+        }
+        .sheet(isPresented: $showingAddFriendSheet) {
+            AddFriendView(showingAddFriendSheet: $showingAddFriendSheet)
         }
        
     }
