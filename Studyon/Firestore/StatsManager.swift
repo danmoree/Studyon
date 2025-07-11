@@ -132,8 +132,16 @@ final class UserStatsManager {
     }
     
     func checkAndUpdateLoginStreak(userId: String) async throws {
-        var stats = try await fetchStats(userId: userId)
-
+        var stats: UserStats
+        do {
+            stats = try await fetchStats(userId: userId)
+        } catch {
+            // If the document is missing, create a new one with defaults
+            let newStats = UserStats()
+            try await setStats(userId: userId, stats: newStats)
+            stats = newStats
+        }
+        
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
@@ -145,12 +153,11 @@ final class UserStatsManager {
             return
         }
 
-        // aleady logged in today — do nothing
+        // already logged in today — do nothing
         if calendar.isDateInToday(lastLogin) {
             return
         }
 
-        //
         if calendar.isDate(today, inSameDayAs: calendar.date(byAdding: .day, value: 1, to: lastLogin)!) {
             stats.dayStreak = (stats.dayStreak ?? 0) + 1
         } else {

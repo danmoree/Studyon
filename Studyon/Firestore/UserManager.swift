@@ -24,6 +24,7 @@ struct DBUser: Codable {
     let username: String?
     let dateOfBirth: Date?
     let dailyStudyGoal: TimeInterval?
+    let usernameLowercased: String?
     
     
     init(auth: AuthDataResultModel) {
@@ -36,6 +37,7 @@ struct DBUser: Codable {
         self.username = nil
         self.dateOfBirth = nil
         self.dailyStudyGoal = nil
+        self.usernameLowercased = nil
     }
     
     init(
@@ -47,7 +49,8 @@ struct DBUser: Codable {
         fullName: String? = nil,
         username: String? = nil,
         dateOfBirth: Date? = nil,
-        dailyStudyGoal: TimeInterval? = nil
+        dailyStudyGoal: TimeInterval? = nil,
+        usernameLowercased: String? = nil
     ) {
         self.userId = userId
         self.email = email
@@ -58,6 +61,7 @@ struct DBUser: Codable {
         self.username = username
         self.dateOfBirth = dateOfBirth
         self.dailyStudyGoal = dailyStudyGoal
+        self.usernameLowercased = usernameLowercased
     }
     
 //    func toggleIsPremiumStatus() -> DBUser {
@@ -81,6 +85,7 @@ struct DBUser: Codable {
         case username = "username"
         case dateOfBirth = "date_of_birth"
         case dailyStudyGoal = "daily_study_goal"
+        case usernameLowercased = "username_lowercased"
     }
     
     // download from firestore
@@ -95,6 +100,7 @@ struct DBUser: Codable {
         self.username = try container.decodeIfPresent(String.self, forKey: .username)
         self.dateOfBirth = try container.decodeIfPresent(Date.self, forKey: .dateOfBirth)
         self.dailyStudyGoal = try container.decodeIfPresent(TimeInterval.self, forKey: .dailyStudyGoal)
+        self.usernameLowercased = try container.decodeIfPresent(String.self, forKey: .usernameLowercased)
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -108,6 +114,7 @@ struct DBUser: Codable {
         try container.encodeIfPresent(self.username, forKey: .username)
         try container.encodeIfPresent(self.dateOfBirth, forKey: .dateOfBirth)
         try container.encodeIfPresent(self.dailyStudyGoal, forKey: .dailyStudyGoal)
+        try container.encodeIfPresent(self.usernameLowercased, forKey: .usernameLowercased)
     }
     
  
@@ -192,6 +199,7 @@ final class UserManager {
         let data: [String: Any] = [
             DBUser.CodingKeys.fullName.rawValue: fullName,
             DBUser.CodingKeys.username.rawValue: username,
+            DBUser.CodingKeys.usernameLowercased.rawValue: username.lowercased(),
             DBUser.CodingKeys.dateOfBirth.rawValue: Timestamp(date: dateOfBirth)
         ]
         try await userDocument(userId: userId).setData(data, merge: true)

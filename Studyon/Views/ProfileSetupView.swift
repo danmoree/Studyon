@@ -110,6 +110,7 @@ struct ProfileSetupView: View {
                         
                     } catch {
                         errorMessage = "Failed to save profile: \(error.localizedDescription)"
+                        print("Failed to save profile: \(error.localizedDescription)")
                     }
                 }
                 
