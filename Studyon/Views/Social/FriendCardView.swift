@@ -22,13 +22,17 @@ struct FriendCardView: View {
                 Image("profile_pic1")
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 50, height: 50)
-                    .clipShape(Circle())
-                    .padding(.leading, 10)
+                    .frame(width: 45, height: 45)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 15)
+                            .stroke(Color.black, lineWidth: 1.5)
+                    )
+                    
                 Circle()
                     .fill(Color.green)
                     .frame(width: 15, height: 15)
-                    .padding(.leading, 35)
+                    .padding(.leading, 30)
                     .padding(.top, 35)
             }
             
@@ -36,9 +40,10 @@ struct FriendCardView: View {
             // username, message
             VStack(alignment: .leading) {
                 Text(user.username ?? "User")
-                    .font(.title3)
+                    .font(.body)
                     .bold()
                 Text("In a room")
+                    .font(.caption)
             }
             .fontWidth(.expanded)
             
@@ -48,15 +53,15 @@ struct FriendCardView: View {
             ZStack {
                 Circle()
                     .fill(Color.green)
-                    .frame(width: 40, height: 54)
+                    .frame(width: 35, height: 35)
                 Image(systemName: "paperplane.fill")
                     .foregroundStyle(Color.white)
-                    .font(.title3)
+                    .font(.subheadline)
                
             }
         }
-        .padding(.horizontal, 23)
-        .frame(width: .infinity, height: 100)
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40)
         //.background(Color.gray.opacity(0.1))
     }
 }
