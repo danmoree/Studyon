@@ -64,6 +64,8 @@ struct AddFriendView: View {
                     Button("Cancel") {
                         withAnimation {
                             isTextFieldFocused = false
+                            username = ""
+                            viewModel.searchResults = []
                         }
                     }
                     .foregroundStyle(.black)
@@ -87,8 +89,13 @@ struct AddFriendView: View {
             
         }
         .onChange(of: username) { oldValue, newValue in
-            Task {
-                try? await viewModel.loadUsersByUsername(username: newValue)
+            if !newValue.isEmpty {
+                Task {
+                    try? await viewModel.loadUsersByUsername(username: newValue)
+                }
+            } else {
+                // Optionally clear results if desired:
+                viewModel.searchResults = []
             }
         }
     }
