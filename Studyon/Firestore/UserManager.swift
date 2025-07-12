@@ -14,7 +14,7 @@ import Foundation
 import Firebase
 import FirebaseFirestore
 
-struct DBUser: Codable {
+struct DBUser: Codable, Hashable {
     let userId: String
     let email: String?
     let photoUrl: String?
@@ -117,6 +117,14 @@ struct DBUser: Codable {
         try container.encodeIfPresent(self.usernameLowercased, forKey: .usernameLowercased)
     }
     
+    static func == (lhs: DBUser, rhs: DBUser) -> Bool {
+        return lhs.userId == rhs.userId
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(userId)
+    }
+    
  
 
     
@@ -216,5 +224,24 @@ final class UserManager {
         let query = userCollection.whereField("username_lowercased", isEqualTo: username.lowercased()).limit(to: 1)
         let snapshot = try await query.getDocuments()
         return snapshot.documents.isEmpty
+    }
+    
+    func fetchUsersByExactUsername(_ username: String) async throws -> [DBUser] {
+        let query = userCollection.whereField("username_lowercased", isEqualTo: username)
+        let snapshot = try await query.getDocuments()
+        return snapshot.documents.compactMap { document in
+            try? document.data(as: DBUser.self)
+        }
+    }
+    
+    func fetchUsersByUsernamePrefix(_ prefix: String) async throws -> [DBUser] {
+        let query = userCollection
+            .order(by: "username_lowercased")
+            .start(at: [prefix])
+            .end(at: [prefix + "\u{f8ff}"])
+        let snapshot = try await query.getDocuments()
+        return snapshot.documents.compactMap { document in
+            try? document.data(as: DBUser.self)
+        }
     }
 }

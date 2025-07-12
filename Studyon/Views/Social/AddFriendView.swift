@@ -16,6 +16,7 @@ struct AddFriendView: View {
     @Binding var showingAddFriendSheet: Bool
     @State private var username: String = ""
     @FocusState private var isTextFieldFocused: Bool
+    @StateObject private var viewModel = SocialViewModel()
     var body: some View {
         VStack(alignment: .leading) {
             VStack(alignment: .leading, spacing: 4) {
@@ -76,11 +77,19 @@ struct AddFriendView: View {
             .animation(.easeInOut(duration: 0.2), value: isTextFieldFocused)
             
             ScrollView {
-                VStack {
-                    
+                VStack(spacing: 16) {
+                    ForEach(viewModel.searchResults, id: \.userId) { user in
+                            UserAddCardView(user: user)
+                    }
                 }
+                .padding(.top, 15)
             }
             
+        }
+        .onChange(of: username) { oldValue, newValue in
+            Task {
+                try? await viewModel.loadUsersByUsername(username: newValue)
+            }
         }
     }
 }
