@@ -211,4 +211,10 @@ final class UserManager {
         ]
         try await userDocument(userId: userId).setData(data, merge: true)
     }
+    
+    func checkAvailableUsername(username: String) async throws -> Bool {
+        let query = userCollection.whereField("username_lowercased", isEqualTo: username.lowercased()).limit(to: 1)
+        let snapshot = try await query.getDocuments()
+        return snapshot.documents.isEmpty
+    }
 }

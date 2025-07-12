@@ -95,6 +95,15 @@ struct ProfileSetupView: View {
                 
                 Task {
                     do {
+                        
+                        // 1. check if username is avail
+                        let isAvailable = try await UserManager.shared.checkAvailableUsername(username: username)
+                        guard isAvailable else {
+                            errorMessage = "This username is already taken."
+                            return
+                        }
+                        
+                        // 2. save the info
                         try await UserManager.shared.updateUserProfileInfo(
                             userId: userID,
                             fullName: fullName,
@@ -102,9 +111,8 @@ struct ProfileSetupView: View {
                             dateOfBirth: birthDate
                         )
                         
-                        // Optional: refresh profile
+                        // refresh profile, set flag
                         try await userVM.loadCurrentUser()
-                        
                         needsProfileSetup = false
                         
                         

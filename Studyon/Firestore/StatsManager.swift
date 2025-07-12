@@ -136,7 +136,7 @@ final class UserStatsManager {
         do {
             stats = try await fetchStats(userId: userId)
         } catch {
-            // If the document is missing, create a new one with defaults
+            // If its missing then make it
             let newStats = UserStats()
             try await setStats(userId: userId, stats: newStats)
             stats = newStats
