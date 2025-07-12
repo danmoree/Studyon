@@ -29,7 +29,7 @@ enum FriendshipManagerError: Error, LocalizedError {
 }
 
 struct Friendship: Identifiable, Codable {
-    @DocumentID var id: String?
+    var id: String
     
     var user1Id: String
     var user2Id: String
@@ -39,17 +39,65 @@ struct Friendship: Identifiable, Codable {
     
     var actionBy: String?
     var isFavorite: Bool?
+    
+    
+    init(
+        id: String,
+        user1Id: String,
+        user2Id: String,
+        status: String,
+        createdAt: Date,
+        lastUpdatedAt: Date,
+        actionBy: String,
+        isFavorite: Bool
+    ) {
+        self.id = id
+        self.user1Id = user1Id
+        self.user2Id = user2Id
+        self.status = status
+        self.createdAt = createdAt
+        self.lastUpdatedAt = lastUpdatedAt
+        self.actionBy = actionBy
+        self.isFavorite = isFavorite
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "id"
+        case user1Id = "user1_id"
+        case user2Id = "user2_id"
+        case status = "status"
+        case createdAt = "created_at"
+        case lastUpdatedAt = "last_updated_at"
+        case actionBy = "action_by"
+        case isFavorite = "is_favorite"
+    }
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.user1Id = try container.decode(String.self, forKey: .user1Id)
+        self.user2Id = try container.decode(String.self, forKey: .user2Id)
+        self.status = try container.decode(String.self, forKey: .status)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.lastUpdatedAt = try container.decode(Date.self, forKey: .lastUpdatedAt)
+        self.actionBy = try container.decode(String.self, forKey: .actionBy)
+        self.isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
+        
+    }
+    
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.id, forKey: .id)
+        try container.encode(self.user1Id, forKey: .user1Id)
+        try container.encode(self.user2Id, forKey: .user2Id)
+        try container.encode(self.status, forKey: .status)
+        try container.encode(self.createdAt, forKey: .createdAt)
+        try container.encode(self.lastUpdatedAt, forKey: .lastUpdatedAt)
+        try container.encode(self.actionBy, forKey: .actionBy)
+        try container.encode(self.isFavorite, forKey: .isFavorite)
+    }
 }
 
-enum CodingKeys: String, CodingKey {
-    case user1Id = "user1_id"
-    case user2Id = "user2_id"
-    case status = "status"
-    case createdAt = "created_at"
-    case lastUpdatedAt = "last_updated_at"
-    case actionBy = "action_by"
-    case isFavorite = "is_favorite"
-}
 
 final class FriendshipManager {
     static let shared = FriendshipManager()
@@ -98,6 +146,10 @@ final class FriendshipManager {
             .whereField("user2_id", isEqualTo: myUserId)
             .whereField("status", isEqualTo: "pending")
         let snapshot = try await query.getDocuments()
+        for doc in snapshot.documents {
+            print("Firestore pending request doc:", doc.data())
+        }
+    
         let friendships = snapshot.documents.compactMap { try? $0.data(as: Friendship.self) }
         let requesterIds = friendships.map { $0.user1Id }
         return try await UserManager.shared.fetchUsers(for: requesterIds)

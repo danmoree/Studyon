@@ -98,7 +98,9 @@ struct AddFriendView: View {
                     .padding(.horizontal, 20)
                     ScrollView {
                         VStack(spacing: 16) {
-                            // pending friends
+                            ForEach(viewModel.pendingRequestSenders, id: \.userId) { user in
+                                    UserIncomingReqCardView(user: user, viewModel: viewModel)
+                            }
                         }
                     }
                 }
@@ -116,6 +118,11 @@ struct AddFriendView: View {
             } else {
                 // Optionally clear results if desired:
                 viewModel.searchResults = []
+            }
+        }
+        .onAppear {
+            Task {
+                await viewModel.fetchPendingRequestSenders()
             }
         }
     }

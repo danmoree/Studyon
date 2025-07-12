@@ -57,6 +57,8 @@ final class SocialViewModel: ObservableObject {
         await MainActor.run {
             self.pendingRequestSenders = users ?? []
         }
+        print("Fetched pending")
+        print(users ?? [])
     }
     
     func sendFriendRequest(to userId: String) async {
@@ -64,7 +66,9 @@ final class SocialViewModel: ObservableObject {
             try await FriendshipManager.shared.createFriendRequest(to: userId)
             // Optionally refresh data, e.g. pending requests or friends, after a successful request
             await fetchPendingRequestSenders()
-            friendRequestError = nil
+            await MainActor.run {
+                self.friendRequestError = nil
+            }
         } catch {
             await MainActor.run {
                 self.friendRequestError = error.localizedDescription
@@ -76,7 +80,9 @@ final class SocialViewModel: ObservableObject {
         do {
             try await FriendshipManager.shared.declineFriendRequest(from: userId)
             await fetchPendingRequestSenders()
-            declineFriendRequestError = nil
+            await MainActor.run {
+                self.declineFriendRequestError = nil
+            }
         } catch {
             await MainActor.run {
                 self.declineFriendRequestError = error.localizedDescription
@@ -89,7 +95,9 @@ final class SocialViewModel: ObservableObject {
             try await FriendshipManager.shared.acceptFriendRequest(from: userId)
             await fetchFriends()
             await fetchPendingRequestSenders()
-            acceptFriendRequestError = nil
+            await MainActor.run {
+                self.acceptFriendRequestError = nil
+            }
         } catch {
             await MainActor.run {
                 self.acceptFriendRequestError = error.localizedDescription
@@ -97,3 +105,4 @@ final class SocialViewModel: ObservableObject {
         }
     }
 }
+
