@@ -11,12 +11,12 @@
 //
 
 import Foundation
+import FirebaseAuth
 
 final class SocialViewModel: ObservableObject {
     @Published var searchResults: [DBUser] = []
     
     func loadUsersByUsername(username: String) async throws {
-        // You can choose which match to use: exact, prefix, or both combined.
         let users = try await UserManager.shared.fetchUsersByExactUsername(username.lowercased())
         let usersPrefix = try await UserManager.shared.fetchUsersByUsernamePrefix(username.lowercased())
 
@@ -31,5 +31,15 @@ final class SocialViewModel: ObservableObject {
         // await MainActor.run {
         //     self.searchResults = usersPrefix
         // }
+    }
+    
+    func fetchFriends() async throws -> [DBUser] {
+        guard let myUserId = Auth.auth().currentUser?.uid else {
+            print("No logged-in user!")
+            return []
+        }
+        let friendships = try await FriendshipManager.shared.fetchFriends(for: myUserId)
+        let friendIds = friendships.map { $0.user1Id == myUserId ? $0.user2Id : $0.user1Id }
+        return try await UserManager.shared.fetchUsers(for: friendIds)
     }
 }

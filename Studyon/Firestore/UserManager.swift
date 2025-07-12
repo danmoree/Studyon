@@ -226,6 +226,7 @@ final class UserManager {
         return snapshot.documents.isEmpty
     }
     
+    // for users list when trying to add a friend
     func fetchUsersByExactUsername(_ username: String) async throws -> [DBUser] {
         let query = userCollection.whereField("username_lowercased", isEqualTo: username)
         let snapshot = try await query.getDocuments()
@@ -234,6 +235,7 @@ final class UserManager {
         }
     }
     
+    // for users list when trying to add a friend
     func fetchUsersByUsernamePrefix(_ prefix: String) async throws -> [DBUser] {
         let query = userCollection
             .order(by: "username_lowercased")
@@ -243,5 +245,24 @@ final class UserManager {
         return snapshot.documents.compactMap { document in
             try? document.data(as: DBUser.self)
         }
+    }
+    
+    func fetchUsers(for userIds: [String]) async throws -> [DBUser] {
+        guard !userIds.isEmpty else { return [] }
+        let chunkSize = 10
+        var users: [DBUser] = []
+        for chunk in userIds.chunked(into: chunkSize) {
+            let query = userCollection.whereField("user_id", in: chunk)
+            let snapshot = try await query.getDocuments()
+            let batch = snapshot.documents.compactMap { try? $0.data(as: DBUser.self) }
+            users.append(contentsOf: batch)
+        }
+        return users
+    }
+}
+
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map { Array(self[$0..<Swift.min($0 + size, count)]) }
     }
 }
