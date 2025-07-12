@@ -9,6 +9,7 @@ import SwiftUI
 
 struct UserAddCardView: View {
     let user: DBUser
+    @ObservedObject var viewModel: SocialViewModel
     var body: some View {
         HStack {
             // profile pic
@@ -41,7 +42,9 @@ struct UserAddCardView: View {
             // add button
             
             Button {
-                
+                Task {
+                    await viewModel.sendFriendRequest(to: user.userId)
+                }
             } label: {
                 ZStack {
                     HStack {
@@ -65,5 +68,5 @@ struct UserAddCardView: View {
 }
 
 #Preview {
-    UserAddCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
+    UserAddCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"), viewModel: SocialViewModel())
 }

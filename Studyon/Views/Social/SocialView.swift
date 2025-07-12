@@ -14,6 +14,7 @@ import SwiftUI
 
 struct SocialView: View {
     @State private var showingAddFriendSheet = false
+    @StateObject private var viewModel = SocialViewModel()
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
@@ -51,17 +52,26 @@ struct SocialView: View {
             
             ScrollView {
                 VStack (spacing: 25) {
-                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
-                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
-                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
-                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
+                    
+                    ForEach(viewModel.friends, id: \.userId) { user in
+                            UserAddCardView(user: user)
+                    }
+//                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
+//                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
+//                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
+//                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
                 }
                 .padding(.top, 10)
             }
             .padding(.bottom, 55)
         }
+        .onAppear {
+            Task {
+                await viewModel.fetchFriends()
+            }
+        }
         .sheet(isPresented: $showingAddFriendSheet) {
-            AddFriendView(showingAddFriendSheet: $showingAddFriendSheet)
+            AddFriendView(showingAddFriendSheet: $showingAddFriendSheet, viewModel: viewModel)
         }
        
     }

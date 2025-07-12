@@ -15,6 +15,11 @@ import FirebaseAuth
 
 final class SocialViewModel: ObservableObject {
     @Published var searchResults: [DBUser] = []
+    @Published var pendingRequestSenders: [DBUser] = []
+    @Published var friends: [DBUser] = []
+    @Published var friendRequestError: String? = nil
+    @Published var declineFriendRequestError: String? = nil
+    @Published var acceptFriendRequestError: String? = nil
     
     func loadUsersByUsername(username: String) async throws {
         let users = try await UserManager.shared.fetchUsersByExactUsername(username.lowercased())
@@ -33,13 +38,62 @@ final class SocialViewModel: ObservableObject {
         // }
     }
     
-    func fetchFriends() async throws -> [DBUser] {
+    
+    func fetchFriends() async {
         guard let myUserId = Auth.auth().currentUser?.uid else {
-            print("No logged-in user!")
-            return []
+            await MainActor.run { self.friends = [] }
+            return
         }
-        let friendships = try await FriendshipManager.shared.fetchFriends(for: myUserId)
-        let friendIds = friendships.map { $0.user1Id == myUserId ? $0.user2Id : $0.user1Id }
-        return try await UserManager.shared.fetchUsers(for: friendIds)
+        let friendships = try? await FriendshipManager.shared.fetchFriends(for: myUserId)
+        let friendIds = friendships?.map { $0.user1Id == myUserId ? $0.user2Id : $0.user1Id } ?? []
+        let users = try? await UserManager.shared.fetchUsers(for: friendIds)
+        await MainActor.run {
+            self.friends = users ?? []
+        }
+    }
+    
+    func fetchPendingRequestSenders() async {
+        let users = try? await FriendshipManager.shared.fetchPendingRequestSendersToCurrentUser()
+        await MainActor.run {
+            self.pendingRequestSenders = users ?? []
+        }
+    }
+    
+    func sendFriendRequest(to userId: String) async {
+        do {
+            try await FriendshipManager.shared.createFriendRequest(to: userId)
+            // Optionally refresh data, e.g. pending requests or friends, after a successful request
+            await fetchPendingRequestSenders()
+            friendRequestError = nil
+        } catch {
+            await MainActor.run {
+                self.friendRequestError = error.localizedDescription
+            }
+        }
+    }
+    
+    func declineFriendRequest(from userId: String) async {
+        do {
+            try await FriendshipManager.shared.declineFriendRequest(from: userId)
+            await fetchPendingRequestSenders()
+            declineFriendRequestError = nil
+        } catch {
+            await MainActor.run {
+                self.declineFriendRequestError = error.localizedDescription
+            }
+        }
+    }
+    
+    func acceptFriendRequest(from userId: String) async {
+        do {
+            try await FriendshipManager.shared.acceptFriendRequest(from: userId)
+            await fetchFriends()
+            await fetchPendingRequestSenders()
+            acceptFriendRequestError = nil
+        } catch {
+            await MainActor.run {
+                self.acceptFriendRequestError = error.localizedDescription
+            }
+        }
     }
 }

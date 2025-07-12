@@ -16,7 +16,7 @@ struct AddFriendView: View {
     @Binding var showingAddFriendSheet: Bool
     @State private var username: String = ""
     @FocusState private var isTextFieldFocused: Bool
-    @StateObject private var viewModel = SocialViewModel()
+    @ObservedObject var viewModel: SocialViewModel
     var body: some View {
         VStack(alignment: .leading) {
             VStack(alignment: .leading, spacing: 4) {
@@ -78,14 +78,34 @@ struct AddFriendView: View {
             .padding(.top, 12)
             .animation(.easeInOut(duration: 0.2), value: isTextFieldFocused)
             
-            ScrollView {
-                VStack(spacing: 16) {
-                    ForEach(viewModel.searchResults, id: \.userId) { user in
-                            UserAddCardView(user: user)
+            if isTextFieldFocused {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        ForEach(viewModel.searchResults, id: \.userId) { user in
+                            UserAddCardView(user: user, viewModel: viewModel)
+                        }
+                    }
+                    .padding(.top, 15)
+                }
+                .animation(.easeInOut(duration: 0.2), value: isTextFieldFocused)
+            } else {
+                
+                VStack {
+                    HStack {
+                        Text("Pending requests")
+                            .fontWidth(.expanded)
+                    }
+                    .padding(.horizontal, 20)
+                    ScrollView {
+                        VStack(spacing: 16) {
+                            // pending friends
+                        }
                     }
                 }
-                .padding(.top, 15)
+                .animation(.easeInOut(duration: 0.2), value: isTextFieldFocused)
             }
+            
+           
             
         }
         .onChange(of: username) { oldValue, newValue in
@@ -102,5 +122,5 @@ struct AddFriendView: View {
 }
 
 #Preview {
-    AddFriendView(showingAddFriendSheet: .constant(true))
+    AddFriendView(showingAddFriendSheet: .constant(true), viewModel: SocialViewModel())
 }

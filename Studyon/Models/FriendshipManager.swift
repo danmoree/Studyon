@@ -12,6 +12,21 @@
 
 import Foundation
 import FirebaseFirestore
+import FirebaseAuth
+
+enum FriendshipManagerError: Error, LocalizedError {
+    case alreadyRequested
+    case userNotLoggedIn
+
+    var errorDescription: String? {
+        switch self {
+        case .alreadyRequested:
+            return "A friend request already exists or you are already friends."
+        case .userNotLoggedIn:
+            return "You must be logged in to send a friend request."
+        }
+    }
+}
 
 struct Friendship: Identifiable, Codable {
     @DocumentID var id: String?
@@ -70,6 +85,80 @@ final class FriendshipManager {
         let friends2 = snapshot2.documents.compactMap { try? $0.data(as: Friendship.self) }
 
         return friends1 + friends2
+    }
+    
+
+    
+    func fetchPendingRequestSendersToCurrentUser() async throws -> [DBUser] {
+        guard let myUserId = Auth.auth().currentUser?.uid else {
+            print("No logged-in user!")
+            return []
+        }
+        let query = friendshipCollection
+            .whereField("user2_id", isEqualTo: myUserId)
+            .whereField("status", isEqualTo: "pending")
+        let snapshot = try await query.getDocuments()
+        let friendships = snapshot.documents.compactMap { try? $0.data(as: Friendship.self) }
+        let requesterIds = friendships.map { $0.user1Id }
+        return try await UserManager.shared.fetchUsers(for: requesterIds)
+    }
+    
+    func createFriendRequest(to userId: String) async throws {
+        guard let myUserId = Auth.auth().currentUser?.uid else {
+            throw FriendshipManagerError.userNotLoggedIn
+        }
+        // normalized the id
+        let docID = generateFriendshipDocumentID(userAId: myUserId, userBId: userId)
+        let docRef = friendshipCollection.document(docID)
+
+        // Check if the friendship already exists
+        let snapshot = try await docRef.getDocument()
+        if snapshot.exists {
+            throw FriendshipManagerError.alreadyRequested
+        }
+
+        // The sender is user1, recipient is user2 by convention
+        let friendship = Friendship(
+            id: docID,
+            user1Id: myUserId,
+            user2Id: userId,
+            status: "pending",
+            createdAt: Date(),
+            lastUpdatedAt: Date(),
+            actionBy: myUserId,
+            isFavorite: false
+        )
+        try await docRef.setData(from: friendship, merge: false)
+    }
+    
+    func acceptFriendRequest(from userId: String) async throws {
+        guard let myUserId = Auth.auth().currentUser?.uid else {
+            throw FriendshipManagerError.userNotLoggedIn
+        }
+        let docID = generateFriendshipDocumentID(userAId: userId, userBId: myUserId)
+        let docRef = friendshipCollection.document(docID)
+        let snapshot = try await docRef.getDocument()
+        guard let friendship = try? snapshot.data(as: Friendship.self), friendship.status == "pending", friendship.user2Id == myUserId else {
+            throw FriendshipManagerError.alreadyRequested // (reuse error for no request)
+        }
+        try await docRef.updateData([
+            "status": "accepted",
+            "last_updated_at": Date(),
+            "action_by": myUserId
+        ])
+    }
+
+    func declineFriendRequest(from userId: String) async throws {
+        guard let myUserId = Auth.auth().currentUser?.uid else {
+            throw FriendshipManagerError.userNotLoggedIn
+        }
+        let docID = generateFriendshipDocumentID(userAId: userId, userBId: myUserId)
+        let docRef = friendshipCollection.document(docID)
+        let snapshot = try await docRef.getDocument()
+        guard let friendship = try? snapshot.data(as: Friendship.self), friendship.status == "pending", friendship.user2Id == myUserId else {
+            throw FriendshipManagerError.alreadyRequested // (reuse error for no request)
+        }
+        try await docRef.delete()
     }
     
 }
