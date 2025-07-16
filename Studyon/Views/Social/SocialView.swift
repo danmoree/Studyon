@@ -14,6 +14,7 @@ import SwiftUI
 
 struct SocialView: View {
     @State private var showingAddFriendSheet = false
+    @State private var isRefreshing = false
     @ObservedObject var viewModel: SocialViewModel
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -69,8 +70,12 @@ struct SocialView: View {
             AddFriendView(showingAddFriendSheet: $showingAddFriendSheet, viewModel: viewModel)
         }
         .refreshable {
+            guard !isRefreshing else { return }
+            isRefreshing = true
             await viewModel.fetchFriends()
-              }
+            try? await Task.sleep(nanoseconds: 10_000_000_000) // 10 second delay
+            isRefreshing = false
+        }
        
     }
 }
