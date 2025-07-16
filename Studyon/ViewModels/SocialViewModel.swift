@@ -20,6 +20,38 @@ final class SocialViewModel: ObservableObject {
     @Published var friendRequestError: String? = nil
     @Published var declineFriendRequestError: String? = nil
     @Published var acceptFriendRequestError: String? = nil
+    @Published var friendStats: UserStats? = nil
+    @Published var userStats: UserStats? = nil
+    
+    func loadFriendStats(for userId: String) async {
+        do {
+            let stats = try await UserStatsManager.shared.fetchStats(userId: userId)
+            await MainActor.run {
+                self.friendStats = stats
+            }
+        } catch {
+            print("Failed loading friend stats:", error)
+            // leave defaults or show an error state
+        }
+    }
+    
+    /// Returns the total hours studied for the current user, or 0 if not available.
+
+    var totalHoursStudied: Double {
+        guard let timeStudiedByDate = friendStats?.timeStudiedByDate else { return 0 }
+        let totalSeconds = timeStudiedByDate.values.reduce(0, +)
+        return totalSeconds / 3600.0
+    }
+    
+    var friendSecondsStudiedToday: Double {
+        guard let timeStudiedByDate = friendStats?.timeStudiedByDate else { return 0 }
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        df.timeZone = .current
+        let dateKey = df.string(from: Date())
+        return timeStudiedByDate[dateKey] ?? 0
+    }
+    
     
     func loadUsersByUsername(username: String) async throws {
         let users = try await UserManager.shared.fetchUsersByExactUsername(username.lowercased())

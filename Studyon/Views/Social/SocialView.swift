@@ -54,7 +54,7 @@ struct SocialView: View {
                 VStack (spacing: 25) {
                     
                     ForEach(viewModel.friends, id: \.userId) { user in
-                        FriendCardView(user: user)
+                        FriendCardView(user: user, viewModel: viewModel)
                     }
 //                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
 //                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
