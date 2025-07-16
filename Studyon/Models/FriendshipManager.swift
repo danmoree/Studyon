@@ -213,4 +213,17 @@ final class FriendshipManager {
         try await docRef.delete()
     }
     
+    func unfriend(userId: String) async throws {
+        guard let myUserId = Auth.auth().currentUser?.uid else {
+            throw FriendshipManagerError.userNotLoggedIn
+        }
+        let docID = generateFriendshipDocumentID(userAId: myUserId, userBId: userId)
+        let docRef = friendshipCollection.document(docID)
+        let snapshot = try await docRef.getDocument()
+        guard let friendship = try? snapshot.data(as: Friendship.self), friendship.status == "accepted" else {
+            throw FriendshipManagerError.alreadyRequested // Reuse error for not actually friends
+        }
+        try await docRef.delete()
+    }
+    
 }

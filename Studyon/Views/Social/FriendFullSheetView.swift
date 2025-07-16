@@ -81,8 +81,21 @@ struct FriendFullSheetView: View {
                         }
                     }
                     
-                    Button {
-                        // code
+                    Menu {
+//                        Button("Report User") {
+//                            // report code
+//                        }
+                        Button("Remove Friend") {
+                            Task {
+                                await socialVM.unfriend(userId: user.userId)
+                                await MainActor.run {
+                                    showFriendSheet = false
+                                }
+                            }
+                        }
+//                        Button("Block User") {
+//                            
+//                        }
                     } label: {
                         ZStack {
                             RoundedRectangle(cornerRadius: 15)
@@ -131,6 +144,21 @@ struct FriendFullSheetView: View {
                         .opacity(0.5)
                         .padding(.top,5)
                         .shimmer()
+                    
+                    
+//                    Button {
+//                        
+//                    } label: {
+//                        ZStack {
+//                            
+//                            RoundedRectangle(cornerRadius: 15)
+//                                .fill(Color.black)
+//                                .frame(width: .infinity, height: 40)
+//                            Text("Added ✅")
+//                                .fontWidth(.expanded)
+//                                .foregroundStyle(.white)
+//                        }
+//                    }
                     
                     
                     VStack {

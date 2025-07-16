@@ -20,6 +20,7 @@ final class SocialViewModel: ObservableObject {
     @Published var friendRequestError: String? = nil
     @Published var declineFriendRequestError: String? = nil
     @Published var acceptFriendRequestError: String? = nil
+    @Published var unfriendError: String? = nil
     @Published var friendStats: UserStats? = nil
     @Published var userStats: UserStats? = nil
     
@@ -136,5 +137,18 @@ final class SocialViewModel: ObservableObject {
             }
         }
     }
+    
+    func unfriend(userId: String) async {
+        do {
+            try await FriendshipManager.shared.unfriend(userId: userId)
+            await fetchFriends()
+            await MainActor.run {
+                self.unfriendError = nil
+            }
+        } catch {
+            await MainActor.run {
+                self.unfriendError = error.localizedDescription
+            }
+        }
+    }
 }
-
