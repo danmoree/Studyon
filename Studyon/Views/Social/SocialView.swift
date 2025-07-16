@@ -14,7 +14,7 @@ import SwiftUI
 
 struct SocialView: View {
     @State private var showingAddFriendSheet = false
-    @StateObject private var viewModel = SocialViewModel()
+    @ObservedObject var viewModel: SocialViewModel
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
@@ -65,18 +65,16 @@ struct SocialView: View {
             }
             .padding(.bottom, 55)
         }
-        .onAppear {
-            Task {
-                await viewModel.fetchFriends()
-            }
-        }
         .sheet(isPresented: $showingAddFriendSheet) {
             AddFriendView(showingAddFriendSheet: $showingAddFriendSheet, viewModel: viewModel)
         }
+        .refreshable {
+            await viewModel.fetchFriends()
+              }
        
     }
 }
 
 #Preview {
-    SocialView()
+    SocialView(viewModel: SocialViewModel())
 }

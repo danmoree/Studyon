@@ -10,6 +10,8 @@ import SwiftUI
 struct UserAddCardView: View {
     let user: DBUser
     @ObservedObject var viewModel: SocialViewModel
+    @State private var isAdded = false
+    
     var body: some View {
         HStack {
             // profile pic
@@ -44,21 +46,24 @@ struct UserAddCardView: View {
             Button {
                 Task {
                     await viewModel.sendFriendRequest(to: user.userId)
+                    withAnimation {
+                        isAdded = true
+                    }
                 }
             } label: {
                 ZStack {
                     HStack {
-                        Text("ADD")
+                        Text(isAdded ? "Reqested" : "ADD")
                             .font(.caption2)
                             .fontWidth(.expanded)
                     }
                 }
                 .foregroundColor(.white)
                 .padding()
-                .frame(width:70, height: 30)
-                .background(Color.black)
+                .frame(width: isAdded ? 100 : 70, height: 30)
+                .background(isAdded ? Color.green : Color.black)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
-                
+                .animation(.easeInOut, value: isAdded)
             }
         }
         .padding(.horizontal, 16)
@@ -70,3 +75,4 @@ struct UserAddCardView: View {
 #Preview {
     UserAddCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"), viewModel: SocialViewModel())
 }
+

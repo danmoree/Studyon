@@ -44,6 +44,7 @@ struct UserIncomingReqCardView: View {
             Button {
                 Task {
                     await viewModel.acceptFriendRequest(from: user.userId)
+                    await viewModel.fetchFriends()
                 }
             } label: {
                 ZStack {

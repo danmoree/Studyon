@@ -23,6 +23,7 @@ final class SocialViewModel: ObservableObject {
     @Published var unfriendError: String? = nil
     @Published var friendStats: UserStats? = nil
     @Published var userStats: UserStats? = nil
+    @Published var friendIds: [String] = []
     
     func loadFriendStats(for userId: String) async {
         do {
@@ -60,9 +61,13 @@ final class SocialViewModel: ObservableObject {
 
         // If you want to combine and remove duplicates:
         let allUsers = Array(Set(users + usersPrefix))
+        let filteredUsers = allUsers.filter { user in
+            user.userId != Auth.auth().currentUser?.uid && !friendIds.contains(user.userId)
+            
+        }
         // Update the published property on the main thread
         await MainActor.run {
-            self.searchResults = allUsers
+            self.searchResults = filteredUsers
         }
 
         // If you only want prefix results:
@@ -81,6 +86,7 @@ final class SocialViewModel: ObservableObject {
         let friendIds = friendships?.map { $0.user1Id == myUserId ? $0.user2Id : $0.user1Id } ?? []
         let users = try? await UserManager.shared.fetchUsers(for: friendIds)
         await MainActor.run {
+            self.friendIds = friendIds
             self.friends = users ?? []
         }
     }

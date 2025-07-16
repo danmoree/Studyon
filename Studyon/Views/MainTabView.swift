@@ -17,6 +17,7 @@ struct MainTabView: View {
     @State private var selectedTab: Tab = .home
     @State private var hideTabBar = false
     @StateObject private var tasksVM = TasksViewModel()
+    @StateObject private var socialVM = SocialViewModel()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,7 +35,7 @@ struct MainTabView: View {
                     HomeParentView(isUserLoggedIn: $isUserLoggedIn)
                         .environmentObject(tasksVM)
                 case .social:
-                   SocialView()
+                   SocialView(viewModel: socialVM)
                 }
                 
                 if !hideTabBar {
@@ -46,6 +47,11 @@ struct MainTabView: View {
             
            
             
+        }
+        .onAppear {
+            Task {
+                await socialVM.fetchFriends()
+            }
         }
         .edgesIgnoringSafeArea(.bottom)
     }
