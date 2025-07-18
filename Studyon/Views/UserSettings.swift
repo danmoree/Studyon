@@ -29,11 +29,13 @@ struct UserSettings: View {
 
            
             Button(action: {
-                do {
-                    try AuthenticationManager.shared.signOut()
-                    isUserLoggedIn = false
-                } catch {
-                    print("Error signing out: \(error.localizedDescription)")
+                Task {
+                    do {
+                        try await viewModel.signOut()
+                        isUserLoggedIn = false
+                    } catch {
+                        print("Error signing out: \(error.localizedDescription)")
+                    }
                 }
             }) {
                 Text("Log Out")

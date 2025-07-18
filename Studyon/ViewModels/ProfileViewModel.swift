@@ -55,5 +55,12 @@ final class ProfileViewModel: ObservableObject {
         
     }
     
+    func signOut() async throws {
+        try AuthenticationManager.shared.signOut()
+        await MainActor.run {
+            self.user = nil
+        }
+    }
+    
     
 }
