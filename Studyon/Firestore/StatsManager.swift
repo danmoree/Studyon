@@ -79,6 +79,30 @@ struct UserStats: Codable {
         try container.encode(longestSession, forKey: .longestSession)
         try container.encode(lastLoginDate, forKey: .lastLoginDate)
     }
+    
+    // UserDefaults Caching
+    static let userDefaultsKey = "cachedUserStats"
+
+    static func cache(_ stats: UserStats) {
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(stats) {
+            UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
+        }
+    }
+    
+    static func loadFromCache() -> UserStats? {
+        if let data = UserDefaults.standard.data(forKey: userDefaultsKey) {
+            let decoder = JSONDecoder()
+            if let stats = try? decoder.decode(UserStats.self, from: data) {
+                return stats
+            }
+        }
+        return nil
+    }
+    
+    static func clearCache() {
+        UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+    }
 }
 
 final class UserStatsManager {

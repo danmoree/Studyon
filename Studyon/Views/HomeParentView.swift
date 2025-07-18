@@ -30,10 +30,11 @@ struct HomeParentView: View {
                     Button {
                         showingSettings = true
                     } label: {
-                        Image(systemName: "person.crop.circle.fill")
+                        Image("profile_pic1")
                             .resizable()
                             .foregroundStyle(.black)
                             .frame(width: 60, height: 60)
+                            .clipShape(Circle())
                     }
                     .sheet(isPresented: $showingSettings) {
                         UserSettings(isUserLoggedIn: $isUserLoggedIn)
@@ -47,7 +48,10 @@ struct HomeParentView: View {
                                 .font(.title)
                                 .bold()
                         } else {
-                            Text("Loading...")
+                            let cachedName = DBUser.loadCachedFullName()?.split(separator: " ").first.map(String.init)
+                            Text("Hi, \(cachedName ?? "there") ☕️")
+                                .font(.title)
+                                .bold()
                         }
                         
                             

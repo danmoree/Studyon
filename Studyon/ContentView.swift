@@ -39,7 +39,7 @@ struct ContentView: View {
                     }
                 }
             } else if isUserLoggedIn && !hasCheckedProfile {
-                ProgressView("Loading profile...")
+                //ProgressView("Loading profile...")
             } else {
                 AuthView(onLoginSuccess: {
                     self.userID = Auth.auth().currentUser?.uid

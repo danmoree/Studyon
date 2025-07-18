@@ -59,5 +59,11 @@ final class AuthenticationManager {
     
     func signOut() throws {
         try Auth.auth().signOut()
+        UserDefaults.standard.removeObject(forKey: "cachedDayStreak")
+        UserDefaults.standard.removeObject(forKey: "cachedXP")
+        UserDefaults.standard.removeObject(forKey: "cachedSecondsStudiedToday")
+        UserStats.clearCache()
+        DBUser.clearCachedFullName()
+        
     }
 }

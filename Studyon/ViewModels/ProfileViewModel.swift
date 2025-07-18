@@ -24,6 +24,7 @@ final class ProfileViewModel: ObservableObject {
         
         await MainActor.run {
             self.user = fetchedUser
+            DBUser.cacheFullName(fetchedUser.fullName)
         }
     }
     

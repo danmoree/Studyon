@@ -125,8 +125,20 @@ struct DBUser: Codable, Hashable {
         hasher.combine(userId)
     }
     
- 
-
+    // UserDefaults Full Name Caching
+    static let cachedFullNameKey = "cachedUserFullName"
+    
+    static func cacheFullName(_ name: String?) {
+        UserDefaults.standard.set(name, forKey: cachedFullNameKey)
+    }
+    
+    static func loadCachedFullName() -> String? {
+        UserDefaults.standard.string(forKey: cachedFullNameKey)
+    }
+    
+    static func clearCachedFullName() {
+        UserDefaults.standard.removeObject(forKey: cachedFullNameKey)
+    }
     
 }
 final class UserManager {
@@ -266,3 +278,4 @@ extension Array {
         stride(from: 0, to: count, by: size).map { Array(self[$0..<Swift.min($0 + size, count)]) }
     }
 }
+

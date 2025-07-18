@@ -30,7 +30,7 @@ struct UserSettings: View {
            
             Button(action: {
                 do {
-                    try Auth.auth().signOut()
+                    try AuthenticationManager.shared.signOut()
                     isUserLoggedIn = false
                 } catch {
                     print("Error signing out: \(error.localizedDescription)")
