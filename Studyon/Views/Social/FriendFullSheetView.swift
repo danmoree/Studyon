@@ -140,12 +140,29 @@ struct FriendFullSheetView: View {
                         .fontWidth(.expanded)
                         .opacity(0.4)
                         .font(.callout)
-                    Text(user.isOnline == true ? "Online" : "Offline")
-                        .fontWidth(.expanded)
-                        .font(.callout)
-                        .opacity(0.5)
-                        .padding(.top,5)
-                        .shimmer()
+                    
+                    if user.isOnline == true {
+                        Text("Online")
+                            .fontWidth(.expanded)
+                            .font(.callout)
+                            .opacity(0.9)
+                            .padding(.top,5)
+                            .shimmer()
+                    } else if let lastSeen = user.lastSeen {
+                        Text("Last seen \(lastSeen.relativeFormat())")
+                            .fontWidth(.expanded)
+                            .font(.callout)
+                            .opacity(0.5)
+                            .padding(.top,5)
+                    } else {
+                        Text("Offline")
+                            .fontWidth(.expanded)
+                            .font(.callout)
+                            .opacity(0.5)
+                            .padding(.top,5)
+                            .shimmer()
+                    }
+                      
                     
                     
 //                    Button {

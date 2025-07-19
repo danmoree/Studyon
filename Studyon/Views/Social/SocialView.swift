@@ -54,7 +54,7 @@ struct SocialView: View {
             ScrollView {
                 VStack (spacing: 25) {
                     
-                    ForEach(viewModel.friends, id: \.userId) { user in
+                    ForEach(viewModel.friends, id: \.self) { user in
                         FriendCardView(user: user, viewModel: viewModel)
                     }
 //                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
@@ -76,10 +76,19 @@ struct SocialView: View {
             try? await Task.sleep(nanoseconds: 10_000_000_000) // 10 second delay
             isRefreshing = false
         }
+        .id(viewModel.friends.map { $0.userId + "\($0.isOnline ?? false)" }.joined())
        
     }
 }
 
 #Preview {
     SocialView(viewModel: SocialViewModel())
+}
+
+extension Date {
+    func relativeFormat() -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter.localizedString(for: self, relativeTo: Date())
+    }
 }

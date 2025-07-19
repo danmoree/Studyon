@@ -47,7 +47,7 @@ struct FriendCardView: View {
                         Text(user.username ?? "User")
                             .font(.body)
                             .bold()
-                        Text("In a room")
+                        Text(user.isOnline == true ? "Online" : "Offline")
                             .font(.caption)
                     }
                     .fontWidth(.expanded)
