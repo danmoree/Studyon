@@ -15,6 +15,7 @@ import Firebase
 import FirebaseAuth
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var isUserLoggedIn = Auth.auth().currentUser != nil
     @StateObject private var userVM = ProfileViewModel()
     @State private var needsProfileSetup = false
@@ -51,6 +52,26 @@ struct ContentView: View {
             if isUserLoggedIn && !hasCheckedProfile {
                 self.checkProfile()
             }
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            switch newPhase {
+            case .active:
+                Task {
+                    if let uid = userID {
+                        try await UserManager.shared.setStatusOnline(userId: uid)
+                    }
+                }
+            case .inactive, .background:
+                Task {
+                    if let uid = userID {
+                        try await UserManager.shared.setStatusOffline(userId: uid)
+                    }
+                }
+            
+            @unknown default:
+                break
+            }
+            
         }
     
     }

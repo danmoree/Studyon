@@ -35,7 +35,7 @@ struct FriendCardView: View {
                             )
                             
                         Circle()
-                            .fill(Color.green)
+                            .fill(user.isOnline == true ? Color.green : Color.gray)
                             .frame(width: 15, height: 15)
                             .padding(.leading, 30)
                             .padding(.top, 35)

@@ -25,8 +25,10 @@ struct DBUser: Codable, Hashable {
     let dateOfBirth: Date?
     let dailyStudyGoal: TimeInterval?
     let usernameLowercased: String?
+    let isOnline: Bool?
+    let lastSeen: Date?
     
-    
+    // when auth is completed, create this DBUser
     init(auth: AuthDataResultModel) {
         self.userId = auth.uid
         self.email = auth.email
@@ -38,6 +40,8 @@ struct DBUser: Codable, Hashable {
         self.dateOfBirth = nil
         self.dailyStudyGoal = nil
         self.usernameLowercased = nil
+        self.isOnline = true
+        self.lastSeen = nil
     }
     
     init(
@@ -50,7 +54,9 @@ struct DBUser: Codable, Hashable {
         username: String? = nil,
         dateOfBirth: Date? = nil,
         dailyStudyGoal: TimeInterval? = nil,
-        usernameLowercased: String? = nil
+        usernameLowercased: String? = nil,
+        isOnline: Bool? = nil,
+        lastSeen: Date? = nil
     ) {
         self.userId = userId
         self.email = email
@@ -62,6 +68,8 @@ struct DBUser: Codable, Hashable {
         self.dateOfBirth = dateOfBirth
         self.dailyStudyGoal = dailyStudyGoal
         self.usernameLowercased = usernameLowercased
+        self.isOnline = isOnline
+        self.lastSeen = lastSeen
     }
     
 //    func toggleIsPremiumStatus() -> DBUser {
@@ -86,6 +94,8 @@ struct DBUser: Codable, Hashable {
         case dateOfBirth = "date_of_birth"
         case dailyStudyGoal = "daily_study_goal"
         case usernameLowercased = "username_lowercased"
+        case isOnline = "is_online"
+        case lastSeen = "last_seen"
     }
     
     // download from firestore
@@ -101,6 +111,8 @@ struct DBUser: Codable, Hashable {
         self.dateOfBirth = try container.decodeIfPresent(Date.self, forKey: .dateOfBirth)
         self.dailyStudyGoal = try container.decodeIfPresent(TimeInterval.self, forKey: .dailyStudyGoal)
         self.usernameLowercased = try container.decodeIfPresent(String.self, forKey: .usernameLowercased)
+        self.isOnline = try container.decodeIfPresent(Bool.self, forKey: .isOnline)
+        self.lastSeen = try container.decodeIfPresent(Date.self, forKey: .lastSeen)
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -115,6 +127,8 @@ struct DBUser: Codable, Hashable {
         try container.encodeIfPresent(self.dateOfBirth, forKey: .dateOfBirth)
         try container.encodeIfPresent(self.dailyStudyGoal, forKey: .dailyStudyGoal)
         try container.encodeIfPresent(self.usernameLowercased, forKey: .usernameLowercased)
+        try container.encodeIfPresent(self.isOnline, forKey: .isOnline)
+        try container.encodeIfPresent(self.lastSeen, forKey: .lastSeen)
     }
     
     static func == (lhs: DBUser, rhs: DBUser) -> Bool {
@@ -270,6 +284,24 @@ final class UserManager {
             users.append(contentsOf: batch)
         }
         return users
+    }
+    
+    func setStatusOnline(userId: String) async throws {
+        let data: [String: Any] = [
+            DBUser.CodingKeys.isOnline.rawValue: true,
+            DBUser.CodingKeys.lastSeen.rawValue: NSNull()
+        ]
+        
+        try await userDocument(userId: userId).setData(data, merge: true)
+    }
+    
+    func setStatusOffline(userId: String) async throws {
+        let data: [String: Any] = [
+            DBUser.CodingKeys.isOnline.rawValue: false,
+            DBUser.CodingKeys.lastSeen.rawValue: FieldValue.serverTimestamp()
+        ]
+        
+        try await userDocument(userId: userId).setData(data, merge: true)
     }
 }
 

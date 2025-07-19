@@ -117,14 +117,16 @@ struct FriendFullSheetView: View {
                             .scaledToFill()
                             .frame(width: 80, height: 80)
                             .clipShape(RoundedRectangle(cornerRadius: 25))
-                            .shadow(color: Color.green.opacity(0.2), radius: 20, x: 0, y: 0)
+                            .shadow(
+                                color: (user.isOnline == true ? Color.green : Color.gray).opacity(0.2),
+                                radius: 20, x: 0, y: 0)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 25)
                                     .stroke(Color.black, lineWidth: 1.5)
                             )
                         
                         Circle()
-                            .fill(Color.green)
+                            .fill(user.isOnline == true ? Color.green : Color.gray)
                             .frame(width: 20, height: 20)
                             .padding(.leading, 60)
                             .padding(.top, 60)
@@ -138,7 +140,7 @@ struct FriendFullSheetView: View {
                         .fontWidth(.expanded)
                         .opacity(0.4)
                         .font(.callout)
-                    Text("Currently in a study room.")
+                    Text(user.isOnline == true ? "Online" : "Offline")
                         .fontWidth(.expanded)
                         .font(.callout)
                         .opacity(0.5)

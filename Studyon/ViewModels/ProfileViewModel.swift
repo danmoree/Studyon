@@ -15,12 +15,14 @@ import Foundation
 final class ProfileViewModel: ObservableObject {
     @Published private(set) var user: DBUser? = nil
     
+    // basicly on login
     func loadCurrentUser() async throws {
         let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
         let fetchedUser = try await UserManager.shared.getUser(userId: authDataResult.uid)
         
         // day streak check
         try await UserStatsManager.shared.checkAndUpdateLoginStreak(userId: fetchedUser.userId)
+        try await UserManager.shared.setStatusOnline(userId: fetchedUser.userId)
         
         await MainActor.run {
             self.user = fetchedUser
@@ -56,6 +58,8 @@ final class ProfileViewModel: ObservableObject {
     }
     
     func signOut() async throws {
+        guard let user = user else { return }
+        try await UserManager.shared.setStatusOffline(userId: user.userId)
         try AuthenticationManager.shared.signOut()
         await MainActor.run {
             self.user = nil
