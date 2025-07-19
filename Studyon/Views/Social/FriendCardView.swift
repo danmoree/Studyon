@@ -58,15 +58,15 @@ struct FriendCardView: View {
             Spacer()
             // dm button
             
-            ZStack {
-                Circle()
-                    .fill(Color.green)
-                    .frame(width: 35, height: 35)
-                Image(systemName: "paperplane.fill")
-                    .foregroundStyle(Color.white)
-                    .font(.subheadline)
-               
-            }
+//            ZStack {
+//                Circle()
+//                    .fill(Color.green)
+//                    .frame(width: 35, height: 35)
+//                Image(systemName: "paperplane.fill")
+//                    .foregroundStyle(Color.white)
+//                    .font(.subheadline)
+//               
+//            }
         }
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40)

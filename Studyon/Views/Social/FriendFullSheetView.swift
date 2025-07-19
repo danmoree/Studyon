@@ -68,18 +68,18 @@ struct FriendFullSheetView: View {
                 HStack {
                     Spacer()
                     
-                    Button {
-                        // code
-                    } label: {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.black)
-                                .frame(width: 40, height: 40)
-                            
-                            Image(systemName: "paperplane.fill")
-                                .foregroundColor(.white)
-                        }
-                    }
+//                    Button {
+//                        // code
+//                    } label: {
+//                        ZStack {
+//                            RoundedRectangle(cornerRadius: 15)
+//                                .fill(Color.black)
+//                                .frame(width: 40, height: 40)
+//                            
+//                            Image(systemName: "paperplane.fill")
+//                                .foregroundColor(.white)
+//                        }
+//                    }
                     
                     Menu {
 //                        Button("Report User") {
