@@ -39,7 +39,7 @@ struct TasksView: View {
                         Image(systemName: "plus.circle.fill")
                             .resizable()
                             .frame(width: 28, height: 28)
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                            
                     }
                 }
@@ -294,4 +294,5 @@ struct TasksView: View {
 #Preview {
     TasksView(isUserLoggedIn: .constant(true))
         .environmentObject(ProfileViewModel())
+        .environmentObject(TasksViewModel())
 }

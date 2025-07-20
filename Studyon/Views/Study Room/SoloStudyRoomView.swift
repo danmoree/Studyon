@@ -17,6 +17,7 @@ struct SoloStudyRoomView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: SoloStudyRoomViewModel
     @EnvironmentObject var userVM: ProfileViewModel
+    @Environment(\.colorScheme) var colorScheme
     
     
     init(studyRoom: SoloStudyRoom) {
@@ -33,10 +34,11 @@ struct SoloStudyRoomView: View {
             let capsuleY = topY + (bottomY - topY) * (viewModel.progress * 1.12)
             
             ZStack {
-                Color(red: 250/255, green: 201/255, blue: 184/255)
+                //Color(red: 250/255, green: 201/255, blue: 184/255)
+                Color("background")
                 
                 Capsule()
-                    .fill(Color.white)
+                    .fill(colorScheme == .light ? Color.black.opacity(0.07) : Color.white.opacity(0.2))
                     .frame(width: geo.size.width * 1.18, height: capsuleHeight)
                     .position(x: geo.size.width / 2, y: capsuleY)
                     .animation(.easeInOut, value: viewModel.progress)
@@ -52,7 +54,7 @@ struct SoloStudyRoomView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 25, height: 25)
-                                    .foregroundStyle(.black)
+                                    .foregroundStyle(colorScheme == .light ? .black : .white)
                             }
                         
                         
@@ -65,7 +67,7 @@ struct SoloStudyRoomView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 27, height: 27)
-                                .foregroundStyle(.black)
+                                .foregroundStyle(colorScheme == .light ? .black : .white)
                         }
                     }
                     
@@ -113,9 +115,9 @@ struct SoloStudyRoomView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
-                                    .foregroundStyle(.black)
+                                    .foregroundStyle(colorScheme == .light ? .black : .white)
                             }
-                            .padding(.top, 20)
+                            
                             
                             
                             
@@ -137,7 +139,7 @@ struct SoloStudyRoomView: View {
         studyRoom: SoloStudyRoom(
             createAt: Date(),
             pomIsRunning: true,
-            pomDurationSec: 1500,
+            pomDurationSec: 20,
             pomBreakDurationSec: 300
         )
     )

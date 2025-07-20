@@ -15,6 +15,7 @@ import SwiftUI
 struct TabBarView: View {
     @Binding var selectedTab: Tab
     @Namespace private var animation
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack {
@@ -29,14 +30,18 @@ struct TabBarView: View {
                         ZStack {
                             if selectedTab == tab {
                                 Circle()
-                                    .fill(Color.white)
+                                    .fill(colorScheme == .light ? Color.white : Color.gray.opacity(0.3))
                                     .frame(width: 40, height: 40)
                                     .matchedGeometryEffect(id: "background", in: animation)
                             }
 
                             Image(systemName: tab.iconName)
                                 .font(.system(size: 22))
-                                .foregroundColor(selectedTab == tab ? .black : .gray)
+                                .foregroundColor(
+                                    selectedTab == tab
+                                        ? (colorScheme == .light ? .black : .white)
+                                        : .gray
+                                )
                         }
                     }
                 }
@@ -44,7 +49,7 @@ struct TabBarView: View {
             }
         }
         .padding(.vertical, 12)
-        .background(Color.white)
+        .background(Color("background"))
         .clipShape(Capsule())
         .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 2)
         .background(Color.clear)

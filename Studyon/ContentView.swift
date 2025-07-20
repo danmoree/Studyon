@@ -31,7 +31,7 @@ struct ContentView: View {
                         .environmentObject(userVM)
                 } else {
                     ZStack {
-                        Color.softWhite.ignoresSafeArea()
+                        Color("background").ignoresSafeArea()
                         MainTabView(isUserLoggedIn: $isUserLoggedIn)
                             .task {
                                 try? await userVM.loadCurrentUser()

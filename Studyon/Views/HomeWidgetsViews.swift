@@ -24,6 +24,7 @@ struct TodayTasks: View {
     @EnvironmentObject var tasksVM: TasksViewModel
     @EnvironmentObject var userVM: ProfileViewModel
     @State var showingAddTaskSheet = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -37,12 +38,12 @@ struct TodayTasks: View {
             HStack {
                 Text("Today")
                     .fontWidth(.expanded)
-                    .foregroundColor(.black)
+                    .foregroundColor(Color("text_color"))
                 Text(String(todayTasks.count))
                     .fontWidth(.expanded)
                     .fontWeight(.thin)
                     .font(.footnote)
-                    .foregroundColor(.black.opacity(0.8))
+                    .foregroundColor(Color("text_color").opacity(0.8))
                 
                 Spacer()
                 
@@ -52,7 +53,7 @@ struct TodayTasks: View {
                     
                 } label: {
                     Image(systemName: "plus")
-                        .foregroundColor(.black)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                 }
                 .padding(.trailing, 5)
             }
@@ -76,7 +77,7 @@ struct TodayTasks: View {
                             task.title ?? "NULL",
                             systemImage: task.completed ?? false ? "checkmark.square.fill" : "square"
                         )
-                        .foregroundColor(.black)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     }
@@ -101,7 +102,7 @@ struct TodayTasks: View {
         .padding(.trailing, 4)
         .padding()
         .frame(width: 170, height: 170, alignment: .top)
-        .background(Color.white)
+        .background(Color("foreground_widget"))
         .clipShape(RoundedRectangle(cornerRadius: 20))
         //.shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
         .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
@@ -274,13 +275,14 @@ struct ActiveRoomsPreviewView: View {
 
 struct StudiedTimeTodayView: View {
     let studiedTimeToday: TimeInterval
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Time Studied")
                     .fontWidth(.expanded)
-                    .foregroundColor(.black)
+                    .foregroundColor(Color("text_color"))
                 
                 Spacer()
             }
@@ -304,7 +306,7 @@ struct StudiedTimeTodayView: View {
 
 struct QuickStartStudyRoomView: View {
     @State private var newSoloRoom: SoloStudyRoom? = nil
-    
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         
             VStack(alignment: .leading) {
@@ -312,7 +314,7 @@ struct QuickStartStudyRoomView: View {
                 HStack {
                     Text("Quick Study ⏳")
                         .fontWidth(.expanded)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color("text_color"))
                     Spacer()
                 }
                 
@@ -341,6 +343,7 @@ struct QuickStartStudyRoomView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .fontWidth(.expanded)
                                     .fontWeight(.light)
+                                    .foregroundColor(Color("text_color"))
                             }
                             
                             
@@ -348,6 +351,7 @@ struct QuickStartStudyRoomView: View {
                             HStack {
                                 Text("15m")
                                     .font(.title)
+                                    .foregroundColor(Color("text_color"))
                                 
                                 Spacer()
                             }
@@ -355,9 +359,9 @@ struct QuickStartStudyRoomView: View {
                         }
                         .padding(.horizontal, 10)
                         .frame(width: 100, height: 100)
-                        .background(Color.white)
+                        .background(colorScheme == .light ? Color.white : Color.gray.opacity(0.2))
                         .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+                        .shadow(color: colorScheme == .light ? .black.opacity(0.3) : .white.opacity(0.1), radius: 6, x: 0, y: 10)
                         .foregroundStyle(.black)
                         
                     }
@@ -387,6 +391,7 @@ struct QuickStartStudyRoomView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .fontWidth(.expanded)
                                     .fontWeight(.light)
+                                    .foregroundStyle(Color("text_color"))
                             }
                             
                             
@@ -394,6 +399,7 @@ struct QuickStartStudyRoomView: View {
                             HStack {
                                 Text("25m")
                                     .font(.title)
+                                    .foregroundStyle(Color("text_color"))
                                 
                                 Spacer()
                             }
@@ -401,9 +407,9 @@ struct QuickStartStudyRoomView: View {
                         }
                         .padding(.horizontal, 10)
                         .frame(width: 100, height: 100)
-                        .background(Color.white)
+                        .background(colorScheme == .light ? Color.white : Color.gray.opacity(0.2))
                         .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+                        .shadow(color: colorScheme == .light ? .black.opacity(0.3) : .white.opacity(0.1), radius: 6, x: 0, y: 10)
                         .foregroundStyle(.black)
                     }
                     .frame(width: 100, height: 100)
@@ -432,6 +438,7 @@ struct QuickStartStudyRoomView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .fontWidth(.expanded)
                                     .fontWeight(.light)
+                                    .foregroundStyle(Color("text_color"))
                             }
                             
                             
@@ -439,6 +446,7 @@ struct QuickStartStudyRoomView: View {
                             HStack {
                                 Text("50m")
                                     .font(.title)
+                                    .foregroundStyle(Color("text_color"))
                                 
                                 Spacer()
                             }
@@ -446,9 +454,9 @@ struct QuickStartStudyRoomView: View {
                         }
                         .padding(.horizontal, 10)
                         .frame(width: 100, height: 100)
-                        .background(Color.white)
+                        .background(colorScheme == .light ? Color.white : Color.gray.opacity(0.2))
                         .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 10)
+                        .shadow(color: colorScheme == .light ? .black.opacity(0.3) : .white.opacity(0.1), radius: 6, x: 0, y: 10)
                         .foregroundStyle(.black)
                         
                     }
@@ -466,7 +474,7 @@ struct QuickStartStudyRoomView: View {
             //.padding(.top, -30)
             .padding()
             .frame(maxWidth: .infinity, minHeight: 170, maxHeight: 170)
-            .background(Color.white)
+            .background(Color("foreground_widget"))
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
             .fullScreenCover(item: $newSoloRoom) { room in
@@ -480,6 +488,7 @@ struct DailyGoalProgressView: View {
     let goalAmount: Int
     
     @State var displayedProgress: CGFloat = 0
+    @Environment(\.colorScheme) var colorScheme
     var goalMessage: String {
         let progress = studiedTimeToday / Double(goalAmount)
         
@@ -501,12 +510,12 @@ struct DailyGoalProgressView: View {
         VStack(alignment: .center) {
             Text("Daily Goal")
                 .fontWidth(.expanded)
-                .foregroundColor(.black)
+                .foregroundColor(Color("text_color"))
             Text(goalMessage)
                 .font(.caption)
                 .fontWeight(.thin)
                 .fontWidth(.expanded)
-                .foregroundColor(.black)
+                .foregroundColor(Color("text_color"))
                 .multilineTextAlignment(.center)
 
             Spacer()
@@ -518,19 +527,21 @@ struct DailyGoalProgressView: View {
                         .fontWeight(.medium)
                         .fontWidth(.expanded)
                         .padding(.top, -20)
+                        .foregroundStyle(Color("text_color"))
                     Text("of your \(goalAmount / 60)-minute focus goal")
                         .font(.caption)
                         .fontWeight(.thin)
                         .fontWidth(.expanded)
-                        .foregroundColor(.black)
                         .multilineTextAlignment(.center)
                         .padding(.top, 5)
+                        .foregroundStyle(Color("text_color"))
                 }
+                
             }
         }
         .padding(.top)
         .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 200)
-        .background(Color.white)
+        .background(Color("foreground_widget"))
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
     }
@@ -566,7 +577,7 @@ struct StudyTimeBarChartView: View {
             HStack {
                 Text("Time Studied")
                     .fontWidth(.expanded)
-                    .foregroundColor(.black)
+                    .foregroundColor(Color("text_color"))
                 
                 Spacer()
             }
@@ -587,19 +598,19 @@ struct StudyTimeBarChartView: View {
                             }
                             Text(day.label)
                                 .font(.caption2)
-                                .foregroundColor(.black)
+                                .foregroundColor(Color("text_color"))
                         }
                         .frame(maxHeight: .infinity, alignment: .bottom)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.vertical, 4)
-                .background(Color.white)
+                .background(Color("foreground_widget"))
             }
         }
         .padding()
         .frame(width: 170, height: 170)
-        .background(Color.white)
+        .background(Color("foreground_widget"))
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
     }
@@ -607,15 +618,23 @@ struct StudyTimeBarChartView: View {
 
 
 #Preview {
-    //TodayTasks()
-    //    .environmentObject(TasksViewModel())
-    //    .environmentObject(ProfileViewModel())
+    ZStack {
+        Color("background").ignoresSafeArea()
+        VStack {
+            TodayTasks()
+                .environmentObject(TasksViewModel())
+                .environmentObject(ProfileViewModel())
+            
+            QuickStartStudyRoomView()
+            DailyGoalProgressView(studiedTimeToday: 10, goalAmount: 50)
+            StudyTimeBarChartView(timeStudiedByDate: ["2025-07-03": 60 * 60, "2025-07-04": 80 * 60, "2025-07-05": 30 * 60, "2025-07-06": 0, "2025-07-07": 45 * 60, "2025-07-08": 100 * 60, "2025-07-09": 110 * 60])
+        }
+       
+    }
     //TimeSpentCard()
     //ActiveRoomsPreviewView()
     //StudiedTimeTodayView(studiedTimeToday: 123)
-    //QuickStartStudyRoomView()
-    DailyGoalProgressView(studiedTimeToday: 10, goalAmount: 50)
-    StudyTimeBarChartView(timeStudiedByDate: ["2025-07-03": 60 * 60, "2025-07-04": 80 * 60, "2025-07-05": 30 * 60, "2025-07-06": 0, "2025-07-07": 45 * 60, "2025-07-08": 100 * 60, "2025-07-09": 110 * 60])
+    
     
 }
 

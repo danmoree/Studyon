@@ -135,5 +135,8 @@ struct CustomTaskView: View {
 
 
 #Preview {
-    CustomTaskView(taskId: "preview-task-id", title: "Finish ch3", dueDate: Date().addingTimeInterval(86400), isCompleted: true, priority: "low", viewModel: TasksViewModel())
+    ZStack {
+        Color("background").ignoresSafeArea()
+        CustomTaskView(taskId: "preview-task-id", title: "Finish ch3", dueDate: Date().addingTimeInterval(86400), isCompleted: true, priority: "low", viewModel: TasksViewModel())
+    }
 }

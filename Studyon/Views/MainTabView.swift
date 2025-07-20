@@ -18,11 +18,16 @@ struct MainTabView: View {
     @State private var hideTabBar = false
     @StateObject private var tasksVM = TasksViewModel()
     @StateObject private var socialVM = SocialViewModel()
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         VStack(spacing: 0) {
             ZStack(alignment: .bottom) {
-                AnimatedCloudsView()
+                
+                if colorScheme == .light {
+                    AnimatedCloudsView()
+                }
+                
                 switch selectedTab {
                 case .tasks:
                     TasksView(isUserLoggedIn: $isUserLoggedIn)

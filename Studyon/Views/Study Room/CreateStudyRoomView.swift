@@ -16,6 +16,7 @@ struct CreateStudyRoomView: View {
     @Binding var showCreateStudyRoom: Bool
     @State private var progress: Double = 0
     @State private var showCreateStudyRoomSolo = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack {
@@ -54,6 +55,7 @@ struct CreateStudyRoomView: View {
                     Text("Solo \nSession")
                         .fontWidth(.expanded)
                         .fontWeight(.bold)
+                        .foregroundStyle(Color.black)
                     
                     Spacer()
                 }
@@ -63,6 +65,7 @@ struct CreateStudyRoomView: View {
                 Image(systemName: "person.fill")
                     .resizable()
                     .frame(width: 32, height: 32)
+                    .foregroundStyle(colorScheme == .light ? .white : .black)
                 
                 Text("Just you")
                     .fontWeight(.light)
@@ -100,6 +103,7 @@ struct CreateStudyRoomView: View {
                     Text("Group \nSession")
                         .fontWidth(.expanded)
                         .fontWeight(.bold)
+                        .foregroundStyle(Color.black)
                     
                     Spacer()
                 }
@@ -109,6 +113,7 @@ struct CreateStudyRoomView: View {
                 Image(systemName: "person.3.fill")
                   .resizable()
                   .frame(width: 60, height: 30)
+                  .foregroundStyle(colorScheme == .light ? .white : .black)
                   .symbolRenderingMode(.hierarchical)
                   .symbolEffect(
                     .variableColor.cumulative.dimInactiveLayers.reversing,

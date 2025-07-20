@@ -16,6 +16,7 @@ struct SocialView: View {
     @State private var showingAddFriendSheet = false
     @State private var isRefreshing = false
     @ObservedObject var viewModel: SocialViewModel
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
@@ -33,15 +34,17 @@ struct SocialView: View {
                         ZStack {
                             HStack {
                                 Image(systemName: "person.fill.badge.plus")
+                                    .foregroundStyle(colorScheme == .light ? Color.white : Color.black)
                                 Text("ADD")
                                     .font(.caption2)
                                     .fontWidth(.expanded)
+                                    .foregroundStyle(colorScheme == .light ? Color.white : Color.black)
                             }
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .padding()
                         .frame(width:90, height: 30)
-                        .background(Color.black)
+                        .background(colorScheme == .light ? .black : .white)
                         .clipShape(RoundedRectangle(cornerRadius: 20))
                         
                     }

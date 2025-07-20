@@ -18,12 +18,16 @@ struct StudyRoomsView: View {
     @Binding var isUserLoggedIn: Bool
     @Binding var hideTabBar: Bool
     @State private var selectedRoom: StudyRoom? = nil
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         ZStack {
             NavigationStack {
                 ZStack {
-                    Color.softWhite.ignoresSafeArea()
-                    AnimatedCloudsView()
+                    Color("background").ignoresSafeArea()
+                    if colorScheme == .light {
+                        AnimatedCloudsView()
+                    }
+                    
                     VStack(alignment: .leading, spacing: 16) {
                         // header
                         VStack(alignment: .leading, spacing: 4) {
@@ -40,7 +44,7 @@ struct StudyRoomsView: View {
                                     Image(systemName: "plus.circle.fill")
                                         .resizable()
                                         .frame(width: 28, height: 28)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(.primary)
                                     
                                 }
                             }

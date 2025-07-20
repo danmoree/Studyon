@@ -16,6 +16,7 @@ struct FriendCardView: View {
     let user: DBUser
     @State private var showSheet = false
     @ObservedObject var viewModel: SocialViewModel
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack {
@@ -31,7 +32,7 @@ struct FriendCardView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 15))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 15)
-                                    .stroke(Color.black, lineWidth: 1.5)
+                                    .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
                             )
                             
                         Circle()

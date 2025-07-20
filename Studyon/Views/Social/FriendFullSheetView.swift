@@ -60,9 +60,10 @@ struct FriendFullSheetView: View {
     let user: DBUser
     @Binding var showFriendSheet: Bool
     @ObservedObject var socialVM: SocialViewModel
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         ZStack {
-            Color.softWhite.ignoresSafeArea()
+            Color("background").ignoresSafeArea()
             VStack {
                 // top buttons
                 HStack {
@@ -99,11 +100,11 @@ struct FriendFullSheetView: View {
                     } label: {
                         ZStack {
                             RoundedRectangle(cornerRadius: 15)
-                                .fill(Color.black)
+                                .fill(colorScheme == .light ? Color.black : Color.white)
                                 .frame(width: 40, height: 40)
                             
                             Image(systemName: "ellipsis")
-                                .foregroundColor(.white)
+                                .foregroundColor(colorScheme == .light ? .white : .black)
                                 .rotationEffect(.degrees(90))
                         }
                     }
@@ -122,7 +123,7 @@ struct FriendFullSheetView: View {
                                 radius: 20, x: 0, y: 0)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 25)
-                                    .stroke(Color.black, lineWidth: 1.5)
+                                    .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
                             )
                         
                         Circle()
@@ -160,7 +161,6 @@ struct FriendFullSheetView: View {
                             .font(.callout)
                             .opacity(0.5)
                             .padding(.top,5)
-                            .shimmer()
                     }
                       
                     
@@ -249,7 +249,7 @@ struct FriendStatWidgetView: View {
                 .fontWidth(.expanded)
                 .padding(.leading, 15)
                 .frame(width: 170, height: 75)
-                .background(Color.white)
+                .background(Color("foreground_widget"))
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 10)
     }

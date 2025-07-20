@@ -14,6 +14,7 @@ import SwiftUI
 
 struct TasksSegmentedControl: View {
     @Binding var selectedFilter: TasksFilter
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -31,9 +32,17 @@ struct TasksSegmentedControl: View {
                             .padding(.horizontal, 16)
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
-                                    .fill(selectedFilter == filter ? Color.black : Color(.systemGray5))
+                                    .fill(
+                                        selectedFilter == filter
+                                            ? (colorScheme == .light ? Color.black : Color.white)
+                                            : Color(.systemGray5)
+                                    )
                             )
-                            .foregroundColor(selectedFilter == filter ? .white : .black)
+                            .foregroundColor(
+                                selectedFilter == filter
+                                    ? (colorScheme == .light ? .white : .black)
+                                    : (colorScheme == .light ? .black : .white)
+                            )
                     }
                 }
             }
@@ -43,5 +52,9 @@ struct TasksSegmentedControl: View {
 }
 
 #Preview {
-    TasksSegmentedControl(selectedFilter: .constant(.all))
+    ZStack {
+        Color("background").ignoresSafeArea()
+        TasksSegmentedControl(selectedFilter: .constant(.all))
+    }
+    
 }
