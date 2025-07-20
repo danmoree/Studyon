@@ -25,7 +25,7 @@ private func formatHoursMinutes(from seconds: TimeInterval) -> String {
 
 fileprivate struct Shimmer: ViewModifier {
     @State private var phase: CGFloat = 0
-    let duration: Double = 1.2
+    let duration: Double = 2.2
     func body(content: Content) -> some View {
         content
             .overlay(
@@ -147,7 +147,8 @@ struct FriendFullSheetView: View {
                             .fontWidth(.expanded)
                             .font(.callout)
                             .opacity(0.9)
-                            .padding(.top,5)
+                            .padding(.top, 5)
+                            .foregroundStyle(colorScheme == .light ? .gray : .green.opacity(0.5))
                             .shimmer()
                     } else if let lastSeen = user.lastSeen {
                         Text("Last seen \(lastSeen.relativeFormat())")
@@ -257,7 +258,7 @@ struct FriendStatWidgetView: View {
 }
 
 #Preview {
-    FriendFullSheetView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"), showFriendSheet: .constant(true), socialVM: SocialViewModel())
+    FriendFullSheetView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore", isOnline: true), showFriendSheet: .constant(true), socialVM: SocialViewModel())
         
 }
 
