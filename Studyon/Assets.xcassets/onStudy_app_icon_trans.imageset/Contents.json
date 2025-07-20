@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "onStudy_app_icon_trans.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
