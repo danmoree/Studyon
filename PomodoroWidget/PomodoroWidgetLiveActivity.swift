@@ -16,9 +16,15 @@ struct PomodoroWidgetLiveActivity: Widget {
             // Lock screen/banner UI goes here
             VStack {
                 Text("Hello \(context.state.emoji)")
-                Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
-                    .font(.title2)
-                    .monospacedDigit()
+                if context.state.isPaused {
+                    Text(timeString(from: context.state.timeRemaining))
+                        .font(.title2)
+                        .monospacedDigit()
+                } else {
+                    Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
+                        .font(.title2)
+                        .monospacedDigit()
+                }
                 Text(context.state.isBreak ? "Break" : "Focus")
                     .font(.headline)
                     .foregroundColor(context.state.isBreak ? .green : .red)
@@ -38,9 +44,15 @@ struct PomodoroWidgetLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack {
-                        Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
-                            .font(.headline)
-                            .monospacedDigit()
+                        if context.state.isPaused {
+                            Text(timeString(from: context.state.timeRemaining))
+                                .font(.headline)
+                                .monospacedDigit()
+                        } else {
+                            Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
+                                .font(.headline)
+                                .monospacedDigit()
+                        }
                         Text(context.state.isBreak ? "Break" : "Focus")
                             .font(.subheadline)
                             .foregroundColor(context.state.isBreak ? .green : .red)
@@ -48,21 +60,39 @@ struct PomodoroWidgetLiveActivity: Widget {
                     }
                 }
             } compactLeading: {
-                Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
-                    .monospacedDigit()
+                if context.state.isPaused {
+                    Text(timeString(from: context.state.timeRemaining))
+                        .font(.caption2)
+                        .monospacedDigit()
+                } else {
+                    Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
+                        .monospacedDigit()
+                }
             } compactTrailing: {
                 VStack {
                     Text("T \(context.state.emoji)")
-                    Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
-                        .font(.caption2)
-                        .monospacedDigit()
+                    if context.state.isPaused {
+                        Text(timeString(from: context.state.timeRemaining))
+                            .font(.caption2)
+                            .monospacedDigit()
+                    } else {
+                        Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
+                            .font(.caption2)
+                            .monospacedDigit()
+                    }
                 }
             } minimal: {
                 VStack {
                     Text(context.state.emoji)
-                    Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
-                        .font(.caption2)
-                        .monospacedDigit()
+                    if context.state.isPaused {
+                        Text(timeString(from: context.state.timeRemaining))
+                            .font(.caption2)
+                            .monospacedDigit()
+                    } else {
+                        Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
+                            .font(.caption2)
+                            .monospacedDigit()
+                    }
                 }
             }
             .widgetURL(URL(string: "http://www.apple.com"))
@@ -70,14 +100,12 @@ struct PomodoroWidgetLiveActivity: Widget {
         }
     }
 
-    /*
     private func timeString(from timeInterval: TimeInterval) -> String {
         let totalSeconds = max(0, Int(timeInterval))
         let minutes = totalSeconds / 60
         let seconds = totalSeconds % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
-    */
 }
 
 extension PomodoroWidgetAttributes {
@@ -88,11 +116,11 @@ extension PomodoroWidgetAttributes {
 
 extension PomodoroWidgetAttributes.ContentState {
     fileprivate static var smiley: PomodoroWidgetAttributes.ContentState {
-        PomodoroWidgetAttributes.ContentState(emoji: "😀", timeRemaining: 900, isBreak: false)
+        PomodoroWidgetAttributes.ContentState(emoji: "😀", timeRemaining: 900, isBreak: false, isPaused: false)
      }
      
      fileprivate static var starEyes: PomodoroWidgetAttributes.ContentState {
-         PomodoroWidgetAttributes.ContentState(emoji: "🤩", timeRemaining: 300, isBreak: true)
+         PomodoroWidgetAttributes.ContentState(emoji: "🤩", timeRemaining: 300, isBreak: true, isPaused: false)
      }
 }
 

@@ -14,6 +14,7 @@ struct PomodoroWidgetAttributes: ActivityAttributes {
         var emoji: String
         var timeRemaining: TimeInterval
         var isBreak: Bool
+        var isPaused: Bool
     }
 
     // Fixed non-changing properties about your activity go here!

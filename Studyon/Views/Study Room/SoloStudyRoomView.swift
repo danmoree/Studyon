@@ -48,6 +48,7 @@ struct SoloStudyRoomView: View {
                     HStack {
                             Button {
                                 viewModel.recordWorkSession()
+                                viewModel.endLiveActivity()
                                 dismiss()
                             } label: {
                                 Image(systemName: "chevron.left")

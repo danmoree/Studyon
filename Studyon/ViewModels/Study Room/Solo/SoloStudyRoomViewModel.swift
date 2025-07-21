@@ -114,12 +114,13 @@ final class SoloStudyRoomViewModel: ObservableObject {
 
         // When resuming from pause (playing), reset sessionStart and sessionEnd so new time is counted only
         // This prevents overlapping or repeated study segments from being logged
-        if isPaused == true && remainingTime > 0 && !isOnBreak {
+        if isPaused == true && remainingTime > 0 {
             sessionStart = Date()
             sessionEnd = Date().addingTimeInterval(TimeInterval(remainingTime))
         }
 
         isPaused.toggle()
+        updateLiveActivity()
     }
     
 
@@ -151,7 +152,9 @@ final class SoloStudyRoomViewModel: ObservableObject {
         let contentState = PomodoroWidgetAttributes.ContentState(
             emoji: "⏱️",
             timeRemaining: TimeInterval(remainingTime),
-            isBreak: isOnBreak
+            isBreak: isOnBreak,
+            isPaused: isPaused
+            
         )
         let activityContent = ActivityContent(state: contentState, staleDate: nil)
         do {
@@ -170,10 +173,25 @@ final class SoloStudyRoomViewModel: ObservableObject {
         let contentState = PomodoroWidgetAttributes.ContentState(
             emoji: isOnBreak ? "☕️" : "⏱️",
             timeRemaining: TimeInterval(remainingTime),
-            isBreak: isOnBreak
+            isBreak: isOnBreak,
+            isPaused: isPaused
         )
         Task {
             await liveActivity.update(ActivityContent(state: contentState, staleDate: nil))
+        }
+    }
+    
+    func endLiveActivity() {
+        guard let liveActivity else { return }
+        let finalState = PomodoroWidgetAttributes.ContentState(
+            emoji: "✅",
+            timeRemaining: 0,
+            isBreak: false,
+            isPaused: false
+        )
+        let finalContent = ActivityContent(state: finalState, staleDate: nil)
+        Task {
+            await liveActivity.end(finalContent, dismissalPolicy: .immediate)
         }
     }
     
@@ -181,3 +199,4 @@ final class SoloStudyRoomViewModel: ObservableObject {
         timer?.cancel()
     }
 }
+
