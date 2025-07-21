@@ -8,6 +8,8 @@
 import Foundation
 import Combine
 import FirebaseAuth
+import ActivityKit
+import WidgetKit
 
 final class SoloStudyRoomViewModel: ObservableObject {
     @Published var remainingTime: Int
@@ -22,6 +24,8 @@ final class SoloStudyRoomViewModel: ObservableObject {
     let studyRoom: SoloStudyRoom
     private let statsManager = UserStatsManager.shared
     private let minRecordableSessionSeconds: TimeInterval = 10 // Threashold for calling recordWorkSession()
+    
+    private var liveActivity: Activity<PomodoroWidgetAttributes>?
 
     init(studyRoom: SoloStudyRoom) {
         self.studyRoom = studyRoom
@@ -30,6 +34,7 @@ final class SoloStudyRoomViewModel: ObservableObject {
         sessionStart = Date() // start time
         sessionEnd = sessionStart!.addingTimeInterval(TimeInterval(studyRoom.pomDurationSec)) // pom sesh should end at this time
         startTimer()
+        startLiveActivity()
     }
 
     // combine timer
@@ -82,6 +87,7 @@ final class SoloStudyRoomViewModel: ObservableObject {
                 }
             }
         }
+        updateLiveActivity()
     }
 
     
@@ -139,11 +145,39 @@ final class SoloStudyRoomViewModel: ObservableObject {
             }
         }
     }
-
     
+    func startLiveActivity() {
+        let attributes = PomodoroWidgetAttributes(name: "Solo Room")
+        let contentState = PomodoroWidgetAttributes.ContentState(
+            emoji: "⏱️",
+            timeRemaining: TimeInterval(remainingTime),
+            isBreak: isOnBreak
+        )
+        let activityContent = ActivityContent(state: contentState, staleDate: nil)
+        do {
+            liveActivity = try Activity<PomodoroWidgetAttributes>.request(
+                attributes: attributes,
+                content: activityContent,
+                pushType: nil
+            )
+        } catch {
+            print("Failed to start Live Activity: \(error)")
+        }
+    }
+
+    func updateLiveActivity() {
+        guard let liveActivity else { return }
+        let contentState = PomodoroWidgetAttributes.ContentState(
+            emoji: isOnBreak ? "☕️" : "⏱️",
+            timeRemaining: TimeInterval(remainingTime),
+            isBreak: isOnBreak
+        )
+        Task {
+            await liveActivity.update(ActivityContent(state: contentState, staleDate: nil))
+        }
+    }
     
     deinit {
         timer?.cancel()
     }
 }
-
