@@ -14,6 +14,7 @@ struct PomodoroWidgetAttributes: ActivityAttributes {
         var timeRemaining: TimeInterval
         var isBreak: Bool
         var isPaused: Bool
+        var totalDuration: TimeInterval
     }
 
     // Fixed non-changing properties about your activity go here!

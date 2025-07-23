@@ -149,10 +149,12 @@ final class SoloStudyRoomViewModel: ObservableObject {
     
     func startLiveActivity() {
         let attributes = PomodoroWidgetAttributes(name: "Solo Room")
+        let totalDuration = isOnBreak ? studyRoom.pomBreakDurationSec : studyRoom.pomDurationSec
         let contentState = PomodoroWidgetAttributes.ContentState(
             timeRemaining: TimeInterval(remainingTime),
             isBreak: isOnBreak,
-            isPaused: isPaused
+            isPaused: isPaused,
+            totalDuration: TimeInterval(totalDuration)
             
         )
         let activityContent = ActivityContent(state: contentState, staleDate: nil)
@@ -169,10 +171,12 @@ final class SoloStudyRoomViewModel: ObservableObject {
 
     func updateLiveActivity() {
         guard let liveActivity else { return }
+        let totalDuration = isOnBreak ? studyRoom.pomBreakDurationSec : studyRoom.pomDurationSec
         let contentState = PomodoroWidgetAttributes.ContentState(
             timeRemaining: TimeInterval(remainingTime),
             isBreak: isOnBreak,
-            isPaused: isPaused
+            isPaused: isPaused,
+            totalDuration: TimeInterval(totalDuration)
         )
         Task {
             await liveActivity.update(ActivityContent(state: contentState, staleDate: nil))
@@ -184,7 +188,8 @@ final class SoloStudyRoomViewModel: ObservableObject {
         let finalState = PomodoroWidgetAttributes.ContentState(
             timeRemaining: 0,
             isBreak: false,
-            isPaused: false
+            isPaused: false,
+            totalDuration: 0
         )
         let finalContent = ActivityContent(state: finalState, staleDate: nil)
         Task {
