@@ -7,7 +7,7 @@
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIImageName</key>
-		<string>onStudy_app_icon_trans870</string>
+		<string>onStudy_app_icon_transSmall</string>
 		<key>UIImageRespectsSafeAreaInsets</key>
 		<true/>
 		<key>UINavigationBar</key>

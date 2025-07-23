@@ -14,23 +14,38 @@ struct PomodoroWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PomodoroWidgetAttributes.self) { context in
             // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
-                if context.state.isPaused {
-                    Text(timeString(from: context.state.timeRemaining))
-                        .font(.title2)
-                        .monospacedDigit()
-                } else {
-                    Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
-                        .font(.title2)
-                        .monospacedDigit()
+            HStack {
+                
+                Image("onStudy_app_icon_transSmall")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 100, height: 100)
+                    
+
+                
+                VStack(alignment: .leading) {
+                    // timer
+                    if context.state.isPaused {
+                        Text(timeString(from: context.state.timeRemaining))
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .fontWidth(.expanded)
+                            
+                    } else {
+                        Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .fontWidth(.expanded)
+                    }
+                    
+                    
+                    Text(context.state.isBreak ? "Break" : "Focus")
+                        .padding(.leading, 5)
+                        .fontWidth(.expanded)
                 }
-                Text(context.state.isBreak ? "Break" : "Focus")
-                    .font(.headline)
-                    .foregroundColor(context.state.isBreak ? .green : .red)
+                .activitySystemActionForegroundColor(Color.black)
             }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
+            .padding(.leading)
 
         } dynamicIsland: { context in
             DynamicIsland {
@@ -56,34 +71,28 @@ struct PomodoroWidgetLiveActivity: Widget {
                         Text(context.state.isBreak ? "Break" : "Focus")
                             .font(.subheadline)
                             .foregroundColor(context.state.isBreak ? .green : .red)
-                        Text("Bottom \(context.state.emoji)")
                     }
                 }
             } compactLeading: {
-                if context.state.isPaused {
-                    Text(timeString(from: context.state.timeRemaining))
-                        .font(.caption2)
-                        .monospacedDigit()
-                } else {
-                    Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
-                        .monospacedDigit()
-                }
+                Image("onStudy_app_icon_transSmall")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 40, height: 40)
+                
             } compactTrailing: {
-                VStack {
-                    Text("T \(context.state.emoji)")
                     if context.state.isPaused {
                         Text(timeString(from: context.state.timeRemaining))
-                            .font(.caption2)
-                            .monospacedDigit()
+                            .font(.body)
+                            .fontWeight(.bold)
+                            .fontWidth(.expanded)
                     } else {
                         Text(timerInterval: Date()...Date().addingTimeInterval(context.state.timeRemaining), countsDown: true)
-                            .font(.caption2)
-                            .monospacedDigit()
-                    }
+                            .font(.body)
+                            .fontWeight(.bold)
+                            .fontWidth(.expanded)
                 }
             } minimal: {
                 VStack {
-                    Text(context.state.emoji)
                     if context.state.isPaused {
                         Text(timeString(from: context.state.timeRemaining))
                             .font(.caption2)
@@ -116,11 +125,11 @@ extension PomodoroWidgetAttributes {
 
 extension PomodoroWidgetAttributes.ContentState {
     fileprivate static var smiley: PomodoroWidgetAttributes.ContentState {
-        PomodoroWidgetAttributes.ContentState(emoji: "😀", timeRemaining: 900, isBreak: false, isPaused: false)
+        PomodoroWidgetAttributes.ContentState(timeRemaining: 900, isBreak: false, isPaused: false)
      }
      
      fileprivate static var starEyes: PomodoroWidgetAttributes.ContentState {
-         PomodoroWidgetAttributes.ContentState(emoji: "🤩", timeRemaining: 300, isBreak: true, isPaused: false)
+         PomodoroWidgetAttributes.ContentState(timeRemaining: 300, isBreak: true, isPaused: false)
      }
 }
 

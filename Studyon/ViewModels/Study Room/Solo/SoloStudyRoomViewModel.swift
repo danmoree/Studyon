@@ -150,7 +150,6 @@ final class SoloStudyRoomViewModel: ObservableObject {
     func startLiveActivity() {
         let attributes = PomodoroWidgetAttributes(name: "Solo Room")
         let contentState = PomodoroWidgetAttributes.ContentState(
-            emoji: "⏱️",
             timeRemaining: TimeInterval(remainingTime),
             isBreak: isOnBreak,
             isPaused: isPaused
@@ -171,7 +170,6 @@ final class SoloStudyRoomViewModel: ObservableObject {
     func updateLiveActivity() {
         guard let liveActivity else { return }
         let contentState = PomodoroWidgetAttributes.ContentState(
-            emoji: isOnBreak ? "☕️" : "⏱️",
             timeRemaining: TimeInterval(remainingTime),
             isBreak: isOnBreak,
             isPaused: isPaused
@@ -184,7 +182,6 @@ final class SoloStudyRoomViewModel: ObservableObject {
     func endLiveActivity() {
         guard let liveActivity else { return }
         let finalState = PomodoroWidgetAttributes.ContentState(
-            emoji: "✅",
             timeRemaining: 0,
             isBreak: false,
             isPaused: false

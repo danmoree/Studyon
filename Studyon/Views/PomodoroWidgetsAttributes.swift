@@ -11,7 +11,6 @@ import ActivityKit
 struct PomodoroWidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         // Dynamic stateful properties about your activity go here!
-        var emoji: String
         var timeRemaining: TimeInterval
         var isBreak: Bool
         var isPaused: Bool
