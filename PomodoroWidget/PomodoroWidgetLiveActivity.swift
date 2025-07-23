@@ -44,6 +44,8 @@ struct PomodoroWidgetLiveActivity: Widget {
                         .fontWidth(.expanded)
                 }
                 .activitySystemActionForegroundColor(Color.black)
+                
+                Spacer()
             }
             .padding(.leading)
 
