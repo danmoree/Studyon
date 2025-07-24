@@ -45,7 +45,13 @@ struct PomodoroWidgetLiveActivity: Widget {
                         .padding(.leading, 2)
                         .fontWidth(.expanded)
                     
-                    ProgressView(value: max(0, min(1, 1.0 - context.state.timeRemaining / context.state.totalDuration)))
+                    let startDate = context.state.startDate
+                    let endDate = context.state.endDate
+                    let totalDuration = endDate.timeIntervalSince(startDate)
+                    let elapsed = Date.now.timeIntervalSince(startDate)
+                    let progress = max(0, min(1, elapsed / totalDuration))
+
+                    ProgressView(value: progress)
                         .progressViewStyle(.linear)
                         .frame(height: 8)
                         .accentColor(context.state.isPaused ? .red : .green)
@@ -99,7 +105,13 @@ struct PomodoroWidgetLiveActivity: Widget {
                                 .padding(.leading, 2)
                                 .fontWidth(.expanded)
                             
-                            ProgressView(value: max(0, min(1, 1.0 - context.state.timeRemaining / context.state.totalDuration)))
+                            let startDate = context.state.startDate
+                            let endDate = context.state.endDate
+                            let totalDuration = endDate.timeIntervalSince(startDate)
+                            let elapsed = Date.now.timeIntervalSince(startDate)
+                            let progress = max(0, min(1, elapsed / totalDuration))
+
+                            ProgressView(value: progress)
                                 .progressViewStyle(.linear)
                                 .frame(height: 8)
                                 .accentColor(context.state.isPaused ? .red : .green)
@@ -174,11 +186,12 @@ extension PomodoroWidgetAttributes {
 
 extension PomodoroWidgetAttributes.ContentState {
     fileprivate static var smiley: PomodoroWidgetAttributes.ContentState {
-        PomodoroWidgetAttributes.ContentState(timeRemaining: 300, isBreak: false, isPaused: false, totalDuration: 900)
+        PomodoroWidgetAttributes.ContentState(timeRemaining: 300, isBreak: false, isPaused: false, totalDuration: 900,
+                                              startDate: Date(), endDate: Date())
      }
      
      fileprivate static var starEyes: PomodoroWidgetAttributes.ContentState {
-         PomodoroWidgetAttributes.ContentState(timeRemaining: 300, isBreak: true, isPaused: false, totalDuration: 500)
+         PomodoroWidgetAttributes.ContentState(timeRemaining: 300, isBreak: true, isPaused: false, totalDuration: 500, startDate: Date(), endDate: Date())
      }
 }
 

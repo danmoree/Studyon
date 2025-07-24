@@ -49,6 +49,7 @@ struct SoloStudyRoomView: View {
                             Button {
                                 viewModel.recordWorkSession()
                                 viewModel.endLiveActivity()
+                                NotificationsManager.shared.cancelPomodoroNotification()
                                 dismiss()
                             } label: {
                                 Image(systemName: "chevron.left")

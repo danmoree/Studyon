@@ -27,6 +27,8 @@ final class SoloStudyRoomViewModel: ObservableObject {
     
     private var liveActivity: Activity<PomodoroWidgetAttributes>?
 
+    private static let notificationPermissionKey = "didRequestNotificationPermission"
+    
     init(studyRoom: SoloStudyRoom) {
         self.studyRoom = studyRoom
         self.remainingTime = studyRoom.pomDurationSec
@@ -35,6 +37,16 @@ final class SoloStudyRoomViewModel: ObservableObject {
         sessionEnd = sessionStart!.addingTimeInterval(TimeInterval(studyRoom.pomDurationSec)) // pom sesh should end at this time
         startTimer()
         startLiveActivity()
+        requestNotificationPermissionIfNeeded()
+        NotificationsManager.shared.schedulePomodoroNotification(duration: TimeInterval(studyRoom.pomDurationSec), sessionType: "Pomodoro")
+    }
+    
+    private func requestNotificationPermissionIfNeeded() {
+        let key = SoloStudyRoomViewModel.notificationPermissionKey
+        if !UserDefaults.standard.bool(forKey: key) {
+            NotificationsManager.shared.requestPermission()
+            UserDefaults.standard.set(true, forKey: key)
+        }
     }
 
     // combine timer
@@ -67,10 +79,14 @@ final class SoloStudyRoomViewModel: ObservableObject {
                     sessionEnd = Date().addingTimeInterval(TimeInterval(studyRoom.pomBreakDurationSec))
                     remainingTime = studyRoom.pomBreakDurationSec
                     startTimer()
+                    requestNotificationPermissionIfNeeded()
+                    NotificationsManager.shared.schedulePomodoroNotification(duration: TimeInterval(studyRoom.pomBreakDurationSec), sessionType: "Break")
                 } else {
                     isPaused = true
                     sessionStart = nil
                     sessionEnd = nil
+                    requestNotificationPermissionIfNeeded()
+                    NotificationsManager.shared.schedulePomodoroNotification(duration: TimeInterval(studyRoom.pomBreakDurationSec), sessionType: "Break")
                 }
             } else {
                 // Break ended
@@ -80,10 +96,14 @@ final class SoloStudyRoomViewModel: ObservableObject {
                     sessionEnd = Date().addingTimeInterval(TimeInterval(studyRoom.pomDurationSec))
                     remainingTime = studyRoom.pomDurationSec
                     startTimer()
+                    requestNotificationPermissionIfNeeded()
+                    NotificationsManager.shared.schedulePomodoroNotification(duration: TimeInterval(studyRoom.pomDurationSec), sessionType: "Pomodoro")
                 } else {
                     isPaused = true
                     sessionStart = nil
                     sessionEnd = nil
+                    requestNotificationPermissionIfNeeded()
+                    NotificationsManager.shared.schedulePomodoroNotification(duration: TimeInterval(studyRoom.pomBreakDurationSec), sessionType: "Break")
                 }
             }
         }
@@ -92,6 +112,18 @@ final class SoloStudyRoomViewModel: ObservableObject {
 
     
     func pauseToggle() {
+        if !isPaused {
+            // Pausing: cancel notification
+            NotificationsManager.shared.cancelPomodoroNotification()
+        }
+        
+        if isPaused && remainingTime > 0 {
+            // Resuming: schedule notification with remaining time
+            requestNotificationPermissionIfNeeded()
+            let sessionType = isOnBreak ? "Break" : "Pomodoro"
+            NotificationsManager.shared.schedulePomodoroNotification(duration: TimeInterval(remainingTime), sessionType: sessionType)
+        }
+        
         if !isOnBreak && remainingTime > 0 && !isPaused {
             recordWorkSession()
             sessionStart = nil
@@ -154,7 +186,9 @@ final class SoloStudyRoomViewModel: ObservableObject {
             timeRemaining: TimeInterval(remainingTime),
             isBreak: isOnBreak,
             isPaused: isPaused,
-            totalDuration: TimeInterval(totalDuration)
+            totalDuration: TimeInterval(totalDuration),
+            startDate: sessionStart ?? Date(),
+            endDate: sessionEnd ?? Date()
             
         )
         let activityContent = ActivityContent(state: contentState, staleDate: nil)
@@ -176,7 +210,9 @@ final class SoloStudyRoomViewModel: ObservableObject {
             timeRemaining: TimeInterval(remainingTime),
             isBreak: isOnBreak,
             isPaused: isPaused,
-            totalDuration: TimeInterval(totalDuration)
+            totalDuration: TimeInterval(totalDuration),
+            startDate: sessionStart ?? Date(),
+            endDate: sessionEnd ?? Date()
         )
         Task {
             await liveActivity.update(ActivityContent(state: contentState, staleDate: nil))
@@ -189,7 +225,9 @@ final class SoloStudyRoomViewModel: ObservableObject {
             timeRemaining: 0,
             isBreak: false,
             isPaused: false,
-            totalDuration: 0
+            totalDuration: 0,
+            startDate: sessionStart ?? Date(),
+            endDate: sessionEnd ?? Date()
         )
         let finalContent = ActivityContent(state: finalState, staleDate: nil)
         Task {
