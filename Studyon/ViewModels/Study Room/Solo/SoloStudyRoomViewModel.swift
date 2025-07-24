@@ -107,7 +107,7 @@ final class SoloStudyRoomViewModel: ObservableObject {
                 }
             }
         }
-        updateLiveActivity()
+        //updateLiveActivity()
     }
 
     
@@ -206,13 +206,23 @@ final class SoloStudyRoomViewModel: ObservableObject {
     func updateLiveActivity() {
         guard let liveActivity else { return }
         let totalDuration = isOnBreak ? studyRoom.pomBreakDurationSec : studyRoom.pomDurationSec
+        let now = Date()
+        let startDate: Date
+        let endDate: Date
+        if isPaused {
+            endDate = now.addingTimeInterval(TimeInterval(remainingTime))
+            startDate = endDate.addingTimeInterval(-TimeInterval(totalDuration))
+        } else {
+            startDate = sessionStart ?? now
+            endDate = sessionEnd ?? now.addingTimeInterval(TimeInterval(remainingTime))
+        }
         let contentState = PomodoroWidgetAttributes.ContentState(
             timeRemaining: TimeInterval(remainingTime),
             isBreak: isOnBreak,
             isPaused: isPaused,
             totalDuration: TimeInterval(totalDuration),
-            startDate: sessionStart ?? Date(),
-            endDate: sessionEnd ?? Date()
+            startDate: startDate,
+            endDate: endDate
         )
         Task {
             await liveActivity.update(ActivityContent(state: contentState, staleDate: nil))

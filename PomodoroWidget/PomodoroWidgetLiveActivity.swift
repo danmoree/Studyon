@@ -47,15 +47,28 @@ struct PomodoroWidgetLiveActivity: Widget {
                     
                     let startDate = context.state.startDate
                     let endDate = context.state.endDate
-                    let totalDuration = endDate.timeIntervalSince(startDate)
-                    let elapsed = Date.now.timeIntervalSince(startDate)
-                    let progress = max(0, min(1, elapsed / totalDuration))
-
-                    ProgressView(value: progress)
+                    
+                    if context.state.isPaused {
+                        let totalDuration = endDate.timeIntervalSince(startDate)
+                        let elapsed = totalDuration - context.state.timeRemaining
+                        let progress = max(0, min(1, elapsed / totalDuration))
+                        ProgressView(value: progress)
+                            .progressViewStyle(.linear)
+                            .frame(height: 8)
+                            .accentColor(.red)
+                            .padding(.bottom, 10)
+                    } else {
+                        ProgressView(
+                            timerInterval: startDate...endDate,
+                            countsDown: false,
+                            label: { Text("") },
+                            currentValueLabel: { Text("") }
+                        )
                         .progressViewStyle(.linear)
                         .frame(height: 8)
-                        .accentColor(context.state.isPaused ? .red : .green)
+                        .tint(.green)
                         .padding(.bottom, 10)
+                    }
                 }
                 .activitySystemActionForegroundColor(Color.black)
                 
@@ -107,15 +120,28 @@ struct PomodoroWidgetLiveActivity: Widget {
                             
                             let startDate = context.state.startDate
                             let endDate = context.state.endDate
-                            let totalDuration = endDate.timeIntervalSince(startDate)
-                            let elapsed = Date.now.timeIntervalSince(startDate)
-                            let progress = max(0, min(1, elapsed / totalDuration))
-
-                            ProgressView(value: progress)
+                            
+                            if context.state.isPaused {
+                                let totalDuration = endDate.timeIntervalSince(startDate)
+                                let elapsed = totalDuration - context.state.timeRemaining
+                                let progress = max(0, min(1, elapsed / totalDuration))
+                                ProgressView(value: progress)
+                                    .progressViewStyle(.linear)
+                                    .frame(height: 8)
+                                    .accentColor(.red)
+                                    .padding(.bottom, 10)
+                            } else {
+                                ProgressView(
+                                    timerInterval: startDate...endDate,
+                                    countsDown: false,
+                                    label: { Text("") },
+                                    currentValueLabel: { Text("") }
+                                )
                                 .progressViewStyle(.linear)
                                 .frame(height: 8)
-                                .accentColor(context.state.isPaused ? .red : .green)
+                                .tint(.green)
                                 .padding(.bottom, 10)
+                            }
                         }
                         .activitySystemActionForegroundColor(Color.black)
                         
