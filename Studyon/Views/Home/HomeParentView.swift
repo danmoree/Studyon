@@ -16,10 +16,13 @@ import FirebaseAuth
 struct HomeParentView: View {
     @State private var selectedFilter: HomeFilter = .all
     @State private var showingSettings = false
+    @State private var showingProfileSheet = false
     @Binding var isUserLoggedIn: Bool
     @EnvironmentObject var userVM: ProfileViewModel
     @StateObject private var widgetVM =  HomeWidgetsViewModel()
     @EnvironmentObject var tasksVM: TasksViewModel
+    @EnvironmentObject var socialVM: SocialViewModel
+    @EnvironmentObject var settingsVM: SettingsViewModel
 
     var body: some View {
         
@@ -28,7 +31,7 @@ struct HomeParentView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Button {
-                        showingSettings = true
+                        showingProfileSheet = true
                     } label: {
                         Image("profile_pic1")
                             .resizable()
@@ -36,8 +39,13 @@ struct HomeParentView: View {
                             .frame(width: 60, height: 60)
                             .clipShape(Circle())
                     }
-                    .sheet(isPresented: $showingSettings) {
-                        UserSettings(isUserLoggedIn: $isUserLoggedIn)
+                    .sheet(isPresented: $showingProfileSheet) {
+                        if let user = userVM.user {
+                            UserProfileFullSheetView(user: user, socialVM: socialVM)
+                                .environmentObject(settingsVM)
+                        } else {
+                            Text("No user loaded")
+                        }
                     }
 
                   

@@ -15,7 +15,6 @@ import Firebase
 import FirebaseAuth
 import FirebaseCore
 import FirebaseStorage
-// ...
 
 
 
@@ -195,7 +194,12 @@ class SettingsService {
         return .system
     }
     
-    
+    func updateUserDailyStudyGoal(userId: String, goal: TimeInterval) async throws {
+        let data: [String: Any] = [
+            DBUser.CodingKeys.dailyStudyGoal.rawValue: goal
+        ]
+        try await userCollection.document(userId).setData(data, merge: true)
+    }
     
 }
 

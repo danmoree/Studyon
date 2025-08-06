@@ -18,6 +18,7 @@ struct MainTabView: View {
     @State private var hideTabBar = false
     @StateObject private var tasksVM = TasksViewModel()
     @StateObject private var socialVM = SocialViewModel()
+    @StateObject private var settingsVM = SettingsViewModel()
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
@@ -39,6 +40,8 @@ struct MainTabView: View {
                 case .home:
                     HomeParentView(isUserLoggedIn: $isUserLoggedIn)
                         .environmentObject(tasksVM)
+                        .environmentObject(socialVM)
+                        .environmentObject(settingsVM)
                 case .social:
                    SocialView(viewModel: socialVM)
                 }

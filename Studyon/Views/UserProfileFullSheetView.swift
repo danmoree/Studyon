@@ -53,9 +53,10 @@ fileprivate struct Shimmer: ViewModifier {
 
 struct UserProfileFullSheetView: View {
     let user: DBUser
-    @Binding var showFriendSheet: Bool
     @ObservedObject var socialVM: SocialViewModel
+    @EnvironmentObject var settingsVM: SettingsViewModel
     @Environment(\.colorScheme) var colorScheme
+    @State private var showingSettings = false
     
     var body: some View {
         ZStack {
@@ -79,7 +80,7 @@ struct UserProfileFullSheetView: View {
 //                    }
                     
                     Button  {
-                        
+                        showingSettings = true
                     } label: {
                         ZStack {
                             RoundedRectangle(cornerRadius: 15)
@@ -204,10 +205,16 @@ struct UserProfileFullSheetView: View {
                 await socialVM.loadFriendStats(for: user.userId)
             }
         }
+        .sheet(isPresented: $showingSettings) {
+            NavigationStack {
+                UserSettingsView(settingsVM: settingsVM)
+            }
+        }
         
     }
 }
 
 #Preview {
-    UserProfileFullSheetView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore", isOnline: true), showFriendSheet: .constant(true), socialVM: SocialViewModel())
+    UserProfileFullSheetView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore", isOnline: true), socialVM: SocialViewModel())
 }
+

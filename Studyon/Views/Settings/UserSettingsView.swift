@@ -13,6 +13,7 @@
 import SwiftUI
 
 struct UserSettingsView: View {
+    @ObservedObject var settingsVM: SettingsViewModel
     var body: some View {
             
             NavigationStack {
@@ -22,13 +23,18 @@ struct UserSettingsView: View {
                             .ignoresSafeArea()
                     
                     List {
-                        Section(header: Text("General")) {
-                           // NavigationLink("Account", destination: AccountSettingsView())
+                        Section(header: Text("Profile")) {
+                            NavigationLink("Username", destination: ProfileSettingsView(settingsVM: settingsVM))
                            // NavigationLink("Notifications", destination: NotificationSettingsView())
                         }
                         
 
                         Section(header: Text("Appearance")) {
+                          //  NavigationLink("Theme", destination: ThemeSettingsView())
+                          //  NavigationLink("Font Size", destination: FontSizeSettingsView())
+                        }
+                        
+                        Section(header: Text("Study")) {
                           //  NavigationLink("Theme", destination: ThemeSettingsView())
                           //  NavigationLink("Font Size", destination: FontSizeSettingsView())
                         }
@@ -55,5 +61,5 @@ struct UserSettingsView: View {
 }
 
 #Preview {
-    UserSettingsView()
+    UserSettingsView(settingsVM: SettingsViewModel())
 }

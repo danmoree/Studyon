@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseAuth
 
 
 class SettingsViewModel: ObservableObject {
@@ -17,5 +18,16 @@ class SettingsViewModel: ObservableObject {
     
     init() {
         self.selectedTheme = SettingsService.shared.loadTheme()
+    }
+    
+    var currentUserUID: String? {
+        return Auth.auth().currentUser?.uid
+    }
+    
+    func changeUsername(username: String) async throws {
+        guard let uid = currentUserUID else {
+            throw NSError(domain: "SettingsViewModel", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
+        }
+        try await SettingsService.shared.changeUsername(username: username, userId: uid)
     }
 }
