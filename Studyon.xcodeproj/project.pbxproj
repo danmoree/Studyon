@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		654189432DD685B2007E7F77 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 654189422DD685B2007E7F77 /* FirebaseFirestore */; };
+		65BB224D2E4310EC00623E2C /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 65BB224C2E4310EC00623E2C /* FirebaseStorage */; };
 		65D543422E2DE799003B5737 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65D543412E2DE799003B5737 /* WidgetKit.framework */; };
 		65D543442E2DE799003B5737 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65D543432E2DE799003B5737 /* SwiftUI.framework */; };
 		65D543552E2DE79A003B5737 /* PomodoroWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 65D543402E2DE799003B5737 /* PomodoroWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -70,6 +71,20 @@
 			);
 			target = 65B85A512D5F20B600A735DE /* Studyon */;
 		};
+		65BB22532E43124700623E2C /* Exceptions for "Studyon" folder in "StudyonTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = 65B85A612D5F20B800A735DE /* StudyonTests */;
+		};
+		65BB22542E43124700623E2C /* Exceptions for "Studyon" folder in "StudyonUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = 65B85A6B2D5F20B800A735DE /* StudyonUITests */;
+		};
 		65D543592E2DE79A003B5737 /* Exceptions for "PomodoroWidget" folder in "PomodoroWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -81,6 +96,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
+				"GoogleService-Info.plist",
 				Views/PomodoroWidgetsAttributes.swift,
 			);
 			target = 65D5433F2E2DE799003B5737 /* PomodoroWidgetExtension */;
@@ -92,6 +108,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				65A904EA2E2C7ED800013F5D /* Exceptions for "Studyon" folder in "Studyon" target */,
+				65BB22532E43124700623E2C /* Exceptions for "Studyon" folder in "StudyonTests" target */,
+				65BB22542E43124700623E2C /* Exceptions for "Studyon" folder in "StudyonUITests" target */,
 				65D543602E2DEF10003B5737 /* Exceptions for "Studyon" folder in "PomodoroWidgetExtension" target */,
 			);
 			path = Studyon;
@@ -123,6 +141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				65D805D92D725AEE00BF8A91 /* FirebaseAnalytics in Frameworks */,
+				65BB224D2E4310EC00623E2C /* FirebaseStorage in Frameworks */,
 				65D805DC2D72CF4C00BF8A91 /* FirebaseAuth in Frameworks */,
 				654189432DD685B2007E7F77 /* FirebaseFirestore in Frameworks */,
 			);
@@ -211,6 +230,7 @@
 				65D805D82D725AEE00BF8A91 /* FirebaseAnalytics */,
 				65D805DB2D72CF4C00BF8A91 /* FirebaseAuth */,
 				654189422DD685B2007E7F77 /* FirebaseFirestore */,
+				65BB224C2E4310EC00623E2C /* FirebaseStorage */,
 			);
 			productName = Studyon;
 			productReference = 65B85A522D5F20B600A735DE /* Studyon.app */;
@@ -801,6 +821,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 65D805D72D725AEE00BF8A91 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		65BB224C2E4310EC00623E2C /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 65D805D72D725AEE00BF8A91 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 		65D805D82D725AEE00BF8A91 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;

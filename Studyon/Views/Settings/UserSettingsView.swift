@@ -1,4 +1,9 @@
 //
+//  Created by Daniel Moreno on 2025
+//  © 2025 Daniel Moreno. All rights reserved.
+//  This code is proprietary and confidential.
+//  Do not copy, distribute, or reuse without written permission.
+//
 //  UserSettingsView.swift
 //  Studyon
 //
@@ -11,8 +16,11 @@ struct UserSettingsView: View {
     var body: some View {
             
             NavigationStack {
+                
                 ZStack {
-                    Color("background").ignoresSafeArea()
+                    Color.background
+                            .ignoresSafeArea()
+                    
                     List {
                         Section(header: Text("General")) {
                            // NavigationLink("Account", destination: AccountSettingsView())
@@ -34,8 +42,10 @@ struct UserSettingsView: View {
                             }
                         }
                     }
+                    .scrollContentBackground(.hidden)
                     .navigationTitle("Settings")
                     .listStyle(.insetGrouped) // Or .grouped depending on your design
+                    
                 }
                  
                     }
