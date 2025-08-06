@@ -43,6 +43,8 @@ class SettingsService {
     static let shared = SettingsService()
     private init() {}
     
+    let appVersion = "Version 0.1"
+    
     private let userCollection = Firestore.firestore().collection("users")
     
     // user profile settings that write to firebase
@@ -176,6 +178,21 @@ class SettingsService {
         let query = userCollection.whereField("username_lowercased", isEqualTo: username.lowercased()).limit(to: 1)
         let snapshot = try await query.getDocuments()
         return snapshot.documents.isEmpty
+    }
+    
+    
+    // Appearance
+    // saving to user dafaults
+    func saveTheme(_ theme: AppTheme) {
+        UserDefaults.standard.set(theme.rawValue, forKey: "appTheme")
+    }
+    
+    func loadTheme() -> AppTheme {
+        if let raw = UserDefaults.standard.string(forKey: "appTheme"),
+           let theme = AppTheme(rawValue: raw) {
+            return theme
+        }
+        return .system
     }
     
     
