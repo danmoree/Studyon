@@ -24,19 +24,25 @@ struct UserSettingsView: View {
                     
                     List {
                         Section(header: Text("Profile")) {
-                            NavigationLink("Username", destination: ProfileSettingsView(settingsVM: settingsVM))
-                           // NavigationLink("Notifications", destination: NotificationSettingsView())
+                            NavigationLink("Username", destination: UsernameSettingsView(settingsVM: settingsVM))
+                            
+                            NavigationLink("Profile Picture", destination: UsernameSettingsView(settingsVM: settingsVM))
+                            
+                            NavigationLink("Name", destination: NameSettingsView(settingsVM: settingsVM))
+                            
+                            NavigationLink("Email", destination: UsernameSettingsView(settingsVM: settingsVM))
+                            
+                            NavigationLink("Password", destination: UsernameSettingsView(settingsVM: settingsVM))
+
                         }
                         
 
                         Section(header: Text("Appearance")) {
-                          //  NavigationLink("Theme", destination: ThemeSettingsView())
-                          //  NavigationLink("Font Size", destination: FontSizeSettingsView())
+                            NavigationLink("Theme", destination: UsernameSettingsView(settingsVM: settingsVM))
                         }
                         
                         Section(header: Text("Study")) {
-                          //  NavigationLink("Theme", destination: ThemeSettingsView())
-                          //  NavigationLink("Font Size", destination: FontSizeSettingsView())
+                            NavigationLink("Daily Goal", destination: UsernameSettingsView(settingsVM: settingsVM))
                         }
 
                         Section {

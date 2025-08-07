@@ -30,4 +30,12 @@ class SettingsViewModel: ObservableObject {
         }
         try await SettingsService.shared.changeUsername(username: username, userId: uid)
     }
+    
+    func changeName(name: String) async throws {
+        guard let uid = currentUserUID else {
+            throw NSError(domain: "SettingsViewModel", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
+        }
+        
+        try await SettingsService.shared.changeName(name: name, userId: uid)
+    }
 }

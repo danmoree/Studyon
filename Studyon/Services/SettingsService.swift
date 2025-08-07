@@ -48,14 +48,14 @@ class SettingsService {
     
     // user profile settings that write to firebase
     func changeName(name: String, userId: String) async throws {
-        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw SettingsError.invalidInput("Name cannot be empty.")
-        }
+          guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+              throw SettingsError.invalidInput("Name cannot be empty.")
+          }
 
-        do {
-            // Example Firebase Firestore update
-            try await Firestore.firestore()
-                .collection("users")
+          do {
+              // Example Firebase Firestore update
+              try await Firestore.firestore()
+                  .collection("users")
                 .document(userId)
                 .updateData(["full_name": name])
         } catch _ as URLError {
