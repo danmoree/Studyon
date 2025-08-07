@@ -38,4 +38,8 @@ class SettingsViewModel: ObservableObject {
         
         try await SettingsService.shared.changeName(name: name, userId: uid)
     }
+    
+    var appVersion: String {
+        SettingsService.shared.appVersion
+    }
 }

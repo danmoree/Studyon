@@ -21,6 +21,7 @@ struct ContentView: View {
     @State private var needsProfileSetup = false
     @State private var userID: String? = Auth.auth().currentUser?.uid
     @State private var hasCheckedProfile = false
+    @EnvironmentObject var settingsVM: SettingsViewModel
     
     var body: some View {
         
@@ -37,6 +38,8 @@ struct ContentView: View {
                                 try? await userVM.loadCurrentUser()
                             }
                             .environmentObject(userVM)
+                            .environmentObject(settingsVM)
+                    
                     }
                 }
             } else if isUserLoggedIn && !hasCheckedProfile {

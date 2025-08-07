@@ -18,7 +18,7 @@ struct MainTabView: View {
     @State private var hideTabBar = false
     @StateObject private var tasksVM = TasksViewModel()
     @StateObject private var socialVM = SocialViewModel()
-    @StateObject private var settingsVM = SettingsViewModel()
+    @EnvironmentObject var settingsVM:  SettingsViewModel
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {

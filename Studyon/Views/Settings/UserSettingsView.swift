@@ -20,43 +20,60 @@ struct UserSettingsView: View {
                 
                 ZStack {
                     Color.background
-                            .ignoresSafeArea()
+                        .ignoresSafeArea()
                     
-                    List {
-                        Section(header: Text("Profile")) {
-                            NavigationLink("Username", destination: UsernameSettingsView(settingsVM: settingsVM))
-                            
-                            NavigationLink("Profile Picture", destination: UsernameSettingsView(settingsVM: settingsVM))
-                            
-                            NavigationLink("Name", destination: NameSettingsView(settingsVM: settingsVM))
-                            
-                            NavigationLink("Email", destination: UsernameSettingsView(settingsVM: settingsVM))
-                            
-                            NavigationLink("Password", destination: UsernameSettingsView(settingsVM: settingsVM))
+                    VStack {
+                        List {
+                            Section(header: Text("Profile")) {
+                                NavigationLink("Username", destination: UsernameSettingsView(settingsVM: settingsVM))
+                                
+                                NavigationLink("Profile Picture", destination: UsernameSettingsView(settingsVM: settingsVM))
+                                
+                                NavigationLink("Name", destination: NameSettingsView(settingsVM: settingsVM))
+                                
+                              //  NavigationLink("Email", destination: UsernameSettingsView(settingsVM: settingsVM))
+                                
+                              //  NavigationLink("Password", destination: UsernameSettingsView(settingsVM: settingsVM))
 
-                        }
-                        
+                            }
+                            
 
-                        Section(header: Text("Appearance")) {
-                            NavigationLink("Theme", destination: UsernameSettingsView(settingsVM: settingsVM))
-                        }
-                        
-                        Section(header: Text("Study")) {
-                            NavigationLink("Daily Goal", destination: UsernameSettingsView(settingsVM: settingsVM))
-                        }
+                            Section(header: Text("Appearance")) {
+                                NavigationLink("Theme", destination: ThemeSettingsView(settingsVM: settingsVM))
+                            }
+                            
+                            Section(header: Text("Study")) {
+                                NavigationLink("Daily Goal", destination: UsernameSettingsView(settingsVM: settingsVM))
+                            }
 
-                        Section {
-                           // NavigationLink("About", destination: AboutView())
-                           Button(role: .destructive) {
-                                // Handle logout
-                            } label: {
-                                Text("Log Out")
+                            Section {
+                               // NavigationLink("About", destination: AboutView())
+                               Button(role: .destructive) {
+                                    // Handle logout
+                                } label: {
+                                    Text("Log Out")
+                                }
                             }
                         }
+                        .scrollContentBackground(.hidden)
+                        .navigationTitle("Settings")
+                        .listStyle(.insetGrouped)
+                        
+                        
+                        VStack {
+                            Image("onStudy_app_icon")
+                                .resizable()
+                                .frame(width: 50, height: 50)
+                            
+                            Text(settingsVM.appVersion)
+                                .fontWidth(.expanded)
+                                .font(.caption)
+                        }
+                        .padding(.bottom, 1)
+                        
+                        Spacer()
+                        
                     }
-                    .scrollContentBackground(.hidden)
-                    .navigationTitle("Settings")
-                    .listStyle(.insetGrouped) // Or .grouped depending on your design
                     
                 }
                  

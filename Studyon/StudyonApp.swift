@@ -18,10 +18,13 @@ struct StudyonApp: App {
     // Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
+    @StateObject var settingsVM = SettingsViewModel()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
-                //.preferredColorScheme(.light)
+                .environmentObject(settingsVM)
+                .preferredColorScheme(settingsVM.selectedTheme.colorScheme)
         }
     }
 }
