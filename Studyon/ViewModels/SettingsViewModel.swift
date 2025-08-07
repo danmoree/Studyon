@@ -42,4 +42,11 @@ class SettingsViewModel: ObservableObject {
     var appVersion: String {
         SettingsService.shared.appVersion
     }
+    
+    func updateDailyStudyGoal(amount: TimeInterval) async throws {
+        guard let uid = currentUserUID else {
+            throw NSError(domain: "SettingsViewModel", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
+        }
+        try await UserManager.shared.updateUserDailyStudyGoal(userId: uid, goal: amount)
+    }
 }

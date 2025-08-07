@@ -43,7 +43,7 @@ struct UserSettingsView: View {
                             }
                             
                             Section(header: Text("Study")) {
-                                NavigationLink("Daily Goal", destination: UsernameSettingsView(settingsVM: settingsVM))
+                                NavigationLink("Daily Goal", destination: GoalsSettingsView(settingsVM: settingsVM))
                             }
 
                             Section {
