@@ -7,7 +7,7 @@
 
 import Foundation
 import FirebaseAuth
-
+import UIKit
 
 class SettingsViewModel: ObservableObject {
     @Published var selectedTheme: AppTheme {
@@ -39,6 +39,10 @@ class SettingsViewModel: ObservableObject {
         try await SettingsService.shared.changeName(name: name, userId: uid)
     }
     
+    func changeProfilePic(imageData: Data) async throws {
+        try await SettingsService.shared.changeProfilePic(imageData: imageData)
+    }
+    
     var appVersion: String {
         SettingsService.shared.appVersion
     }
@@ -50,3 +54,4 @@ class SettingsViewModel: ObservableObject {
         try await UserManager.shared.updateUserDailyStudyGoal(userId: uid, goal: amount)
     }
 }
+

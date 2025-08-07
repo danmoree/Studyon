@@ -27,7 +27,7 @@ struct UserSettingsView: View {
                             Section(header: Text("Profile")) {
                                 NavigationLink("Username", destination: UsernameSettingsView(settingsVM: settingsVM))
                                 
-                                NavigationLink("Profile Picture", destination: UsernameSettingsView(settingsVM: settingsVM))
+                                NavigationLink("Profile Picture", destination: ProfilePicSettingsView(settingsVM: settingsVM))
                                 
                                 NavigationLink("Name", destination: NameSettingsView(settingsVM: settingsVM))
                                 

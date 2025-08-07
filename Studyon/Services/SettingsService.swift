@@ -15,6 +15,7 @@ import Firebase
 import FirebaseAuth
 import FirebaseCore
 import FirebaseStorage
+import UIKit
 
 
 
@@ -119,26 +120,35 @@ class SettingsService {
     }
     
     
-        func changeProfilePic(imageData: Data) async throws {
-            // make sure that the viewmodel checks for valid pic, compresses it then upload/save url
-            // 1. Get the user ID
-            guard let uid = Auth.auth().currentUser?.uid else {
-                throw NSError(domain: "ProfilePicService", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
-            }
-            
-            // 2. Create a reference to Firebase Storage
-            let storageRef = Storage.storage().reference().child("profile_pics/\(uid).jpg")
-            
-            // 3. Upload the data
-            _ = try await storageRef.putDataAsync(imageData, metadata: nil)
-            
-            // 4. Get the download URL
-            let downloadURL = try await storageRef.downloadURL()
-            
-            // 5. Save the URL to Firestore
-            let userDoc = Firestore.firestore().collection("users").document(uid)
-            try await userDoc.updateData(["photo_url": downloadURL.absoluteString])
+    func changeProfilePic(imageData: Data) async throws {
+        // 1. Check for valid image
+        guard let image = UIImage(data: imageData) else {
+            throw SettingsError.invalidInput("Provided data is not a valid image.")
         }
+
+        // 2. Compress image to JPEG (quality: 0.8)
+        guard let compressedData = image.jpegData(compressionQuality: 0.8) else {
+            throw SettingsError.invalidInput("Failed to compress image to JPEG.")
+        }
+
+        // 3. Get the user ID
+        guard let uid = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "ProfilePicService", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])
+        }
+
+        // 4. Create a reference to Firebase Storage
+        let storageRef = Storage.storage().reference().child("profile_pics/\(uid).jpg")
+
+        // 5. Upload the compressed data
+        _ = try await storageRef.putDataAsync(compressedData, metadata: nil)
+
+        // 6. Get the download URL
+        let downloadURL = try await storageRef.downloadURL()
+
+        // 7. Save the URL to Firestore
+        let userDoc = Firestore.firestore().collection("users").document(uid)
+        try await userDoc.updateData(["photo_url": downloadURL.absoluteString])
+    }
     
 //    func changePhoto(photo: Data, userId: String) async throws {
 //        // Attempt to create UIImage from data to check format
