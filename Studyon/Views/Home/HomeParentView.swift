@@ -33,11 +33,24 @@ struct HomeParentView: View {
                     Button {
                         showingProfileSheet = true
                     } label: {
-                        Image("profile_pic1")
-                            .resizable()
-                            .foregroundStyle(.black)
-                            .frame(width: 60, height: 60)
-                            .clipShape(Circle())
+                       
+                        if let image = userVM.profileImage {
+                            Image(uiImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 60, height: 60)
+                                .clipShape(Circle())
+                        } else {
+                            // Optional: you could show a ProgressView or another placeholder here
+                            Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .frame(width: 60, height: 60)
+                        }
+//                        Image("profile_pic1")
+//                            .resizable()
+//                            .foregroundStyle(.black)
+//                            .frame(width: 60, height: 60)
+//                            .clipShape(Circle())
                     }
                     .sheet(isPresented: $showingProfileSheet) {
                         if let user = userVM.user {
@@ -87,6 +100,10 @@ struct HomeParentView: View {
             .fontWidth(.expanded)
             .padding(.horizontal, 23)
             .padding(.top, 20)
+            .onAppear {
+                print("Profile pic URL: \(userVM.user?.photoUrl ?? "not logged in yet")")
+            }
+            
             
 
             // Segmented Control - Top tab bar

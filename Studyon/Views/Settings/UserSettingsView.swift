@@ -49,7 +49,7 @@ struct UserSettingsView: View {
                             Section {
                                // NavigationLink("About", destination: AboutView())
                                Button(role: .destructive) {
-                                    // Handle logout
+                            
                                 } label: {
                                     Text("Log Out")
                                 }

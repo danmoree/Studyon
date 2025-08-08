@@ -53,5 +53,6 @@ class SettingsViewModel: ObservableObject {
         }
         try await UserManager.shared.updateUserDailyStudyGoal(userId: uid, goal: amount)
     }
+
 }
 

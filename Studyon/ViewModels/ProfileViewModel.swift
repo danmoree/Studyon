@@ -11,10 +11,13 @@
 //
 
 import Foundation
+import UIKit
 
 final class ProfileViewModel: ObservableObject {
     @Published private(set) var user: DBUser? = nil
-    
+
+    @Published private(set) var profileImage: UIImage? = nil
+
     // basicly on login
     func loadCurrentUser() async throws {
         let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
@@ -66,5 +69,19 @@ final class ProfileViewModel: ObservableObject {
         }
     }
     
+    func loadProfileImage() async {
+        guard let user = self.user else { return }
+        do {
+            let image = try await UserManager.shared.fetchProfileImageWithDiskCache(for: user)
+            await MainActor.run {
+                self.profileImage = image ?? UIImage(systemName: "person.crop.circle")
+            }
+        } catch {
+            // On error, set the default SF Symbol
+            await MainActor.run {
+                self.profileImage = UIImage(systemName: "person.crop.circle")
+            }
+        }
+    }
     
 }

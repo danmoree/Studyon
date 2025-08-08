@@ -36,6 +36,7 @@ struct ContentView: View {
                         MainTabView(isUserLoggedIn: $isUserLoggedIn)
                             .task {
                                 try? await userVM.loadCurrentUser()
+                                await userVM.loadProfileImage()
                             }
                             .environmentObject(userVM)
                             .environmentObject(settingsVM)

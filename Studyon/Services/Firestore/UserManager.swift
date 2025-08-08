@@ -13,6 +13,7 @@
 import Foundation
 import Firebase
 import FirebaseFirestore
+import UIKit
 
 struct DBUser: Codable, Hashable {
     let userId: String
@@ -302,6 +303,34 @@ final class UserManager {
         ]
         
         try await userDocument(userId: userId).setData(data, merge: true)
+    }
+    
+    
+    private func profileImageCacheURL(for photoUrl: String) -> URL? {
+        guard let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
+        let filename = String(photoUrl.hashValue) + ".jpg"
+        return caches.appendingPathComponent(filename)
+    }
+
+    /// Fetches the user's profile image from disk cache, or downloads and caches it.
+    func fetchProfileImageWithDiskCache(for user: DBUser) async throws -> UIImage? {
+        guard let photoUrl = user.photoUrl, let url = URL(string: photoUrl) else { return nil }
+        guard let cacheURL = profileImageCacheURL(for: photoUrl) else { return nil }
+
+        // 1. Try to load from disk cache
+        if FileManager.default.fileExists(atPath: cacheURL.path),
+           let data = try? Data(contentsOf: cacheURL),
+           let image = UIImage(data: data) {
+            return image
+        }
+
+        // 2. Download and cache
+        let (data, _) = try await URLSession.shared.data(from: url)
+        if let image = UIImage(data: data) {
+            try? data.write(to: cacheURL, options: .atomic)
+            return image
+        }
+        return nil
     }
 }
 
