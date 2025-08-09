@@ -54,6 +54,7 @@ fileprivate struct Shimmer: ViewModifier {
 struct UserProfileFullSheetView: View {
     let user: DBUser
     @ObservedObject var socialVM: SocialViewModel
+    @ObservedObject var profileVM: ProfileViewModel
     @EnvironmentObject var settingsVM: SettingsViewModel
     @Environment(\.colorScheme) var colorScheme
     @State private var showingSettings = false
@@ -100,24 +101,48 @@ struct UserProfileFullSheetView: View {
                 }
                 VStack(alignment: .center) {
                     ZStack {
-                        Image("profile_pic1")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 80, height: 80)
-                            .clipShape(RoundedRectangle(cornerRadius: 25))
-                            .shadow(
-                                color: (user.isOnline == true ? Color.green : Color.gray).opacity(0.2),
-                                radius: 20, x: 0, y: 0)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 25)
-                                    .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
-                            )
                         
-                        Circle()
-                            .fill(user.isOnline == true ? Color.green : Color.gray)
-                            .frame(width: 20, height: 20)
-                            .padding(.leading, 60)
-                            .padding(.top, 60)
+                        if let image = profileVM.profileImage {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: 25))
+                                .shadow(
+                                    color: (user.isOnline == true ? Color.green : Color.gray).opacity(0.2),
+                                    radius: 20, x: 0, y: 0)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
+                                )
+                            
+                            Circle()
+                                .fill(user.isOnline == true ? Color.green : Color.gray)
+                                .frame(width: 20, height: 20)
+                                .padding(.leading, 60)
+                                .padding(.top, 60)
+                        } else {
+                            Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: 25))
+                                .shadow(
+                                    color: (user.isOnline == true ? Color.green : Color.gray).opacity(0.2),
+                                    radius: 20, x: 0, y: 0)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
+                                )
+                            
+                            Circle()
+                                .fill(user.isOnline == true ? Color.green : Color.gray)
+                                .frame(width: 20, height: 20)
+                                .padding(.leading, 60)
+                                .padding(.top, 60)
+                        }
+                        
+         
                     }
                     
                     
@@ -215,6 +240,6 @@ struct UserProfileFullSheetView: View {
 }
 
 #Preview {
-    UserProfileFullSheetView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore", isOnline: true), socialVM: SocialViewModel())
+    UserProfileFullSheetView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore", isOnline: true), socialVM: SocialViewModel(), profileVM: ProfileViewModel())
 }
 

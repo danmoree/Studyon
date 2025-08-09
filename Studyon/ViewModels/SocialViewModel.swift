@@ -12,6 +12,7 @@
 
 import Foundation
 import FirebaseAuth
+import UIKit
 
 final class SocialViewModel: ObservableObject {
     @Published var searchResults: [DBUser] = []
@@ -24,6 +25,8 @@ final class SocialViewModel: ObservableObject {
     @Published var friendStats: UserStats? = nil
     @Published var userStats: UserStats? = nil
     @Published var friendIds: [String] = []
+    @Published var user: DBUser? = nil
+    @Published var profileImage: UIImage? = nil
     
     func loadFriendStats(for userId: String) async {
         do {
@@ -154,6 +157,21 @@ final class SocialViewModel: ObservableObject {
         } catch {
             await MainActor.run {
                 self.unfriendError = error.localizedDescription
+            }
+        }
+    }
+    
+    func loadProfileImage() async {
+        guard let user = self.user else { return }
+        do {
+            let image = try await UserManager.shared.fetchProfileImageWithDiskCache(for: user)
+            await MainActor.run {
+                self.profileImage = image ?? UIImage(systemName: "person.crop.circle")
+            }
+        } catch {
+            // On error, set the default SF Symbol
+            await MainActor.run {
+                self.profileImage = UIImage(systemName: "person.crop.circle")
             }
         }
     }

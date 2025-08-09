@@ -25,7 +25,7 @@ struct ProfilePicSettingsView: View {
 
             // Current or selected profile image
             ZStack {
-                if let img = pickedImage {
+                if let img = userVM.profileImage {
                     Image(uiImage: img)
                         .resizable()
                         .scaledToFill()
@@ -69,6 +69,7 @@ struct ProfilePicSettingsView: View {
             Button("Upload Photo") {
                 Task {
                     await uploadProfilePic()
+                    await userVM.loadProfileImage()
                 }
             }
             .buttonStyle(.borderedProminent)
