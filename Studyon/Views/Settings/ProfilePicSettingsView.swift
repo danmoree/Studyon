@@ -69,7 +69,6 @@ struct ProfilePicSettingsView: View {
             Button("Upload Photo") {
                 Task {
                     await uploadProfilePic()
-                    await userVM.loadProfileImage()
                 }
             }
             .buttonStyle(.borderedProminent)
@@ -86,6 +85,9 @@ struct ProfilePicSettingsView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Done") {
+                    Task {
+                        await userVM.loadProfileImage()
+                    }
                     dismiss()
                 }
             }
@@ -104,6 +106,10 @@ struct ProfilePicSettingsView: View {
             errorMessage = "Success!"
             pickedImage = nil
             pickerItem = nil
+            if let oldPhotoUrl = userVM.user?.photoUrl {
+                settingsVM.removeImageCache(for: oldPhotoUrl)
+            }
+            await userVM.loadProfileImage()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -115,4 +121,3 @@ struct ProfilePicSettingsView: View {
     ProfilePicSettingsView(settingsVM: SettingsViewModel())
         .environmentObject(ProfileViewModel())
 }
-

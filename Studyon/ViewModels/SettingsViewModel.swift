@@ -54,5 +54,13 @@ class SettingsViewModel: ObservableObject {
         try await UserManager.shared.updateUserDailyStudyGoal(userId: uid, goal: amount)
     }
 
+    /// Removes the cached image for the given profile photo URL, forcing image reload from network next time.
+    func removeImageCache(for photoUrl: String) {
+        let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        let hashedFileName = "\(photoUrl.hashValue).jpg"
+        let cacheFileURL = cacheDirectory.appendingPathComponent(hashedFileName)
+        if FileManager.default.fileExists(atPath: cacheFileURL.path) {
+            try? FileManager.default.removeItem(at: cacheFileURL)
+        }
+    }
 }
-
