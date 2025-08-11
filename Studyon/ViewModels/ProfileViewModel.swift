@@ -13,10 +13,20 @@
 import Foundation
 import UIKit
 
+private let lastProfileImageCacheKey = "lastProfileImageOnDisk"
+
 final class ProfileViewModel: ObservableObject {
     @Published private(set) var user: DBUser? = nil
 
     @Published private(set) var profileImage: UIImage? = nil
+
+    init() {
+        // Try to synchronously load the last cached image if any.
+        if let imageData = UserDefaults.standard.data(forKey: lastProfileImageCacheKey),
+           let image = UIImage(data: imageData) {
+            self.profileImage = image
+        }
+    }
 
     // basicly on login
     func loadCurrentUser() async throws {
@@ -74,13 +84,24 @@ final class ProfileViewModel: ObservableObject {
         do {
             let image = try await UserManager.shared.fetchProfileImageWithDiskCache(for: user)
             await MainActor.run {
-                self.profileImage = image ?? UIImage(systemName: "person.crop.circle")
+                if let image = image {
+                    self.profileImage = image
+                    self.cacheProfileImage(image) // Cache for next launch
+                } else {
+                    self.profileImage = UIImage(systemName: "person.crop.circle")
+                }
             }
         } catch {
             // On error, set the default SF Symbol
             await MainActor.run {
                 self.profileImage = UIImage(systemName: "person.crop.circle")
             }
+        }
+    }
+    
+    private func cacheProfileImage(_ image: UIImage) {
+        if let data = image.jpegData(compressionQuality: 0.95) {
+            UserDefaults.standard.set(data, forKey: lastProfileImageCacheKey)
         }
     }
     
