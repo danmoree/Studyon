@@ -26,7 +26,6 @@ final class SocialViewModel: ObservableObject {
     @Published var userStats: UserStats? = nil
     @Published var friendIds: [String] = []
     @Published var user: DBUser? = nil
-    @Published var profileImage: UIImage? = nil
     
     func loadFriendStats(for userId: String) async {
         do {
@@ -161,18 +160,24 @@ final class SocialViewModel: ObservableObject {
         }
     }
     
-    func loadProfileImage() async {
-        guard let user = self.user else { return }
-        do {
-            let image = try await UserManager.shared.fetchProfileImageWithDiskCache(for: user)
-            await MainActor.run {
-                self.profileImage = image ?? UIImage(systemName: "person.crop.circle")
-            }
-        } catch {
-            // On error, set the default SF Symbol
-            await MainActor.run {
-                self.profileImage = UIImage(systemName: "person.crop.circle")
-            }
+    // MARK: - Image Caching
+    
+    func cacheFriendProfileImage(_ image: UIImage, for userId: String) {
+        let key = "profileImageCache_\(userId)"
+        if let data = image.pngData() {
+            UserDefaults.standard.set(data, forKey: key)
         }
     }
+    
+    func loadCachedFriendProfileImage(for userId: String) -> UIImage? {
+        let key = "profileImageCache_\(userId)"
+        guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
+        return UIImage(data: data)
+    }
+    
+    func clearCachedFriendProfileImage(for userId: String) {
+        let key = "profileImageCache_\(userId)"
+        UserDefaults.standard.removeObject(forKey: key)
+    }
+
 }

@@ -61,6 +61,10 @@ struct FriendFullSheetView: View {
     @Binding var showFriendSheet: Bool
     @ObservedObject var socialVM: SocialViewModel
     @Environment(\.colorScheme) var colorScheme
+    
+    @State private var profileImage: UIImage?
+    @State private var isLoadingImage = false
+    
     var body: some View {
         ZStack {
             Color("background").ignoresSafeArea()
@@ -113,18 +117,46 @@ struct FriendFullSheetView: View {
                 }
                 VStack(alignment: .center) {
                     ZStack {
-                        Image("profile_pic1")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 80, height: 80)
-                            .clipShape(RoundedRectangle(cornerRadius: 25))
-                            .shadow(
-                                color: (user.isOnline == true ? Color.green : Color.gray).opacity(0.2),
-                                radius: 20, x: 0, y: 0)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 25)
-                                    .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
-                            )
+                        if let profileImage = profileImage {
+                            Image(uiImage: profileImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: 25))
+                                .shadow(
+                                    color: (user.isOnline == true ? Color.green : Color.gray).opacity(0.2),
+                                    radius: 20, x: 0, y: 0)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
+                                )
+                        } else if isLoadingImage {
+                            ProgressView()
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: 25))
+                                .shadow(
+                                    color: (user.isOnline == true ? Color.green : Color.gray).opacity(0.2),
+                                    radius: 20, x: 0, y: 0)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
+                                )
+                        } else {
+                            Image("default_profile_pic")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: 25))
+                                .shadow(
+                                    color: (user.isOnline == true ? Color.green : Color.gray).opacity(0.2),
+                                    radius: 20, x: 0, y: 0)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 25)
+                                        .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
+                                )
+                        }
+              
                         
                         Circle()
                             .fill(user.isOnline == true ? Color.green : Color.gray)
@@ -216,6 +248,26 @@ struct FriendFullSheetView: View {
         .onAppear {
             Task {
                 await socialVM.loadFriendStats(for: user.userId)
+            }
+        }
+        .onAppear {
+            if let cachedImage = socialVM.loadCachedFriendProfileImage(for: user.userId) {
+                profileImage = cachedImage
+            } else {
+                isLoadingImage = true
+                Task {
+                    if let loaded = await try? UserManager.shared.fetchProfileImageWithDiskCache(for: user) {
+                        await MainActor.run {
+                            profileImage = loaded
+                            socialVM.cacheFriendProfileImage(loaded, for: user.userId)
+                            isLoadingImage = false
+                        }
+                    } else {
+                        await MainActor.run {
+                            isLoadingImage = false
+                        }
+                    }
+                }
             }
         }
         

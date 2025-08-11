@@ -60,10 +60,6 @@ struct SocialView: View {
                     ForEach(viewModel.friends, id: \.self) { user in
                         FriendCardView(user: user, viewModel: viewModel)
                     }
-//                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
-//                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
-//                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
-//                    FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"))
                 }
                 .padding(.top, 10)
             }

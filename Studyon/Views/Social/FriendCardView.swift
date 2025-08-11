@@ -18,6 +18,9 @@ struct FriendCardView: View {
     @ObservedObject var viewModel: SocialViewModel
     @Environment(\.colorScheme) var colorScheme
     
+    @State private var profileImage: UIImage?
+    @State private var isLoadingImage = false
+    
     var body: some View {
         HStack {
             Button(action: { showSheet = true }) {
@@ -25,21 +28,63 @@ struct FriendCardView: View {
                     // profile pic, online/offline
                     
                     ZStack {
-                        Image("profile_pic1")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 45, height: 45)
-                            .clipShape(RoundedRectangle(cornerRadius: 15))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
-                            )
-                            
+                        if let profileImage = profileImage {
+                            Image(uiImage: profileImage)
+                                .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 45, height: 45)
+                                                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                                                            .overlay(
+                                                                RoundedRectangle(cornerRadius: 15)
+                                                                    .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
+                                                            )
+                        } else if isLoadingImage {
+                            ProgressView()
+                                                            .scaledToFill()
+                                                            .frame(width: 45, height: 45)
+                                                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                                                            .overlay(
+                                                                RoundedRectangle(cornerRadius: 15)
+                                                                    .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
+                                                            )
+                        } else {
+                            Image("default_profile_pic")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 45, height: 45)
+                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 15)
+                                        .stroke(colorScheme == .light ? Color.black : Color.gray, lineWidth: 1.5)
+                                )
+                        }
+                       
+                        
                         Circle()
                             .fill(user.isOnline == true ? Color.green : Color.gray)
                             .frame(width: 15, height: 15)
                             .padding(.leading, 30)
                             .padding(.top, 35)
+                    }
+                    .onAppear {
+                        if let cachedImage = viewModel.loadCachedFriendProfileImage(for: user.userId) {
+                            profileImage = cachedImage
+                        } else {
+                            isLoadingImage = true
+                            Task {
+                                if let loaded = await try? UserManager.shared.fetchProfileImageWithDiskCache(for: user) {
+                                    await MainActor.run {
+                                        profileImage = loaded
+                                        viewModel.cacheFriendProfileImage(loaded, for: user.userId)
+                                        isLoadingImage = false
+                                    }
+                                } else {
+                                    await MainActor.run {
+                                        isLoadingImage = false
+                                    }
+                                }
+                            }
+                        }
                     }
                     
                     
@@ -83,4 +128,3 @@ struct FriendCardView: View {
     FriendCardView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore"), viewModel: SocialViewModel())
         .environmentObject(SocialViewModel())
 }
-
