@@ -41,9 +41,11 @@ struct HomeParentView: View {
                                 .frame(width: 60, height: 60)
                                 .clipShape(Circle())
                         } else {
-                            Image(systemName: "person.crop.circle.fill")
+                            Image("default_profile_pic")
                                 .resizable()
+                                .aspectRatio(contentMode: .fill)
                                 .frame(width: 60, height: 60)
+                                .clipShape(Circle())
                         }
 //                        Image("profile_pic1")
 //                            .resizable()

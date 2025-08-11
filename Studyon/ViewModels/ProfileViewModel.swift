@@ -89,13 +89,13 @@ final class ProfileViewModel: ObservableObject {
                     self.profileImage = image
                     self.cacheProfileImage(image) // Cache for next launch
                 } else {
-                    self.profileImage = UIImage(systemName: "person.crop.circle")
+                    self.profileImage = UIImage(named: "default_profile_pic")
                 }
             }
         } catch {
             // On error, set the default SF Symbol
             await MainActor.run {
-                self.profileImage = UIImage(systemName: "person.crop.circle")
+                self.profileImage = UIImage(named: "default_profile_pic")
             }
         }
     }
