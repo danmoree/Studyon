@@ -14,6 +14,8 @@ import SwiftUI
 
 struct UserSettingsView: View {
     @ObservedObject var settingsVM: SettingsViewModel
+    @ObservedObject var userVM: ProfileViewModel
+    @Binding var isUserLoggedIn: Bool
     var body: some View {
             
             NavigationStack {
@@ -49,7 +51,12 @@ struct UserSettingsView: View {
                             Section {
                                // NavigationLink("About", destination: AboutView())
                                Button(role: .destructive) {
-                            
+                                   Task {
+                                       try await userVM.signOut()
+                                       isUserLoggedIn = false
+                                       
+                                   }
+                                   
                                 } label: {
                                     Text("Log Out")
                                 }
@@ -84,5 +91,5 @@ struct UserSettingsView: View {
 }
 
 #Preview {
-    UserSettingsView(settingsVM: SettingsViewModel())
+    UserSettingsView(settingsVM: SettingsViewModel(), userVM: ProfileViewModel(), isUserLoggedIn: .constant(true))
 }

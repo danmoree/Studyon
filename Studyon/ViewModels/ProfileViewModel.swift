@@ -76,6 +76,7 @@ final class ProfileViewModel: ObservableObject {
         try AuthenticationManager.shared.signOut()
         await MainActor.run {
             self.user = nil
+            self.clearCachedProfileImage()
         }
     }
     
@@ -103,6 +104,10 @@ final class ProfileViewModel: ObservableObject {
         if let data = image.jpegData(compressionQuality: 0.95) {
             UserDefaults.standard.set(data, forKey: lastProfileImageCacheKey)
         }
+    }
+    
+    private func clearCachedProfileImage() {
+        UserDefaults.standard.removeObject(forKey: lastProfileImageCacheKey)
     }
     
 }

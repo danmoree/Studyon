@@ -58,6 +58,7 @@ struct UserProfileFullSheetView: View {
     @EnvironmentObject var settingsVM: SettingsViewModel
     @Environment(\.colorScheme) var colorScheme
     @State private var showingSettings = false
+    @Binding var isUserLoggedIn: Bool
     
     var body: some View {
         ZStack {
@@ -232,7 +233,7 @@ struct UserProfileFullSheetView: View {
         }
         .sheet(isPresented: $showingSettings) {
             NavigationStack {
-                UserSettingsView(settingsVM: settingsVM)
+                UserSettingsView(settingsVM: settingsVM, userVM: profileVM, isUserLoggedIn: $isUserLoggedIn)
             }
         }
         
@@ -240,6 +241,6 @@ struct UserProfileFullSheetView: View {
 }
 
 #Preview {
-    UserProfileFullSheetView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore", isOnline: true), socialVM: SocialViewModel(), profileVM: ProfileViewModel())
+    UserProfileFullSheetView(user: DBUser(userId: "test", email: "test@example.com", photoUrl: "", fullName: "Daniel M", username: "danmore", isOnline: true), socialVM: SocialViewModel(), profileVM: ProfileViewModel(), isUserLoggedIn: .constant(true))
 }
 

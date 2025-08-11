@@ -53,8 +53,9 @@ struct HomeParentView: View {
                     }
                     .sheet(isPresented: $showingProfileSheet) {
                         if let user = userVM.user {
-                            UserProfileFullSheetView(user: user, socialVM: socialVM, profileVM: userVM)
+                            UserProfileFullSheetView(user: user, socialVM: socialVM, profileVM: userVM, isUserLoggedIn: $isUserLoggedIn)
                                 .environmentObject(settingsVM)
+                                .environmentObject(userVM)
                         } else {
                             Text("No user loaded")
                         }
