@@ -11,12 +11,16 @@
 //
 
 import SwiftUI
+import FirebaseAuth
+import FirebaseFirestore
 
 struct CreateStudyRoomView: View {
     @Binding var showCreateStudyRoom: Bool
     @State private var progress: Double = 0
     @State private var showCreateStudyRoomSolo = false
+    @State var showGroupView = false
     @Environment(\.colorScheme) var colorScheme
+    @State private var createdRoomId: String? = nil
     
     var body: some View {
         VStack {
@@ -130,7 +134,20 @@ struct CreateStudyRoomView: View {
                 Spacer()
                 
                 Button {
+                    // Generate Firestore roomId and create an empty room doc
+                    let newRoomId = Firestore.firestore().collection("rooms").document().documentID
                     
+                    // Optionally create the room document now so it exists before opening view
+                    Firestore.firestore().collection("rooms").document(newRoomId).setData([
+                        "room_id": newRoomId,
+                        "host_id": Auth.auth().currentUser?.uid ?? "",
+                        "created_at": FieldValue.serverTimestamp(),
+                        "member_ids": [Auth.auth().currentUser?.uid ?? ""]
+                    ])
+                    
+                    // Save and show the view
+                    self.createdRoomId = newRoomId
+                    showGroupView = true
                 } label: {
                     Text("Configure")
                         .fontWeight(.semibold)
@@ -155,6 +172,22 @@ struct CreateStudyRoomView: View {
             CreateStudyRoomSoloView(showCreateStudyRoomSolo: $showCreateStudyRoomSolo)
                 .presentationDetents([.height(400)])
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showGroupView) {
+            Group {
+                if let createdRoomId {
+                    GroupStudyRoomView(
+                        roomId: createdRoomId,
+                        currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
+                        isHost: true
+                    )
+                } else {
+                    // Optionally provide an empty view or loading indicator if needed
+                    EmptyView()
+                }
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
         
     }

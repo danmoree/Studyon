@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		654189432DD685B2007E7F77 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 654189422DD685B2007E7F77 /* FirebaseFirestore */; };
 		65BB224D2E4310EC00623E2C /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 65BB224C2E4310EC00623E2C /* FirebaseStorage */; };
+		65D21FBF2E4AF1C0005D5721 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 65D21FBE2E4AF1C0005D5721 /* FirebaseDatabase */; };
 		65D543422E2DE799003B5737 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65D543412E2DE799003B5737 /* WidgetKit.framework */; };
 		65D543442E2DE799003B5737 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 65D543432E2DE799003B5737 /* SwiftUI.framework */; };
 		65D543552E2DE79A003B5737 /* PomodoroWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 65D543402E2DE799003B5737 /* PomodoroWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -140,6 +141,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				65D21FBF2E4AF1C0005D5721 /* FirebaseDatabase in Frameworks */,
 				65D805D92D725AEE00BF8A91 /* FirebaseAnalytics in Frameworks */,
 				65BB224D2E4310EC00623E2C /* FirebaseStorage in Frameworks */,
 				65D805DC2D72CF4C00BF8A91 /* FirebaseAuth in Frameworks */,
@@ -231,6 +233,7 @@
 				65D805DB2D72CF4C00BF8A91 /* FirebaseAuth */,
 				654189422DD685B2007E7F77 /* FirebaseFirestore */,
 				65BB224C2E4310EC00623E2C /* FirebaseStorage */,
+				65D21FBE2E4AF1C0005D5721 /* FirebaseDatabase */,
 			);
 			productName = Studyon;
 			productReference = 65B85A522D5F20B600A735DE /* Studyon.app */;
@@ -826,6 +829,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 65D805D72D725AEE00BF8A91 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		65D21FBE2E4AF1C0005D5721 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 65D805D72D725AEE00BF8A91 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
 		};
 		65D805D82D725AEE00BF8A91 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
