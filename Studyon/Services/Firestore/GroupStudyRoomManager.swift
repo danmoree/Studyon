@@ -17,6 +17,7 @@ import FirebaseFirestore
 
 
 
+
 struct GroupStudyRoom: Identifiable, Codable {
     var roomId: String
     let title: String?
@@ -138,6 +139,25 @@ final class StudyRoomManager {
         }
     }
 
+    // MARK: - Queries
+    /// Listen to currently active rooms (timer exists and is not paused).
+    /// Returns rooms sorted by most recently updated (best-effort using Firestore snapshot order).
+    @discardableResult
+    func listenActiveRooms(onChange: @escaping ([GroupStudyRoom]) -> Void) -> ListenerRegistration {
+        return db.collection("rooms")
+            .whereField("timer.is_paused", isEqualTo: false)
+            .addSnapshotListener { snapshot, error in
+                guard let snapshot = snapshot else {
+                    onChange([])
+                    return
+                }
+                let rooms: [GroupStudyRoom] = snapshot.documents.compactMap { doc in
+                    do { return try doc.data(as: GroupStudyRoom.self) } catch { return nil }
+                }
+                onChange(rooms)
+            }
+    }
+
     // MARK: - Timer commands (host only)
     /// Start a work phase
     func startWork(roomId: String, durationSec: Int) async throws {
@@ -199,4 +219,3 @@ final class StudyRoomManager {
         }
     }
 }
-

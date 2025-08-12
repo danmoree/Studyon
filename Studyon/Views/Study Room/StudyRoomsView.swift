@@ -11,6 +11,9 @@
 //
 
 import SwiftUI
+import Firebase
+import FirebaseFirestore
+import FirebaseAuth
 
 struct StudyRoomsView: View {
     @State private var selectedFilter: StudyRoomsFilter = .all
@@ -19,6 +22,12 @@ struct StudyRoomsView: View {
     @Binding var hideTabBar: Bool
     //@State private var selectedRoom: StudyRoom? = nil
     @Environment(\.colorScheme) var colorScheme
+    
+    @State private var activeRooms: [GroupStudyRoom] = []
+    @State private var activeRoomsListener: ListenerRegistration? = nil
+    @State private var showJoinSheet = false
+    @State private var selectedRoomId: String? = nil
+    
     var body: some View {
         ZStack {
             NavigationStack {
@@ -80,13 +89,19 @@ struct StudyRoomsView: View {
                                             }
                                             
                                             ScrollView(.horizontal, showsIndicators: false) {
-                                                HStack(spacing: 25) {
-//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "CS 471 Study", startTime: "11:00 AM", endTime: "1:00 PM", creatorUsername: "danmore", pomoDuration: 1800, pomoBreakDuration: 600, studyRoom: selectedRoom ?? nil)
-//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Geo Study", startTime: "12:00 PM", endTime: "2:00 PM", creatorUsername: "emalynn", pomoDuration: 2700, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Diff eq study", startTime: "6:00 PM", endTime: "9:00 PM", creatorUsername: "Brader", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-                                                    
+                                                HStack(spacing: 16) {
+                                                    ForEach(activeRooms) { room in
+                                                        NavigationLink {
+                                                            GroupStudyRoomView(
+                                                                roomId: room.roomId,
+                                                                currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
+                                                                isHost: room.hostId == Auth.auth().currentUser?.uid
+                                                            )
+                                                        } label: {
+                                                            ActiveRoomCard(room: room)
+                                                        }
+                                                    }
                                                 }
-                                                .padding(.horizontal, 0)
                                             }
                                             .scrollClipDisabled()
                                         }
@@ -108,7 +123,7 @@ struct StudyRoomsView: View {
 //                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "CS 471 Study", startTime: "11:00 AM", endTime: "1:00 PM", creatorUsername: "danmore", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
 //                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Geo Study", startTime: "12:00 PM", endTime: "2:00 PM", creatorUsername: "emalynn", pomoDuration: 2700, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
 //                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Diff eq study", startTime: "6:00 PM", endTime: "9:00 PM", creatorUsername: "Brader", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-//                                                    
+//
                                                 }
                                                 .padding(.horizontal, 0)
                                             }
@@ -162,6 +177,15 @@ struct StudyRoomsView: View {
                     .presentationDetents([.height(340)])
                     .presentationDragIndicator(.visible)
             }
+            .onAppear {
+                activeRoomsListener = StudyRoomManager.shared.listenActiveRooms { rooms in
+                    self.activeRooms = rooms
+                }
+            }
+            .onDisappear {
+                activeRoomsListener?.remove()
+                activeRoomsListener = nil
+            }
         }
         
         
@@ -172,4 +196,39 @@ struct StudyRoomsView: View {
 #Preview {
     StudyRoomsView(isUserLoggedIn: .constant(true), hideTabBar: .constant(true))
         .environmentObject(ProfileViewModel())
+}
+
+private struct ActiveRoomCard: View {
+    let room: GroupStudyRoom
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(room.title ?? "Untitled Room")
+                    .font(.headline)
+                    .lineLimit(1)
+                Spacer()
+                PhaseTag(phase: room.timer?.phase ?? "work")
+            }
+            HStack(spacing: 6) {
+                Image(systemName: "person.2")
+                Text("\(room.memberIds?.count ?? 1)")
+            }
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+        }
+        .padding(12)
+        .frame(width: 220)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
+    }
+}
+
+private struct PhaseTag: View {
+    let phase: String
+    var body: some View {
+        Text(phase == "break" ? "Break" : "Work")
+            .font(.caption)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .background(phase == "break" ? Color.blue.opacity(0.15) : Color.green.opacity(0.15), in: Capsule())
+    }
 }
