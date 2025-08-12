@@ -17,7 +17,7 @@ struct StudyRoomsView: View {
     @State private var showCreateRoomSheet = false
     @Binding var isUserLoggedIn: Bool
     @Binding var hideTabBar: Bool
-    @State private var selectedRoom: StudyRoom? = nil
+    //@State private var selectedRoom: StudyRoom? = nil
     @Environment(\.colorScheme) var colorScheme
     var body: some View {
         ZStack {
@@ -81,9 +81,9 @@ struct StudyRoomsView: View {
                                             
                                             ScrollView(.horizontal, showsIndicators: false) {
                                                 HStack(spacing: 25) {
-                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "CS 471 Study", startTime: "11:00 AM", endTime: "1:00 PM", creatorUsername: "danmore", pomoDuration: 1800, pomoBreakDuration: 600, studyRoom: selectedRoom ?? nil)
-                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Geo Study", startTime: "12:00 PM", endTime: "2:00 PM", creatorUsername: "emalynn", pomoDuration: 2700, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Diff eq study", startTime: "6:00 PM", endTime: "9:00 PM", creatorUsername: "Brader", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
+//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "CS 471 Study", startTime: "11:00 AM", endTime: "1:00 PM", creatorUsername: "danmore", pomoDuration: 1800, pomoBreakDuration: 600, studyRoom: selectedRoom ?? nil)
+//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Geo Study", startTime: "12:00 PM", endTime: "2:00 PM", creatorUsername: "emalynn", pomoDuration: 2700, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
+//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Diff eq study", startTime: "6:00 PM", endTime: "9:00 PM", creatorUsername: "Brader", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
                                                     
                                                 }
                                                 .padding(.horizontal, 0)
@@ -105,10 +105,10 @@ struct StudyRoomsView: View {
                                             
                                             ScrollView(.horizontal, showsIndicators: false) {
                                                 HStack(spacing: 25) {
-                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "CS 471 Study", startTime: "11:00 AM", endTime: "1:00 PM", creatorUsername: "danmore", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Geo Study", startTime: "12:00 PM", endTime: "2:00 PM", creatorUsername: "emalynn", pomoDuration: 2700, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Diff eq study", startTime: "6:00 PM", endTime: "9:00 PM", creatorUsername: "Brader", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-                                                    
+//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "CS 471 Study", startTime: "11:00 AM", endTime: "1:00 PM", creatorUsername: "danmore", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
+//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Geo Study", startTime: "12:00 PM", endTime: "2:00 PM", creatorUsername: "emalynn", pomoDuration: 2700, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
+//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Diff eq study", startTime: "6:00 PM", endTime: "9:00 PM", creatorUsername: "Brader", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
+//                                                    
                                                 }
                                                 .padding(.horizontal, 0)
                                             }
