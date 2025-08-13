@@ -98,7 +98,7 @@ struct StudyRoomsView: View {
                                                                 isHost: room.hostId == Auth.auth().currentUser?.uid
                                                             )
                                                         } label: {
-                                                            ActiveRoomCard(room: room)
+                                                            StudyRoomCard(hideTabBar: $hideTabBar, room: room)
                                                         }
                                                     }
                                                 }

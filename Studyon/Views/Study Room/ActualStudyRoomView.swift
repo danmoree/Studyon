@@ -1,19 +1,19 @@
-////
-////  Created by Daniel Moreno on 2025
-////  © 2025 Daniel Moreno. All rights reserved.
-////  This code is proprietary and confidential.
-////  Do not copy, distribute, or reuse without written permission.
-////
-////  ActualStudyRoomView.swift
-////  Studyon
-////
-////  Created by Daniel Moreno on 6/5/25.
-////
+//////
+//////  Created by Daniel Moreno on 2025
+//////  © 2025 Daniel Moreno. All rights reserved.
+//////  This code is proprietary and confidential.
+//////  Do not copy, distribute, or reuse without written permission.
+//////
+//////  ActualStudyRoomView.swift
+//////  Studyon
+//////
+//////  Created by Daniel Moreno on 6/5/25.
+//////
 //
 //import SwiftUI
 //
 //struct ActualStudyRoomView: View {
-//    let studyRoom: StudyRoom?
+//    let studyRoom: GroupStudyRoom
 //    var body: some View {
 //        GeometryReader { geo in
 //            ZStack {
@@ -45,7 +45,7 @@
 //                    }
 //                    
 //                    HStack {
-//                        Text("\(studyRoom?.creatorId ?? "Unknown")'s Study \nRoom ☕️")
+//                        Text("\(studyRoom.creatorId)'s Study \nRoom ☕️")
 //                            .font(.title)
 //                            .fontWeight(.black)
 //                            .fontWidth(.expanded)
@@ -53,7 +53,8 @@
 //                    
 //                    VStack(alignment: .leading) {
 //                        Text("Total Focused")
-//                        Text("2h 42m") // create func that adds up time studied
+//                        // Placeholder for total focused time display
+//                        Text("N/A")
 //                            .fontWeight(.bold)
 //                    }
 //                    .fontWidth(.expanded)
@@ -64,18 +65,35 @@
 //                        VStack {
 //                            HStack {
 //                                Spacer()
-//                                Text("Pomodoro - \((studyRoom?.pomDurationSec ?? 0) * 60) Minutes")
-//                                    .fontWeight(.bold)
-//                                    .fontWidth(.expanded)
-//                                    .font(.footnote)
+//                                if let pomDuration = studyRoom.pomodoroDuration {
+//                                    Text("Pomodoro - \(pomDuration) Minutes")
+//                                        .fontWeight(.bold)
+//                                        .fontWidth(.expanded)
+//                                        .font(.footnote)
+//                                } else {
+//                                    Text("Pomodoro - N/A Minutes")
+//                                        .fontWeight(.bold)
+//                                        .fontWidth(.expanded)
+//                                        .font(.footnote)
+//                                }
 //                                Spacer()
 //                            }
 //                            
 //                            HStack(alignment: .firstTextBaseline) {
-//                                Text("11:23") // calculate time left based on start time and current time
-//                                    .font(.system(size: 70, weight: .black))
-//                                    .fontWeight(.black)
-//                                    .fontWidth(.expanded)
+//                                if let timer = studyRoom.timer {
+//                                    let timeLeftSec = timer.timeLeft
+//                                    let minutesLeft = Int(timeLeftSec) / 60
+//                                    let secondsLeft = Int(timeLeftSec) % 60
+//                                    Text(String(format: "%02d:%02d", minutesLeft, secondsLeft))
+//                                        .font(.system(size: 70, weight: .black))
+//                                        .fontWeight(.black)
+//                                        .fontWidth(.expanded)
+//                                } else {
+//                                    Text("00:00")
+//                                        .font(.system(size: 70, weight: .black))
+//                                        .fontWeight(.black)
+//                                        .fontWidth(.expanded)
+//                                }
 //                                Text("m")
 //                                    .font(.system(size: 35, weight: .black))
 //                                    .fontWeight(.black)
@@ -101,7 +119,12 @@
 //}
 //
 //#Preview {
-//    @Previewable var selectedRoom: StudyRoom?
-//    
-//    ActualStudyRoomView(studyRoom: selectedRoom ?? nil)
+//    let timer = TimerModel(phase: .focus, timeLeft: 11 * 60 + 23)
+//    let exampleGroupStudyRoom = GroupStudyRoom(
+//        creatorId: "JohnDoe",
+//        title: "Study Room",
+//        pomodoroDuration: 25,
+//        timer: timer
+//    )
+//    ActualStudyRoomView(studyRoom: exampleGroupStudyRoom)
 //}

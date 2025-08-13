@@ -29,6 +29,8 @@ struct GroupStudyRoom: Identifiable, Codable {
     let endTime: Date?
     let day: Date?
     let maxMemberLimit: Int?
+    let pomodoroLength: Int
+    let breakLength: Int
     let isPrivate: Bool?
 
     // New fields for group sessions
@@ -50,7 +52,9 @@ struct GroupStudyRoom: Identifiable, Codable {
         maxMemberLimit: Int? = nil,
         isPrivate: Bool? = true,
         hostId: String? = nil,
-        timer: TimerState? = nil
+        timer: TimerState? = nil,
+        pomodoroLength: Int,
+        breakLength: Int
     ) {
         self.roomId = roomId
         self.title = title
@@ -65,22 +69,26 @@ struct GroupStudyRoom: Identifiable, Codable {
         self.isPrivate = isPrivate
         self.hostId = hostId
         self.timer = timer
+        self.pomodoroLength = pomodoroLength
+        self.breakLength = breakLength
     }
 
     enum CodingKeys: String, CodingKey {
-        case roomId = "room_id"
-        case title = "title"
-        case description = "description"
-        case creatorId = "creator_id"
-        case memberIds = "member_ids"
+        case breakLength = "break_length"
         case createdAt = "created_at"
-        case startTime = "start_time"
-        case endTime = "end_time"
+        case creatorId = "creator_id"
         case day = "day"
-        case maxMemberLimit = "max_member_limit"
-        case isPrivate = "is_private"
+        case description = "description"
+        case endTime = "end_time"
         case hostId = "host_id"
+        case isPrivate = "is_private"
+        case maxMemberLimit = "max_member_limit"
+        case memberIds = "member_ids"
+        case pomodoroLength = "pomodoro_length"
+        case roomId = "room_id"
+        case startTime = "start_time"
         case timer = "timer"
+        case title = "title"
     }
 }
 
@@ -219,3 +227,4 @@ final class StudyRoomManager {
         }
     }
 }
+
