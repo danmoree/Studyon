@@ -173,11 +173,9 @@ struct StudyRoomCard: View {
         createdAt: Date(),
         startTime: Date(),
         endTime: Date().addingTimeInterval(7200),
-        day: Date(),
         maxMemberLimit: 10,
-        isPrivate: false,
-        hostId: "danmore",
-        timer: nil
+        isPrivate: false, hostId: "danmore", timer: nil, pomodoroLength: 1500,
+        breakLength: 300
     )
     StudyRoomCard(hideTabBar: .constant(true), room: demoRoom)
 }
