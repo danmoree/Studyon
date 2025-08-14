@@ -22,7 +22,7 @@ struct CreateStudyRoomGroupView: View {
     @State private var endDate: Date? = nil
     @State private var isPrivate: Bool = false
     // if private then need to open detailed room view, so user can send out invites
-    @Binding var openRoomDetailedView: Bool
+    @State var openRoomDetailedView: Bool = false
     @Environment(\.colorScheme) var colorScheme
     var body: some View {
         VStack(spacing: 24) {
@@ -193,6 +193,8 @@ struct CreateStudyRoomGroupView: View {
                 }
             }
         }
+            .padding(.horizontal, 1)
+            .padding(.top, 20)
         .fullScreenCover(item: $newGroupRoom) { groupRoom in
             VStack {
                 Text("Group Room Created")
@@ -212,6 +214,6 @@ struct CreateStudyRoomGroupView: View {
 }
 
 #Preview {
-    CreateStudyRoomGroupView(showCreateStudyRoomGroup: .constant(true), openRoomDetailedView: .constant(false))
+    CreateStudyRoomGroupView(showCreateStudyRoomGroup: .constant(true))
 }
 
