@@ -16,6 +16,7 @@ import FirebaseFirestore
 
 struct CreateStudyRoomView: View {
     @Binding var showCreateStudyRoom: Bool
+    @State var showCreateGroupStudyRoom = false
     @State private var progress: Double = 0
     @State private var showCreateStudyRoomSolo = false
     @State var showGroupView = false
@@ -135,20 +136,22 @@ struct CreateStudyRoomView: View {
                 
                 Button {
                     // Generate Firestore roomId and create an empty room doc
-                    let newRoomId = Firestore.firestore().collection("rooms").document().documentID
-                    
-                    // Optionally create the room document now so it exists before opening view
-                    Firestore.firestore().collection("rooms").document(newRoomId).setData([
-                        "room_id": newRoomId,
-                        "host_id": Auth.auth().currentUser?.uid ?? "",
-                        "created_at": FieldValue.serverTimestamp(),
-                        "member_ids": [Auth.auth().currentUser?.uid ?? ""]
-                    ])
-                    
-                    // Save and show the view
-                    self.createdRoomId = newRoomId
-                    showGroupView = true
+//                    let newRoomId = Firestore.firestore().collection("rooms").document().documentID
+//                    
+//                    // Optionally create the room document now so it exists before opening view
+//                    Firestore.firestore().collection("rooms").document(newRoomId).setData([
+//                        "room_id": newRoomId,
+//                        "host_id": Auth.auth().currentUser?.uid ?? "",
+//                        "created_at": FieldValue.serverTimestamp(),
+//                        "member_ids": [Auth.auth().currentUser?.uid ?? ""]
+//                    ])
+//                    
+//                    // Save and show the view
+//                    self.createdRoomId = newRoomId
+//                    showGroupView = true
+                    showCreateGroupStudyRoom = true
                 } label: {
+                    
                     Text("Configure")
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
@@ -189,6 +192,11 @@ struct CreateStudyRoomView: View {
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showCreateGroupStudyRoom) {
+            CreateStudyRoomGroupView(showCreateStudyRoomGroup: $showCreateGroupStudyRoom)
+                .presentationDragIndicator(.visible)
+        }
+        
         
     }
 }
