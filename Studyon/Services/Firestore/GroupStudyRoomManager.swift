@@ -27,7 +27,6 @@ struct GroupStudyRoom: Identifiable, Codable {
     let createdAt: Date?
     let startTime: Date?
     let endTime: Date?
-    let day: Date?
     let maxMemberLimit: Int?
     let pomodoroLength: Int
     let breakLength: Int
@@ -48,7 +47,6 @@ struct GroupStudyRoom: Identifiable, Codable {
         createdAt: Date?,
         startTime: Date?,
         endTime: Date?,
-        day: Date?,
         maxMemberLimit: Int? = nil,
         isPrivate: Bool? = true,
         hostId: String? = nil,
@@ -64,7 +62,6 @@ struct GroupStudyRoom: Identifiable, Codable {
         self.createdAt = createdAt
         self.startTime = startTime
         self.endTime = endTime
-        self.day = day
         self.maxMemberLimit = maxMemberLimit
         self.isPrivate = isPrivate
         self.hostId = hostId
@@ -77,7 +74,6 @@ struct GroupStudyRoom: Identifiable, Codable {
         case breakLength = "break_length"
         case createdAt = "created_at"
         case creatorId = "creator_id"
-        case day = "day"
         case description = "description"
         case endTime = "end_time"
         case hostId = "host_id"
