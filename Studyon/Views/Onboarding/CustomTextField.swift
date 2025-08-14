@@ -39,3 +39,26 @@ struct CustomTextField: View {
         }
     }
 }
+
+struct CustomTextField2: View {
+    @Binding var text: String
+    var hint: String
+    var isPassword: Bool = false
+    
+    var body: some View {
+        HStack(spacing: 0) {
+            
+            if isPassword {
+                SecureField(hint, text: $text)
+            } else {
+                TextField(hint, text: $text)
+            }
+        }
+        .padding(.horizontal, 15)
+        .padding(.vertical, 15)
+        .background {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(.gray.opacity(0.1))
+        }
+    }
+}
