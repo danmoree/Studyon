@@ -11,6 +11,8 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
 
 struct CreateStudyRoomGroupView: View {
     @Binding var showCreateStudyRoomGroup: Bool
@@ -20,10 +22,40 @@ struct CreateStudyRoomGroupView: View {
     @State private var title: String = ""
     @State private var startDate: Date? = nil
     @State private var endDate: Date? = nil
-    @State private var isPrivate: Bool = false
+    @State private var isPrivate: Bool = false // false always for now
     // if private then need to open detailed room view, so user can send out invites
     @State var openRoomDetailedView: Bool = false
     @Environment(\.colorScheme) var colorScheme
+    
+    @State var loadingRoom: Bool = false
+    
+    private func createRoomInFirestore() {
+        let newRoomId = Firestore.firestore().collection("rooms").document().documentID
+        let userId = Auth.auth().currentUser?.uid ?? ""
+        let createdAt = FieldValue.serverTimestamp()
+        let start = startDate ?? Date()
+        let end = endDate ?? (start.addingTimeInterval(3600))
+        let roomData: [String: Any] = [
+            GroupStudyRoom.CodingKeys.roomId.rawValue: newRoomId,
+            GroupStudyRoom.CodingKeys.hostId.rawValue: userId,
+            GroupStudyRoom.CodingKeys.createdAt.rawValue: createdAt,
+            GroupStudyRoom.CodingKeys.title.rawValue: title.isEmpty ? "Untitled Group Room" : title,
+            GroupStudyRoom.CodingKeys.isPrivate.rawValue: isPrivate,
+            GroupStudyRoom.CodingKeys.pomodoroLength.rawValue: pomDuration,
+            GroupStudyRoom.CodingKeys.breakLength.rawValue: pomBreakDuration,
+            GroupStudyRoom.CodingKeys.startTime.rawValue: start,
+            GroupStudyRoom.CodingKeys.endTime.rawValue: end,
+            GroupStudyRoom.CodingKeys.memberIds.rawValue: [userId]
+        ]
+        Firestore.firestore().collection("rooms").document(newRoomId).setData(roomData) { error in
+            if let error = error {
+                print("Error creating room: \(error)")
+            } else {
+                print("Room created successfully with ID: \(newRoomId)")
+            }
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 24) {
             // Title bar
@@ -136,56 +168,50 @@ struct CreateStudyRoomGroupView: View {
                         Spacer()
                     }
                     
-                    // Private Toggle
-                    VStack(alignment: .leading, spacing: 6) {
-                        Toggle(isOn: $isPrivate) {
-                            Text("Private Room")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .fontWidth(.expanded)
-                        }
-                    }
+                    // Private Toggle, false for now
+//                    VStack(alignment: .leading, spacing: 6) {
+//                        Toggle(isOn: $isPrivate) {
+//                            Text("Private Room")
+//                                .font(.headline)
+//                                .fontWeight(.semibold)
+//                                .fontWidth(.expanded)
+//                        }
+//                    }
                     .padding(.horizontal)
                     
                     // Create Button
                     Button {
-                        let roomId = UUID().uuidString
-                        let creatorId = "" // placeholder, as no user info provided
-                        let createdAt = Date()
-                        let start = startDate ?? createdAt
-                        let end = endDate ?? createdAt.addingTimeInterval(3600)
-                        
-                        newGroupRoom = GroupStudyRoom(
-                            roomId: roomId,
-                            title: title.isEmpty ? "Untitled Group Room" : title,
-                            description: nil,
-                            creatorId: creatorId,
-                            memberIds: nil,
-                            createdAt: createdAt,
-                            startTime: start,
-                            endTime: end,
-                            maxMemberLimit: nil,
-                            isPrivate: isPrivate,
-                            hostId: creatorId,
-                            timer: nil,
-                            pomodoroLength: pomDuration,
-                            breakLength: pomBreakDuration
-                        )
-                        
-                        if isPrivate {
-                            openRoomDetailedView = true
+                        loadingRoom = true
+                        createRoomInFirestore()
+                        Task {
+                            try? await Task.sleep(nanoseconds: 3_000_000_000)
+                            showCreateStudyRoomGroup = false
+                            loadingRoom = false
                         }
-                        showCreateStudyRoomGroup = false
                     } label: {
-                        Text("Create")
-                            .font(.system(.headline, design: .rounded))
-                            .fontWeight(.bold)
-                            .foregroundColor(colorScheme == .light ? .white : .black)
-                            .fontWidth(.expanded)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(title.isEmpty ? Color.gray.opacity(0.5) : Color.primary)
-                            .cornerRadius(12)
+                        if loadingRoom {
+                            ProgressView()
+                                .font(.system(.headline, design: .rounded))
+                                .fontWeight(.bold)
+                                .foregroundColor(colorScheme == .light ? .white : .black)
+                                .fontWidth(.expanded)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(title.isEmpty ? Color.gray.opacity(0.5) : Color.primary)
+                                .cornerRadius(12)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        } else {
+                            Text("Create")
+                                .font(.system(.headline, design: .rounded))
+                                .fontWeight(.bold)
+                                .foregroundColor(colorScheme == .light ? .white : .black)
+                                .fontWidth(.expanded)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(title.isEmpty ? Color.gray.opacity(0.5) : Color.primary)
+                                .cornerRadius(12)
+                        }
                     }
                     .disabled(title.isEmpty)
                     .padding(.horizontal)
@@ -216,4 +242,3 @@ struct CreateStudyRoomGroupView: View {
 #Preview {
     CreateStudyRoomGroupView(showCreateStudyRoomGroup: .constant(true))
 }
-

@@ -22,7 +22,6 @@ struct GroupStudyRoom: Identifiable, Codable {
     var roomId: String
     let title: String?
     let description: String?
-    let creatorId: String? // userID
     let memberIds: [String]?
     let createdAt: Date?
     let startTime: Date?
@@ -39,25 +38,23 @@ struct GroupStudyRoom: Identifiable, Codable {
     var id: String { roomId }
 
     init(
-        roomId: String,
-        title: String?,
+        roomId: String, // created
+        title: String?, // created
         description: String? = nil,
-        creatorId: String?,
-        memberIds: [String]? = nil,
-        createdAt: Date?,
-        startTime: Date?,
-        endTime: Date?,
+        memberIds: [String]? = nil, // created
+        createdAt: Date?,   // created
+        startTime: Date?,   // created
+        endTime: Date?,     // created
         maxMemberLimit: Int? = nil,
-        isPrivate: Bool? = true,
-        hostId: String? = nil,
+        isPrivate: Bool? = true,    // created
+        hostId: String? = nil,  // created
         timer: TimerState? = nil,
-        pomodoroLength: Int,
-        breakLength: Int
+        pomodoroLength: Int,    // created
+        breakLength: Int    // created
     ) {
         self.roomId = roomId
         self.title = title
         self.description = description
-        self.creatorId = creatorId
         self.memberIds = memberIds
         self.createdAt = createdAt
         self.startTime = startTime
@@ -73,7 +70,6 @@ struct GroupStudyRoom: Identifiable, Codable {
     enum CodingKeys: String, CodingKey {
         case breakLength = "break_length"
         case createdAt = "created_at"
-        case creatorId = "creator_id"
         case description = "description"
         case endTime = "end_time"
         case hostId = "host_id"
