@@ -168,7 +168,6 @@ struct StudyRoomCard: View {
         roomId: "demo123",
         title: "CS 471 Study",
         description: "Final review session",
-        creatorId: "danmore",
         memberIds: ["danmore", "alice", "bob"],
         createdAt: Date(),
         startTime: Date(),
