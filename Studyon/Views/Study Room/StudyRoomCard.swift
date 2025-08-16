@@ -12,6 +12,16 @@
 
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
+
+extension DateFormatter {
+    static var timeOnly: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter
+    }
+}
 
 struct StudyRoomCard: View {
     @Binding var hideTabBar: Bool
@@ -25,13 +35,59 @@ struct StudyRoomCard: View {
     
     let room: GroupStudyRoom
     
+    @State private var hostUsername: String? = nil
+    @State private var hostProfileImage: UIImage? = nil
+    
+    private var formattedStartTime: String {
+        if let startDate = room.startTime as? Date {
+            return DateFormatter.timeOnly.string(from: startDate)
+        }
+        if let start = room.startTime as? String {
+            return start
+        }
+        return "-"
+    }
+    private var formattedEndTime: String {
+        if let endDate = room.endTime as? Date {
+            return DateFormatter.timeOnly.string(from: endDate)
+        }
+        if let end = room.endTime as? String {
+            return end
+        }
+        return "-"
+    }
+    
+    private func fetchUsername(for userId: String?) async {
+        guard let userId else { hostUsername = nil; return }
+        do {
+            let user = try await UserManager.shared.getUser(userId: userId)
+            hostUsername = user.username ?? "Unknown"
+        } catch {
+            hostUsername = "Unknown"
+        }
+    }
+    
+    private func fetchProfileImage(for userId: String?) async {
+        guard let userId else { hostProfileImage = nil; return }
+        do {
+            let user = try await UserManager.shared.getUser(userId: userId)
+            let image = try await UserManager.shared.fetchProfileImageWithDiskCache(for: user)
+            await MainActor.run {
+                hostProfileImage = image
+            }
+        } catch {
+            await MainActor.run {
+                hostProfileImage = nil
+            }
+        }
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             
             HStack(alignment: .top) {
                 // top description, time
-                Text(room.title ?? "OS hw")
+                Text(room.title ?? "No Title")
                     .font(.footnote)
                     .foregroundColor(.black)
                     .fontWeight(.light)
@@ -48,19 +104,17 @@ struct StudyRoomCard: View {
 
                 Spacer(minLength: 8)
 
-//                (
-//                    Text(startTime).font(.footnote) +
-//                    Text(" - \n\(endTime) ").font(.footnote)
-//                )
-//                .foregroundColor(.black)
-//                .fontWidth(.expanded)
-//                .fontWeight(.light)
-//                .fixedSize()
+                Text("\(formattedStartTime) - \n\(formattedEndTime)")
+                    .font(.footnote)
+                    .foregroundColor(.black)
+                    .fontWidth(.expanded)
+                    .fontWeight(.light)
+                    .fixedSize()
             }
             Spacer()
             HStack {
                 // creators room title
-                Text((room.hostId ?? "Unknown") + "'s \nStudy Room 🤓")
+                Text((hostUsername ?? (room.hostId ?? "Unknown")) + "'s \nStudy Room 🤓")
                     .font(.body)
                     .foregroundColor(.black)
                     .fontWeight(.bold)
@@ -83,7 +137,7 @@ struct StudyRoomCard: View {
                 }
                 HStack {
                     // study time amount
-                    Text("Study 25m")
+                    Text("Study \(room.pomodoroLength /  60)m")
                         .foregroundColor(.black).opacity(0.5)
                         .fontWidth(.expanded)
                         .font(.footnote)
@@ -92,7 +146,7 @@ struct StudyRoomCard: View {
                 }
                 HStack {
                     // break time amount
-                    Text("Break 5m")
+                    Text("Break \(room.breakLength /  60)m")
                         .foregroundColor(.black).opacity(0.5)
                         .fontWidth(.expanded)
                         .font(.footnote)
@@ -108,16 +162,19 @@ struct StudyRoomCard: View {
                 // join button
                 HStack {
                     HStack(spacing: -4) {
-                        ForEach(0..<3) { index in
-                            Image("profile_pic\(index + 1)")// Replace with actual image names or URLs
+                        if let hostProfileImage {
+                            Image(uiImage: hostProfileImage)
                                 .resizable()
                                 .scaledToFill()
                                 .frame(width: 25, height: 25)
                                 .clipShape(Circle())
-                            
-                            
+                        } else {
+                            Image("profile_pic1")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 25, height: 25)
+                                .clipShape(Circle())
                         }
-                        
                         
                         
                         ZStack {
@@ -160,6 +217,10 @@ struct StudyRoomCard: View {
         .frame(width: 200.2, height: 284.7)
         .background(Color(red: 183/255, green: 225/255, blue: 147/255))
         .clipShape(RoundedRectangle(cornerRadius: 20))
+        .task {
+            await fetchUsername(for: room.hostId)
+            await fetchProfileImage(for: room.hostId)
+        }
     }
 }
 
@@ -178,4 +239,3 @@ struct StudyRoomCard: View {
     )
     StudyRoomCard(hideTabBar: .constant(true), room: demoRoom)
 }
-

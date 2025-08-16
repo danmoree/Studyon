@@ -218,5 +218,19 @@ final class StudyRoomManager {
             return nil
         }
     }
+    
+    /// Fetch all rooms and sort them by start_time ascending (soonest first)
+    func fetchRoomsStartingSoon(completion: @escaping ([GroupStudyRoom]) -> Void) {
+        db.collection("rooms").getDocuments { snapshot, error in
+            guard let snapshot = snapshot else {
+                completion([])
+                return
+            }
+            let rooms: [GroupStudyRoom] = snapshot.documents.compactMap { doc in
+                do { return try doc.data(as: GroupStudyRoom.self) } catch { return nil }
+            }
+            let sortedRooms = rooms.sorted(by: { ($0.startTime ?? Date.distantFuture) < ($1.startTime ?? Date.distantFuture) })
+            completion(sortedRooms)
+        }
+    }
 }
-
