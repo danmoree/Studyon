@@ -24,6 +24,7 @@ struct StudyRoomsView: View {
     @Environment(\.colorScheme) var colorScheme
     
     @State private var activeRooms: [GroupStudyRoom] = []
+    @State private var upcomingRooms: [GroupStudyRoom] = []
     @State private var activeRoomsListener: ListenerRegistration? = nil
     @State private var showJoinSheet = false
     @State private var selectedRoomId: String? = nil
@@ -89,7 +90,7 @@ struct StudyRoomsView: View {
                                             }
                                             
                                             ScrollView(.horizontal, showsIndicators: false) {
-                                                HStack(spacing: 16) {
+                                                HStack(spacing: 25) {
                                                     ForEach(activeRooms) { room in
                                                         NavigationLink {
                                                             GroupStudyRoomView(
@@ -120,10 +121,17 @@ struct StudyRoomsView: View {
                                             
                                             ScrollView(.horizontal, showsIndicators: false) {
                                                 HStack(spacing: 25) {
-//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "CS 471 Study", startTime: "11:00 AM", endTime: "1:00 PM", creatorUsername: "danmore", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Geo Study", startTime: "12:00 PM", endTime: "2:00 PM", creatorUsername: "emalynn", pomoDuration: 2700, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-//                                                    StudyRoomCard(hideTabBar: $hideTabBar, title: "Diff eq study", startTime: "6:00 PM", endTime: "9:00 PM", creatorUsername: "Brader", pomoDuration: 1800, pomoBreakDuration: 600,  studyRoom: selectedRoom ?? nil)
-//
+                                                    ForEach(upcomingRooms) { room in
+                                                        NavigationLink {
+                                                            GroupStudyRoomView(
+                                                                roomId: room.roomId,
+                                                                currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
+                                                                isHost: room.hostId == Auth.auth().currentUser?.uid
+                                                            )
+                                                        } label: {
+                                                            StudyRoomCard(hideTabBar: $hideTabBar, room: room)
+                                                        }
+                                                    }
                                                 }
                                                 .padding(.horizontal, 0)
                                             }
@@ -180,6 +188,9 @@ struct StudyRoomsView: View {
             .onAppear {
                 activeRoomsListener = StudyRoomManager.shared.listenActiveRooms { rooms in
                     self.activeRooms = rooms
+                }
+                StudyRoomManager.shared.fetchRoomsStartingSoon { rooms in
+                    self.upcomingRooms = rooms
                 }
             }
             .onDisappear {
