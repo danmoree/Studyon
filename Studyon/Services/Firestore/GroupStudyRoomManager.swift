@@ -220,17 +220,25 @@ final class StudyRoomManager {
     }
     
     /// Fetch all rooms and sort them by start_time ascending (soonest first)
-    func fetchRoomsStartingSoon(completion: @escaping ([GroupStudyRoom]) -> Void) {
-        db.collection("rooms").getDocuments { snapshot, error in
-            guard let snapshot = snapshot else {
-                completion([])
-                return
+    func fetchRoomsStartingSoon() async -> [GroupStudyRoom] {
+        do {
+            let snapshot = try await db.collection("rooms").getDocuments()
+            let rooms = snapshot.documents.compactMap { try? $0.data(as: GroupStudyRoom.self) }
+
+            // Only keep rooms with a startTime in the future
+            let now = Date()
+            let futureRooms = rooms.filter { room in
+                if let start = room.startTime {
+                    return start > now   // keep only future dates
+                }
+                return false // if startTime is nil, skip it
             }
-            let rooms: [GroupStudyRoom] = snapshot.documents.compactMap { doc in
-                do { return try doc.data(as: GroupStudyRoom.self) } catch { return nil }
+
+            return futureRooms.sorted {
+                ($0.startTime ?? .distantFuture) < ($1.startTime ?? .distantFuture)
             }
-            let sortedRooms = rooms.sorted(by: { ($0.startTime ?? Date.distantFuture) < ($1.startTime ?? Date.distantFuture) })
-            completion(sortedRooms)
+        } catch {
+            return []
         }
     }
 }

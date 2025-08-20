@@ -119,23 +119,37 @@ struct StudyRoomsView: View {
                                                 Spacer()
                                             }
                                             
-                                            ScrollView(.horizontal, showsIndicators: false) {
-                                                HStack(spacing: 25) {
-                                                    ForEach(upcomingRooms) { room in
-                                                        NavigationLink {
-                                                            GroupStudyRoomView(
-                                                                roomId: room.roomId,
-                                                                currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
-                                                                isHost: room.hostId == Auth.auth().currentUser?.uid
-                                                            )
-                                                        } label: {
-                                                            StudyRoomCard(hideTabBar: $hideTabBar, room: room)
+                                            if upcomingRooms.count == 0 {
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .fill(Color(.systemGray6))
+                                                    .frame(height: 100)
+                                                    .overlay(
+                                                        Text("No upcoming rooms 🙁")
+                                                            .fontWidth(.expanded)
+                                                            .foregroundColor(.secondary)
+                                                            .font(.headline)
+                                                    )
+                                                    .padding(.horizontal, 5)
+                                            } else {
+                                                ScrollView(.horizontal, showsIndicators: false) {
+                                                    HStack(spacing: 25) {
+                                                        ForEach(upcomingRooms) { room in
+                                                            NavigationLink {
+                                                                GroupStudyRoomView(
+                                                                    roomId: room.roomId,
+                                                                    currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
+                                                                    isHost: room.hostId == Auth.auth().currentUser?.uid
+                                                                )
+                                                            } label: {
+                                                                StudyRoomCard(hideTabBar: $hideTabBar, room: room)
+                                                            }
                                                         }
                                                     }
+                                                    .padding(.horizontal, 0)
                                                 }
-                                                .padding(.horizontal, 0)
+                                                .scrollClipDisabled()
                                             }
-                                            .scrollClipDisabled()
+                                 
                                         }
                                     }
                                 case .inProgress:
@@ -189,7 +203,8 @@ struct StudyRoomsView: View {
                 activeRoomsListener = StudyRoomManager.shared.listenActiveRooms { rooms in
                     self.activeRooms = rooms
                 }
-                StudyRoomManager.shared.fetchRoomsStartingSoon { rooms in
+                Task {
+                    let rooms = await StudyRoomManager.shared.fetchRoomsStartingSoon()
                     self.upcomingRooms = rooms
                 }
             }
