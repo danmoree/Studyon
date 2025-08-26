@@ -149,7 +149,7 @@ struct StudyRoomsView: View {
                                                 }
                                                 .scrollClipDisabled()
                                             }
-                                 
+                                            
                                         }
                                     }
                                 case .inProgress:

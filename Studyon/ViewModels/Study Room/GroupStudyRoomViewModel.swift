@@ -71,9 +71,11 @@ final class GroupStudyRoomViewModel: ObservableObject {
         ServerClock.shared.start()
         listenToRoom()
         observePresence()
+        setPresenceOnline()
     }
 
     func stop() {
+        setPresenceOffline()
         roomListener?.remove()
         roomListener = nil
         ticker?.cancel()
@@ -183,6 +185,18 @@ final class GroupStudyRoomViewModel: ObservableObject {
         }
     }
 
+    private func setPresenceOnline() {
+        let userRef = Database.database().reference(withPath: "status/\(roomId)/\(currentUserId)")
+        userRef.setValue(["state": "online"])
+        userRef.onDisconnectSetValue(["state": "offline"])
+    }
+
+    private func setPresenceOffline() {
+        let userRef = Database.database().reference(withPath: "status/\(roomId)/\(currentUserId)")
+        userRef.setValue(["state": "offline"])
+        userRef.cancelDisconnectOperations()
+    }
+
     // MARK: Utils
     func formattedRemaining() -> String {
         let m = remainingSeconds / 60
@@ -190,3 +204,4 @@ final class GroupStudyRoomViewModel: ObservableObject {
         return String(format: "%d:%02d", m, s)
     }
 }
+
