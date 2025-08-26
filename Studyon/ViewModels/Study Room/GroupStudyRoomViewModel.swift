@@ -203,5 +203,12 @@ final class GroupStudyRoomViewModel: ObservableObject {
         let s = remainingSeconds % 60
         return String(format: "%d:%02d", m, s)
     }
+    
+    /// Fetches the user's profile picture URL from Firestore, if available.
+    func profilePhotoURL(for userId: String) async throws -> URL? {
+        let user = try await UserManager.shared.getUser(userId: userId)
+        guard let urlString = user.photoUrl, let url = URL(string: urlString) else { return nil }
+        return url
+    }
 }
 
