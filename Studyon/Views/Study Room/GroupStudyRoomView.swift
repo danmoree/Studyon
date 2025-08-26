@@ -84,8 +84,10 @@ struct GroupStudyRoomView: View {
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
+                    // Use a synchronous cache of profile photo URLs published by the view model,
+                    // to avoid calling async code from the view.
                     ForEach(vm.presence.keys.sorted(), id: \.self) { uid in
-                        PresenceAvatar(uid: uid, state: vm.presence[uid] ?? "offline")
+                        AsyncProfileAvatar(uid: uid, state: vm.presence[uid] ?? "offline", vm: vm)
                     }
                 }
                 .padding(.vertical, 4)
@@ -153,16 +155,28 @@ private struct PhasePill: View {
 private struct PresenceAvatar: View {
     let uid: String
     let state: String // "online" | "offline"
+    let profileImageURL: URL?
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            Circle()
-                .fill(Color(.systemGray5))
+            if let url = profileImageURL {
+                AsyncImage(url: url) { image in
+                    image.resizable().scaledToFill()
+                } placeholder: {
+                    Color(.systemGray5)
+                }
                 .frame(width: 44, height: 44)
-                .overlay(
-                    Text(initials(from: uid))
-                        .font(.caption2).bold()
-                        .foregroundStyle(.secondary)
-                )
+                .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Color(.systemGray5))
+                    .frame(width: 44, height: 44)
+                    .overlay(
+                        Text(initials(from: uid))
+                            .font(.caption2).bold()
+                            .foregroundStyle(.secondary)
+                    )
+            }
+           
             Circle()
                 .fill(state == "online" ? .green : .gray)
                 .frame(width: 10, height: 10)
@@ -175,6 +189,19 @@ private struct PresenceAvatar: View {
         // Cheap placeholder: take first 2 alphanumerics
         let letters = s.filter { $0.isLetter || $0.isNumber }
         return String(letters.prefix(2)).uppercased()
+    }
+}
+
+private struct AsyncProfileAvatar: View {
+    let uid: String
+    let state: String
+    let vm: GroupStudyRoomViewModel
+    @State private var url: URL? = nil
+    var body: some View {
+        PresenceAvatar(uid: uid, state: state, profileImageURL: url)
+            .task {
+                url = try? await vm.profilePhotoURL(for: uid)
+            }
     }
 }
 
