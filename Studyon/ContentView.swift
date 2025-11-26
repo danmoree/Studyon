@@ -26,6 +26,7 @@ struct ContentView: View {
     var body: some View {
         
         Group {
+            // check if userID is not nill then it checks the isUserLoggedin and the other var
             if let uid = userID, isUserLoggedIn, hasCheckedProfile {
                 if needsProfileSetup {
                     ProfileSetupView(userID: uid, needsProfileSetup: $needsProfileSetup)
@@ -46,7 +47,7 @@ struct ContentView: View {
                     }
                 }
             } else if isUserLoggedIn && !hasCheckedProfile {
-                //ProgressView("Loading profile...")
+                ProgressView("Loading profile...")
             } else {
                 AuthView(onLoginSuccess: {
                     self.userID = Auth.auth().currentUser?.uid

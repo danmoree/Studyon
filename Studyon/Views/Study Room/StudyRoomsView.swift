@@ -93,7 +93,7 @@ struct StudyRoomsView: View {
                                                 HStack(spacing: 25) {
                                                     ForEach(activeRooms) { room in
                                                         NavigationLink {
-                                                            GroupStudyRoomView(
+                                                            GroupStudyRoomViewNew(
                                                                 roomId: room.roomId,
                                                                 currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
                                                                 isHost: room.hostId == Auth.auth().currentUser?.uid
@@ -135,7 +135,7 @@ struct StudyRoomsView: View {
                                                     HStack(spacing: 25) {
                                                         ForEach(upcomingRooms) { room in
                                                             NavigationLink {
-                                                                GroupStudyRoomView(
+                                                                GroupStudyRoomViewNew(
                                                                     roomId: room.roomId,
                                                                     currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
                                                                     isHost: room.hostId == Auth.auth().currentUser?.uid

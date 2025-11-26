@@ -68,6 +68,47 @@ struct GroupStudyRoomView: View {
                         .foregroundStyle(.secondary)
                     if vm.isPaused { Text("Paused").font(.caption).foregroundStyle(.secondary) }
                 }
+                VStack(spacing: 12) {
+                    Button {
+                        guard isHost else { return }
+                        // Context-aware control:
+                        // If timer is running -> pause
+                        if !vm.isPaused && vm.remainingSeconds > 0 {
+                            Task { await vm.pause() }
+                            return
+                        }
+                        // If paused mid-phase -> resume
+                        if vm.isPaused && vm.remainingSeconds > 0 {
+                            Task { await vm.resume() }
+                            return
+                        }
+                        // If phase completed or not started -> start next appropriate phase
+                        if vm.remainingSeconds == 0 {
+                            if vm.phase == "work" {
+                                // Work just ended or not started: start break
+                                Task { await vm.startBreak(durationSec: 5 * 60) }
+                            } else {
+                                // Break ended or not started: start work
+                                Task { await vm.startWork(durationSec: 25 * 60) }
+                            }
+                            return
+                        }
+                        // Fallback: if we reach here treat as start work
+                        Task { await vm.startWork(durationSec: 25 * 60) }
+                    } label: {
+                        Image(systemName: (!vm.isPaused && vm.remainingSeconds > 0) ? "pause.fill" : "play.fill")
+                            .font(.system(size: 28, weight: .bold))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!isHost)
+
+                    // Helper hint showing what will happen next
+                    Text(nextActionDescription)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
     }
@@ -132,6 +173,15 @@ struct GroupStudyRoomView: View {
         if vm.isPaused { return 0 }
         // Without total, we can't compute fraction; show a small animated sweep using remainingSeconds modulo.
         return 1 - (Double(vm.remainingSeconds % max(vm.remainingSeconds, 1)) / Double(max(vm.remainingSeconds, 1)))
+    }
+    
+    private var nextActionDescription: String {
+        if !vm.isPaused && vm.remainingSeconds > 0 { return "Tap to pause" }
+        if vm.isPaused && vm.remainingSeconds > 0 { return "Tap to resume" }
+        if vm.remainingSeconds == 0 {
+            return vm.phase == "work" ? "Tap to start break" : "Tap to start work"
+        }
+        return "Tap to start work"
     }
 }
 
