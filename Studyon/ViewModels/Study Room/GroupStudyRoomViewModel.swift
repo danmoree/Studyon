@@ -169,6 +169,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
 
     // MARK: Presence (RTDB)
     /// Observes presence under /status/{roomId}
+    /// Uses the Firebase real time database instead of the regular firebase db
     private func observePresence() {
         let ref = Database.database().reference(withPath: "status/\(roomId)")
         rtdbPresenceRef = ref
@@ -184,7 +185,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
             self?.presence = map
         }
     }
-
+    
     private func setPresenceOnline() {
         let userRef = Database.database().reference(withPath: "status/\(roomId)/\(currentUserId)")
         userRef.setValue(["state": "online"])

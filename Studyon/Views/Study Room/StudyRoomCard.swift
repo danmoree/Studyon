@@ -192,7 +192,7 @@ struct StudyRoomCard: View {
                     
                     Spacer()
                     
-                    NavigationLink(destination: GroupStudyRoomView(
+                    NavigationLink(destination: GroupStudyRoomViewNew(
                         roomId: room.roomId,
                         currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
                         isHost: room.hostId == Auth.auth().currentUser?.uid
