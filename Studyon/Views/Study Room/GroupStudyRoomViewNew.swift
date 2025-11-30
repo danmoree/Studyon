@@ -53,32 +53,23 @@ struct GroupStudyRoomViewNew: View {
                 
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "chevron.left")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 25, height: 25)
-                                .foregroundStyle(colorScheme == .light ? .black : .white)
-                        }
                         
                         
                         Spacer()
                         
-                        Button {
-                           // vm.pauseToggle()
-                        } label: {
-                            Image(systemName: "ellipsis.circle.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 27, height: 27)
-                                .foregroundStyle(colorScheme == .light ? .black : .white)
-                        }
+//                        Button {
+//                           // vm.pauseToggle()
+//                        } label: {
+//                            Image(systemName: "ellipsis.circle.fill")
+//                                .resizable()
+//                                .scaledToFit()
+//                                .frame(width: 27, height: 27)
+//                                .foregroundStyle(colorScheme == .light ? .black : .white)
+//                        }
                     }
                     
                     HStack {
-                        Text(isHost ? "Host Room ☕️" : "Study Room ☕️")
+                        Text(vm.roomTitle)
                             .font(.title)
                             .fontWeight(.black)
                             .fontWidth(.expanded)

@@ -241,4 +241,18 @@ final class StudyRoomManager {
             return []
         }
     }
+
+    // MARK: - Single fetch
+    /// Fetch a single room by id
+    func getRoom(roomId: String) async throws -> GroupStudyRoom? {
+        let snap = try await roomRef(roomId).getDocument()
+        guard snap.exists else { return nil }
+        do {
+            let room = try snap.data(as: GroupStudyRoom.self)
+            return room
+        } catch {
+            print("[StudyRoomManager] decode error in getRoom: \(error)")
+            return nil
+        }
+    }
 }
