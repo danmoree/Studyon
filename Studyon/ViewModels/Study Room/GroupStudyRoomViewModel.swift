@@ -48,6 +48,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
     @Published var phase: String = "work" // or "break"
     @Published var isPaused: Bool = true
     @Published var hostId: String? = nil
+    @Published var roomTitle: String = "Study Room ☕️"
 
     // Optional: presence map from RTDB (uid -> "online"/"offline")
     @Published var presence: [String: String] = [:]
@@ -72,6 +73,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
         listenToRoom()
         observePresence()
         setPresenceOnline()
+        Task { await loadRoomTitle() }
     }
 
     func stop() {
@@ -94,6 +96,9 @@ final class GroupStudyRoomViewModel: ObservableObject {
             guard let self = self, let room = room else { return }
             self.hostId = room.hostId
             self.applyTimer(room.timer)
+            Task { @MainActor in
+                self.setRoomTitle(room.title)
+            }
         }
     }
 
@@ -118,6 +123,24 @@ final class GroupStudyRoomViewModel: ObservableObject {
                 endAt = started.addingTimeInterval(TimeInterval(duration))
                 startTicker()
                 tick() // immediate UI update
+            }
+        }
+    }
+
+    // MARK: Room Metadata
+    @MainActor
+    private func setRoomTitle(_ title: String?) {
+        let trimmed = (title ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        self.roomTitle = trimmed.isEmpty ? "Study Room ☕️" : trimmed
+    }
+
+    /// Loads the room title from Firestore and publishes it.
+    func loadRoomTitle() async {
+        do {
+            if let room = try? await StudyRoomManager.shared.getRoom(roomId: roomId) {
+                await MainActor.run { self.setRoomTitle(room.title) }
+            } else {
+                await MainActor.run { self.setRoomTitle(nil) }
             }
         }
     }
