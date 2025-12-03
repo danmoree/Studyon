@@ -17,18 +17,24 @@ struct GroupStudyRoomViewNew: View {
     let roomId: String
     let currentUserId: String
     let isHost: Bool
+    let pomodoroDuration: Int
+    let breakDuration: Int
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
 
     // ViewModel
     @StateObject private var vm: GroupStudyRoomViewModel
+    @State private var phaseTotalSeconds: Double = 0
+    @State private var lastPhase: String = ""
 
     // Custom initializer so we can pass params into @StateObject
-    init(roomId: String, currentUserId: String, isHost: Bool) {
+    init(roomId: String, currentUserId: String, isHost: Bool, pomoDuration: Int, breakDuration: Int) {
         self.roomId = roomId
         self.currentUserId = currentUserId
         self.isHost = isHost
+        self.pomodoroDuration = pomoDuration
+        self.breakDuration = breakDuration
         _vm = StateObject(wrappedValue: GroupStudyRoomViewModel(roomId: roomId, currentUserId: currentUserId, isHost: isHost))
     }
 
@@ -37,8 +43,11 @@ struct GroupStudyRoomViewNew: View {
             let capsuleHeight = geo.size.height * 1.6
             let topY = -capsuleHeight / 2
             let bottomY = geo.size.height - capsuleHeight / 2
-            let progress = min(1.0, max(0.0, Double(vm.remainingSeconds % 60) / 60.0))
-            let capsuleY = topY + (bottomY - topY) * (progress * 1.12)
+            // Progress over the entire phase duration using dynamically tracked total seconds
+            let totalDurationSec = max(1.0, phaseTotalSeconds)
+            let clampedRemaining = max(0.0, min(Double(vm.remainingSeconds), totalDurationSec))
+            let progress = max(0.0, min(1.0, clampedRemaining / totalDurationSec))
+            let capsuleY = topY + (bottomY - topY) * (1.0 - progress)
             
             ZStack {
                 //Color(red: 250/255, green: 201/255, blue: 184/255)
@@ -82,7 +91,7 @@ struct GroupStudyRoomViewNew: View {
                         VStack {
                             HStack {
                                 Spacer()
-                                Text(vm.phase == "break" ? "Break - \((vm.isPaused ? max(vm.remainingSeconds, 0) : vm.remainingSeconds) / 60) Minutes" : "Pomodoro - \((vm.isPaused ? max(vm.remainingSeconds, 0) : vm.remainingSeconds) / 60) Minutes")
+                                Text(vm.phase == "break" ? "Break - \( breakDuration / 60) Minutes" : "Pomodoro - \(pomodoroDuration / 60) Minutes")
                                     .fontWeight(.bold)
                                     .fontWidth(.expanded)
                                     .font(.footnote)
@@ -152,14 +161,30 @@ struct GroupStudyRoomViewNew: View {
                 .padding(.top, geo.safeAreaInsets.top + 10)
             }
             .ignoresSafeArea()
-            .onAppear { vm.start() }
+            .onAppear {
+                vm.start()
+                lastPhase = vm.phase
+                phaseTotalSeconds = max(1.0, Double(vm.remainingSeconds))
+            }
+            .onChange(of: vm.phase) { newPhase in
+                lastPhase = newPhase
+                // Reset total when phase changes; use current remaining as the new total
+                phaseTotalSeconds = max(1.0, Double(vm.remainingSeconds))
+            }
+            .onChange(of: vm.remainingSeconds) { newValue in
+                // If timer resets/increases (new phase or user-chosen duration), capture as new total
+                let newRemaining = Double(newValue)
+                if newRemaining > phaseTotalSeconds {
+                    phaseTotalSeconds = newRemaining
+                }
+            }
             .onDisappear { vm.stop() }
         }
     }
 }
 
 #Preview {
-    GroupStudyRoomViewNew(roomId: "demoRoom", currentUserId: "u1", isHost: true)
+    GroupStudyRoomViewNew(roomId: "demoRoom", currentUserId: "u1", isHost: true, pomoDuration: 25, breakDuration: 5)
 }
 
 private struct PresenceAvatar: View {
