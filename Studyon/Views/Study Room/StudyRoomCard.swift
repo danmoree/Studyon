@@ -195,7 +195,9 @@ struct StudyRoomCard: View {
                     NavigationLink(destination: GroupStudyRoomViewNew(
                         roomId: room.roomId,
                         currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
-                        isHost: room.hostId == Auth.auth().currentUser?.uid
+                        isHost: room.hostId == Auth.auth().currentUser?.uid,
+                        pomoDuration: room.pomodoroLength,
+                        breakDuration: room.breakLength
                     )
                         .onAppear { hideTabBar = true }
                         .onDisappear { hideTabBar = false }

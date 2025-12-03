@@ -96,7 +96,10 @@ struct StudyRoomsView: View {
                                                             GroupStudyRoomViewNew(
                                                                 roomId: room.roomId,
                                                                 currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
-                                                                isHost: room.hostId == Auth.auth().currentUser?.uid
+                                                                isHost: room.hostId == Auth.auth().currentUser?.uid,
+                                                                pomoDuration: room.pomodoroLength,
+                                                                breakDuration: room.breakLength
+                                                                
                                                             )
                                                         } label: {
                                                             StudyRoomCard(hideTabBar: $hideTabBar, room: room)
@@ -138,7 +141,9 @@ struct StudyRoomsView: View {
                                                                 GroupStudyRoomViewNew(
                                                                     roomId: room.roomId,
                                                                     currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
-                                                                    isHost: room.hostId == Auth.auth().currentUser?.uid
+                                                                    isHost: room.hostId == Auth.auth().currentUser?.uid,
+                                                                    pomoDuration: room.pomodoroLength,
+                                                                    breakDuration: room.breakLength
                                                                 )
                                                             } label: {
                                                                 StudyRoomCard(hideTabBar: $hideTabBar, room: room)
