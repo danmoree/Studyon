@@ -195,29 +195,36 @@ private struct PresenceAvatar: View {
     
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            if let url = profileImageURL {
-                AsyncImage(url: url) { image in
-                    image.resizable().scaledToFill()
-                } placeholder: {
-                    Color(.systemGray5)
-                }
-                .frame(width: 44, height: 44)
-                .clipShape(Circle())
-            } else {
-                Circle()    // generic circle if theres no image url being passed in
-                    .fill(Color(.systemGray5))
+        VStack(spacing: 4) {
+            ZStack(alignment: .bottomTrailing) {
+                if let url = profileImageURL {
+                    AsyncImage(url: url) { image in
+                        image.resizable().scaledToFill()
+                    } placeholder: {
+                        Color(.systemGray5)
+                    }
                     .frame(width: 44, height: 44)
-                    .overlay(
-                        Text(initials())
-                            .font(.caption2).bold()
-                            .foregroundStyle(.secondary)
-                    )
+                    .clipShape(Circle())
+                } else {
+                    Circle()    // generic circle if theres no image url being passed in
+                        .fill(Color(.systemGray5))
+                        .frame(width: 44, height: 44)
+                        .overlay(
+                            Text(initials())
+                                .font(.caption2).bold()
+                                .foregroundStyle(.secondary)
+                        )
+                }
+                Circle()
+                    .fill(state == "online" ? .green : .gray)
+                    .frame(width: 10, height: 10)
+                    .overlay(Circle().stroke(.white, lineWidth: 2))
             }
-            Circle()
-                .fill(state == "online" ? .green : .gray)
-                .frame(width: 10, height: 10)
-                .overlay(Circle().stroke(.white, lineWidth: 2))
+            Text(firstName())
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .frame(width: 44)
         }
     }
     
@@ -227,9 +234,52 @@ private struct PresenceAvatar: View {
     }
     
     private func initials() -> String {
+        // Get a clean display name
         let base = displayName()
-        let letters = base.filter { $0.isLetter || $0.isNumber }
-        return String(letters.prefix(2)).uppercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Split into words by whitespace
+        let parts = base.split(whereSeparator: { $0.isWhitespace })
+        
+        // Extract first letter of first and last word (if present),
+        // keeping only alphanumeric characters.
+        var result = ""
+        if let first = parts.first?.first, (first.isLetter || first.isNumber) {
+            result.append(first)
+        } else if let firstWord = parts.first {
+            // find first alphanumeric in the first word
+            if let ch = firstWord.first(where: { $0.isLetter || $0.isNumber }) {
+                result.append(ch)
+            }
+        }
+        
+        if parts.count >= 2 {
+            if let last = parts.last?.first, (last.isLetter || last.isNumber) {
+                result.append(last)
+            } else if let lastWord = parts.last {
+                if let ch = lastWord.first(where: { $0.isLetter || $0.isNumber }) {
+                    result.append(ch)
+                }
+            }
+        }
+        
+        // If we still don't have anything (e.g., emojis only), fall back to previous logic
+        if result.isEmpty {
+            let letters = base.filter { $0.isLetter || $0.isNumber }
+            result = String(letters.prefix(2))
+        }
+        
+        return result.uppercased()
+    }
+
+    private func firstName() -> String {
+        let display = displayName().trimmingCharacters(in: .whitespacesAndNewlines)
+        if display.isEmpty { return "" }
+        let parts = display.split(separator: " ")
+        if let first = parts.first {
+            return String(first)
+        }
+        return display
     }
 }
 
@@ -238,12 +288,16 @@ private struct AsyncPresenceAvatar: View {
     let state: String
     let name: String?
     let vm: GroupStudyRoomViewModel
+    
     @State private var url: URL? = nil
+    @State private var displayName: String? = nil
     var body: some View {
-        PresenceAvatar(uid: uid, state: state, profileImageURL: url, name: name)
+        PresenceAvatar(uid: uid, state: state, profileImageURL: url, name: displayName ?? name)
             .task(id: uid) {
                 // Safely attempt to load the profile image URL asynchronously
                 url = try? await vm.profilePhotoURL(for: uid)
+                displayName = try? await vm.name(for: uid)
+                
             }
     }
 }
