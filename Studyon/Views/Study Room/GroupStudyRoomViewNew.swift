@@ -146,7 +146,7 @@ struct GroupStudyRoomViewNew: View {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 12) {
                                         ForEach(vm.presence.keys.sorted(), id: \.self) { uid in
-                                            PresenceAvatar(uid: uid, state: vm.presence[uid] ?? "offline", profileImageURL: nil)
+                                            AsyncPresenceAvatar(uid: uid, state: vm.presence[uid] ?? "offline", name: vm.name(for: uid), vm: vm)
                                         }
                                     }
                                     .padding(.vertical, 4)
@@ -191,6 +191,9 @@ private struct PresenceAvatar: View {
     let uid: String
     let state: String // "online" | "offline"
     let profileImageURL: URL?
+    let name: String?
+    
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             if let url = profileImageURL {
@@ -202,11 +205,11 @@ private struct PresenceAvatar: View {
                 .frame(width: 44, height: 44)
                 .clipShape(Circle())
             } else {
-                Circle()
+                Circle()    // generic circle if theres no image url being passed in
                     .fill(Color(.systemGray5))
                     .frame(width: 44, height: 44)
                     .overlay(
-                        Text(initials(from: uid))
+                        Text(initials())
                             .font(.caption2).bold()
                             .foregroundStyle(.secondary)
                     )
@@ -216,12 +219,32 @@ private struct PresenceAvatar: View {
                 .frame(width: 10, height: 10)
                 .overlay(Circle().stroke(.white, lineWidth: 2))
         }
-        .accessibilityLabel("\(uid) is \(state)")
     }
-
-    private func initials(from s: String) -> String {
-        let letters = s.filter { $0.isLetter || $0.isNumber }
+    
+    private func displayName() -> String {
+        if let name, !name.isEmpty { return name }
+        return uid
+    }
+    
+    private func initials() -> String {
+        let base = displayName()
+        let letters = base.filter { $0.isLetter || $0.isNumber }
         return String(letters.prefix(2)).uppercased()
+    }
+}
+
+private struct AsyncPresenceAvatar: View {
+    let uid: String
+    let state: String
+    let name: String?
+    let vm: GroupStudyRoomViewModel
+    @State private var url: URL? = nil
+    var body: some View {
+        PresenceAvatar(uid: uid, state: state, profileImageURL: url, name: name)
+            .task(id: uid) {
+                // Safely attempt to load the profile image URL asynchronously
+                url = try? await vm.profilePhotoURL(for: uid)
+            }
     }
 }
 

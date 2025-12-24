@@ -332,6 +332,27 @@ final class UserManager {
         }
         return nil
     }
+    
+    // fetches the name for the presense avatar for groupStudyRoomViewNew
+    func fetchDisplayName(for uid: String) async throws -> String {
+        let db = Firestore.firestore()
+        let snap = try await db.collection("users").document(uid).getDocument()
+        
+        guard let data = snap.data() else {
+            return uid
+        }
+        
+        if let username = data["username"] as? String, !username.isEmpty {
+            return username
+        }
+        
+        if let fullName = data["full_name"] as? String, !fullName.isEmpty {
+            return fullName
+        }
+        
+        return uid
+    }
+    
 }
 
 extension Array {
