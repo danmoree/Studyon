@@ -167,62 +167,62 @@ final class UserManager {
         userCollection.document(userId)
     }
     
-//    private let encoder: Firestore.Encoder = {
-//        let encoder = Firestore.Encoder()
-//        encoder.keyEncodingStrategy = .convertToSnakeCase
-//        return encoder
-//    }()
-//    
-//    
-//    private let decoder: Firestore.Decoder = {
-//        let decoder = Firestore.Decoder()
-//        decoder.keyDecodingStrategy = .convertFromSnakeCase
-//        return decoder
-//    }()
+    //    private let encoder: Firestore.Encoder = {
+    //        let encoder = Firestore.Encoder()
+    //        encoder.keyEncodingStrategy = .convertToSnakeCase
+    //        return encoder
+    //    }()
+    //
+    //
+    //    private let decoder: Firestore.Decoder = {
+    //        let decoder = Firestore.Decoder()
+    //        decoder.keyDecodingStrategy = .convertFromSnakeCase
+    //        return decoder
+    //    }()
     
     func createNewUser(user: DBUser) async throws {
         try userDocument(userId: user.userId).setData(from: user, merge: false)
     }
     
-//    func createNewUser(auth: AuthDataResultModel) async throws {
-//        var userData: [String:Any] = [
-//            "user_id" : auth.uid,
-//            "data_created" : Timestamp()
-//        ]
-//        if let email = auth.email {
-//            userData["email"] = email
-//        }
-//        if let photoUrl = auth.photoUrl {
-//            userData["photo_url"] = photoUrl
-//        }
-//        
-//        try await userDocument(userId: auth.uid).setData(userData, merge: false)
-//    }
+    //    func createNewUser(auth: AuthDataResultModel) async throws {
+    //        var userData: [String:Any] = [
+    //            "user_id" : auth.uid,
+    //            "data_created" : Timestamp()
+    //        ]
+    //        if let email = auth.email {
+    //            userData["email"] = email
+    //        }
+    //        if let photoUrl = auth.photoUrl {
+    //            userData["photo_url"] = photoUrl
+    //        }
+    //
+    //        try await userDocument(userId: auth.uid).setData(userData, merge: false)
+    //    }
     
     
     func getUser(userId: String) async throws -> DBUser {
         try await userDocument(userId: userId).getDocument(as: DBUser.self)
     }
     
-//    func getUser(userId: String) async throws -> DBUser {
-//        let snapshot = try await userDocument(userId: userId).getDocument()
-//        
-//        guard let data = snapshot.data(),  let userId = data["user_id"] as? String else {
-//            throw URLError(.badServerResponse)
-//        }
-//        
-//       
-//        let email = data["email"] as? String
-//        let photoUrl = data["photo_url"] as? String
-//        let dateCreated = data["data_created"] as? Date
-//        
-//        return DBUser(userId: userId, email: email, photoUrl: photoUrl, dateCreated: dateCreated)
-//    }
+    //    func getUser(userId: String) async throws -> DBUser {
+    //        let snapshot = try await userDocument(userId: userId).getDocument()
+    //
+    //        guard let data = snapshot.data(),  let userId = data["user_id"] as? String else {
+    //            throw URLError(.badServerResponse)
+    //        }
+    //
+    //
+    //        let email = data["email"] as? String
+    //        let photoUrl = data["photo_url"] as? String
+    //        let dateCreated = data["data_created"] as? Date
+    //
+    //        return DBUser(userId: userId, email: email, photoUrl: photoUrl, dateCreated: dateCreated)
+    //    }
     
-//    func updateUserPremiumStatus(user: DBUser) async throws {
-//        try userDocument(userId: user.userId).setData(from: user, merge: true, encoder: encoder)
-//    }
-//    
+    //    func updateUserPremiumStatus(user: DBUser) async throws {
+    //        try userDocument(userId: user.userId).setData(from: user, merge: true, encoder: encoder)
+    //    }
+    //
     func updateUserPremiumStatus(userId: String, isPremium: Bool) async throws {
         let data: [String: Any] = [
             DBUser.CodingKeys.isPremium.rawValue : isPremium
@@ -311,19 +311,19 @@ final class UserManager {
         let filename = String(photoUrl.hashValue) + ".jpg"
         return caches.appendingPathComponent(filename)
     }
-
+    
     /// Fetches the user's profile image from disk cache, or downloads and caches it.
     func fetchProfileImageWithDiskCache(for user: DBUser) async throws -> UIImage? {
         guard let photoUrl = user.photoUrl, let url = URL(string: photoUrl) else { return nil }
         guard let cacheURL = profileImageCacheURL(for: photoUrl) else { return nil }
-
+        
         // 1. Try to load from disk cache
         if FileManager.default.fileExists(atPath: cacheURL.path),
            let data = try? Data(contentsOf: cacheURL),
            let image = UIImage(data: data) {
             return image
         }
-
+        
         // 2. Download and cache
         let (data, _) = try await URLSession.shared.data(from: url)
         if let image = UIImage(data: data) {
@@ -335,24 +335,13 @@ final class UserManager {
     
     // fetches the name for the presense avatar for groupStudyRoomViewNew
     func fetchDisplayName(for uid: String) async throws -> String {
-        let db = Firestore.firestore()
-        let snap = try await db.collection("users").document(uid).getDocument()
+        let user = try await userDocument(userId: uid).getDocument(as: DBUser.self)
         
-        guard let data = snap.data() else {
-            return uid
-        }
-        
-        if let username = data["username"] as? String, !username.isEmpty {
-            return username
-        }
-        
-        if let fullName = data["full_name"] as? String, !fullName.isEmpty {
+        if let fullName = user.fullName, !fullName.isEmpty {
             return fullName
         }
-        
         return uid
     }
-    
 }
 
 extension Array {
