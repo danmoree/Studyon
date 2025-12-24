@@ -50,6 +50,8 @@ final class GroupStudyRoomViewModel: ObservableObject {
     @Published var hostId: String? = nil
     @Published var roomTitle: String = "Study Room ☕️"
 
+    
+    // make an object to store more
     // Optional: presence map from RTDB (uid -> "online"/"offline")
     @Published var presence: [String: String] = [:]
 
@@ -233,6 +235,45 @@ final class GroupStudyRoomViewModel: ObservableObject {
         let user = try await UserManager.shared.getUser(userId: userId)
         guard let urlString = user.photoUrl, let url = URL(string: urlString) else { return nil }
         return url
+    }
+    
+    // Cache for names
+    @Published private(set) var userNames: [String: String] = [:] // uid -> display name
+    
+    // Synchronous accessor that triggers fetch if needed
+    func name(for uid: String) -> String? {
+        if let cached = userNames[uid], !cached.isEmpty {
+            return cached
+        } else {
+            Task { await fetchNameIfNeeded(for: uid) }
+            return nil
+        }
+    }
+    
+    // Fetch and cache if missing
+    @MainActor
+    func fetchNameIfNeeded(for uid: String) async {
+        if userNames[uid] != nil { return }
+        do {
+            let name = try await UserManager.shared.fetchDisplayName(for: uid)
+            userNames[uid] = name
+        } catch {
+            // Store a fallback so we don't refetch constantly
+            userNames[uid] = uid
+        }
+    }
+    
+    // Optional: Prefetch for all current presence UIDs
+    @MainActor
+    func prefetchNamesForCurrentPresence() async {
+        let uids = Array(presence.keys)
+        await withTaskGroup(of: Void.self) { group in
+            for uid in uids {
+                group.addTask { [weak self] in
+                    await self?.fetchNameIfNeeded(for: uid)
+                }
+            }
+        }
     }
 }
 
