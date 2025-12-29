@@ -125,7 +125,7 @@ struct GroupStudyRoomViewNew: View {
                                         Task { await vm.pause() }
                                     }
                                 } label: {
-                                    Image(systemName: vm.isPaused ? "play.fill" : "pause.fill")
+                                    Image(systemName: (vm.isPaused || vm.remainingSeconds == 0) ? "play.fill" : "pause.fill")
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 30, height: 30)
