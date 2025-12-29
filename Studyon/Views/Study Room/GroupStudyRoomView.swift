@@ -86,15 +86,15 @@ struct GroupStudyRoomView: View {
                         if vm.remainingSeconds == 0 {
                             if vm.phase == "work" {
                                 // Work just ended or not started: start break
-                                Task { await vm.startBreak(durationSec: 5 * 60) }
+                                Task { await vm.startBreak(durationSec: vm.breakLengthSec) }
                             } else {
                                 // Break ended or not started: start work
-                                Task { await vm.startWork(durationSec: 25 * 60) }
+                                Task { await vm.startWork(durationSec: vm.pomodoroLengthSec) }
                             }
                             return
                         }
                         // Fallback: if we reach here treat as start work
-                        Task { await vm.startWork(durationSec: 25 * 60) }
+                        Task { await vm.startWork(durationSec: vm.pomodoroLengthSec) }
                     } label: {
                         Image(systemName: (!vm.isPaused && vm.remainingSeconds > 0) ? "pause.fill" : "play.fill")
                             .font(.system(size: 28, weight: .bold))
@@ -140,13 +140,13 @@ struct GroupStudyRoomView: View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
                 Button {
-                    Task { await vm.startWork(durationSec: 25 * 60) }
-                } label: { Label("Start 25:00", systemImage: "play.circle") }
+                    Task { await vm.startWork(durationSec: vm.pomodoroLengthSec) }
+                } label: { Label("Start \(vm.pomodoroLengthSec/60):00", systemImage: "play.circle") }
                 .buttonStyle(.borderedProminent)
 
                 Button {
-                    Task { await vm.startBreak(durationSec: 5 * 60) }
-                } label: { Label("Break 5:00", systemImage: "cup.and.saucer") }
+                    Task { await vm.startBreak(durationSec: vm.breakLengthSec) }
+                } label: { Label("Break \(vm.breakLengthSec/60):00", systemImage: "cup.and.saucer") }
                 .buttonStyle(.bordered)
             }
             HStack(spacing: 12) {
@@ -271,3 +271,4 @@ private struct RingProgress: View {
         GroupStudyRoomView(roomId: "demoRoom", currentUserId: "u1", isHost: true)
     }
 }
+

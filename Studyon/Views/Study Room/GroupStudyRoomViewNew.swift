@@ -91,7 +91,7 @@ struct GroupStudyRoomViewNew: View {
                         VStack {
                             HStack {
                                 Spacer()
-                                Text(vm.phase == "break" ? "Break - \( breakDuration / 60) Minutes" : "Pomodoro - \(pomodoroDuration / 60) Minutes")
+                                Text(vm.phase == "break" ? "Break - \(vm.breakLengthSec / 60) Minutes" : "Pomodoro - \(vm.pomodoroLengthSec / 60) Minutes")
                                     .fontWeight(.bold)
                                     .fontWidth(.expanded)
                                     .font(.footnote)
@@ -115,9 +115,9 @@ struct GroupStudyRoomViewNew: View {
                                     if vm.remainingSeconds == 0 {
                                         // At boundary or idle: start appropriate phase
                                         if vm.phase == "break" {
-                                            Task { await vm.startWork(durationSec: 25 * 60) }
+                                            Task { await vm.startWork(durationSec: vm.pomodoroLengthSec) }
                                         } else {
-                                            Task { await vm.startBreak(durationSec: 5 * 60) }
+                                            Task { await vm.startBreak(durationSec: vm.breakLengthSec) }
                                         }
                                     } else if vm.isPaused {
                                         Task { await vm.resume() }
