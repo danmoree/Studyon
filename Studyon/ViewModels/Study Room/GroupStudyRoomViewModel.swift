@@ -49,11 +49,15 @@ final class GroupStudyRoomViewModel: ObservableObject {
     @Published var isPaused: Bool = true
     @Published var hostId: String? = nil
     @Published var roomTitle: String = "Study Room ☕️"
+    @Published private(set) var pomodoroLengthSec: Int = 25 * 60
+    @Published private(set) var breakLengthSec: Int = 5 * 60
 
     
     // make an object to store more
     // Optional: presence map from RTDB (uid -> "online"/"offline")
     @Published var presence: [String: String] = [:]
+    
+    
 
     // Internals
     private var roomListener: ListenerRegistration?
@@ -97,6 +101,9 @@ final class GroupStudyRoomViewModel: ObservableObject {
         roomListener = StudyRoomManager.shared.listen(roomId: roomId) { [weak self] room in
             guard let self = self, let room = room else { return }
             self.hostId = room.hostId
+            // Update configured durations from room (fallback to defaults if missing)
+            self.pomodoroLengthSec = room.pomodoroLength
+            self.breakLengthSec = room.breakLength
             self.applyTimer(room.timer)
             Task { @MainActor in
                 self.setRoomTitle(room.title)
