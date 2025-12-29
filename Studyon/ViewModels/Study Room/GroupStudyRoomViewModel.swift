@@ -45,7 +45,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
 
     // Outputs (bind these to UI)
     @Published var remainingSeconds: Int = 0
-    @Published var phase: String = "work" // or "break"
+    @Published var phase: String = "break" // or "work"
     @Published var isPaused: Bool = true
     @Published var hostId: String? = nil
     @Published var roomTitle: String = "Study Room ☕️"

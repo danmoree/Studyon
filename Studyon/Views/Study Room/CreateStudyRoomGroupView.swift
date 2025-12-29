@@ -101,7 +101,7 @@ struct CreateStudyRoomGroupView: View {
                         Slider(value: Binding(
                             get: { Double(pomDuration) / 60 },
                             set: { newValue in pomDuration = Int(newValue) * 60}
-                        ), in: 15...60, step: 5)
+                        ), in: 1...30, step: 1)
                         .accentColor(colorScheme == .light ? .black : .white)
                     }
                     .padding(.horizontal)
