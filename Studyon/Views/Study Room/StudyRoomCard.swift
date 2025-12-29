@@ -13,6 +13,7 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseDatabase
 
 extension DateFormatter {
     static var timeOnly: DateFormatter {
@@ -37,6 +38,13 @@ struct StudyRoomCard: View {
     
     @State private var hostUsername: String? = nil
     @State private var hostProfileImage: UIImage? = nil
+    
+    // Presence-driven avatars
+    @State private var activeMemberIds: [String] = []
+    @State private var activeMemberImages: [UIImage?] = []
+    @State private var totalActiveCount: Int = 0
+    @State private var presenceRef: DatabaseReference? = nil
+    @State private var presenceHandle: DatabaseHandle? = nil
     
     private var formattedStartTime: String {
         if let startDate = room.startTime as? Date {
@@ -79,6 +87,88 @@ struct StudyRoomCard: View {
             await MainActor.run {
                 hostProfileImage = nil
             }
+        }
+    }
+    
+    // Observe active members (online) from Realtime Database under status/{roomId}
+    private func observeActiveMembers() {
+        // Ensure we only attach one observer per card instance
+        stopObservingPresence()
+        let ref = Database.database().reference(withPath: "status/\(room.roomId)")
+        presenceRef = ref
+        presenceHandle = ref.observe(.value) { snapshot in
+            var onlineIds: [String] = []
+            for child in snapshot.children {
+                if let snap = child as? DataSnapshot,
+                   let dict = snap.value as? [String: Any],
+                   let state = dict["state"] as? String,
+                   state == "online" {
+                    onlineIds.append(snap.key)
+                }
+            }
+            // Prefer the host first if present, then stable order by uid
+            let sortedIds = onlineIds.sorted { a, b in
+                if a == room.hostId { return true }
+                if b == room.hostId { return false }
+                return a < b
+            }
+            Task {
+                await MainActor.run {
+                    self.totalActiveCount = onlineIds.count
+                    self.activeMemberIds = sortedIds
+                }
+                await loadActiveMemberImages(for: sortedIds)
+            }
+        }
+    }
+
+    private func stopObservingPresence() {
+        if let handle = presenceHandle, let ref = presenceRef {
+            ref.removeObserver(withHandle: handle)
+        }
+        presenceHandle = nil
+        presenceRef = nil
+    }
+
+    /// Loads up to 4 profile images for the provided user IDs, preserving their order.
+    private func loadActiveMemberImages(for ids: [String]) async {
+        let topIds = Array(ids.prefix(2))
+        guard !topIds.isEmpty else {
+            await MainActor.run { self.activeMemberImages = [] }
+            return
+        }
+        do {
+            // Fetch user documents in batches
+            let users = try await UserManager.shared.fetchUsers(for: topIds)
+            // Map userId -> DBUser for quick lookup
+            var userById: [String: DBUser] = [:]
+            for u in users { userById[u.userId] = u }
+
+            // Concurrently fetch images, keeping association by uid
+            var imageById: [String: UIImage] = [:]
+            await withTaskGroup(of: (String, UIImage?).self) { group in
+                for uid in topIds {
+                    if let user = userById[uid] {
+                        group.addTask {
+                            let image = try? await UserManager.shared.fetchProfileImageWithDiskCache(for: user)
+                            return (uid, image)
+                        }
+                    } else {
+                        group.addTask { return (uid, nil) }
+                    }
+                }
+                for await (uid, image) in group {
+                    if let image { imageById[uid] = image }
+                }
+            }
+
+            // Preserve the input order and include nils for users without images so we can show defaults
+            let images: [UIImage?] = topIds.map { imageById[$0] }
+            await MainActor.run {
+                self.activeMemberImages = images
+            }
+        } catch {
+            await MainActor.run { self.activeMemberImages = Array(repeating: nil, count: topIds.count) }
         }
     }
     
@@ -162,32 +252,49 @@ struct StudyRoomCard: View {
                 // join button
                 HStack {
                     HStack(spacing: -4) {
-                        if let hostProfileImage {
-                            Image(uiImage: hostProfileImage)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 25, height: 25)
-                                .clipShape(Circle())
+                        if activeMemberImages.isEmpty {
+                            // Fallback: show host image or default if no active members available
+                            if let hostProfileImage {
+                                Image(uiImage: hostProfileImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 25, height: 25)
+                                    .clipShape(Circle())
+                            } else {
+                                Image("default_profile_pic")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 25, height: 25)
+                                    .clipShape(Circle())
+                            }
                         } else {
-                            Image("profile_pic1")
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 25, height: 25)
-                                .clipShape(Circle())
+                            ForEach(0..<min(activeMemberImages.count, 2), id: \.self) { i in
+                                if let img = activeMemberImages[i] {
+                                    Image(uiImage: img)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 25, height: 25)
+                                        .clipShape(Circle())
+                                } else {
+                                    Image("default_profile_pic")
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 25, height: 25)
+                                        .clipShape(Circle())
+                                }
+                            }
+                            if totalActiveCount > 2 {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.gray)
+                                        .frame(width: 25, height: 25)
+                                    Text("+\(totalActiveCount - 2)")
+                                        .font(.caption2)
+                                        .foregroundColor(.white)
+                                        .fontWidth(.expanded)
+                                }
+                            }
                         }
-                        
-                        
-                        ZStack {
-                            Circle()
-                                .fill(Color.gray)
-                                .frame(width: 25, height: 25)
-                            Text("+4")
-                                .font(.caption2)
-                                .foregroundColor(.white)
-                                .fontWidth(.expanded)
-                        }
-                        
-                        
                     }
                     
                     Spacer()
@@ -223,6 +330,8 @@ struct StudyRoomCard: View {
             await fetchUsername(for: room.hostId)
             await fetchProfileImage(for: room.hostId)
         }
+        .onAppear { observeActiveMembers() }
+        .onDisappear { stopObservingPresence() }
     }
 }
 
