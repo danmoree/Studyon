@@ -1,5 +1,7 @@
 # Studyon
 
+> Note: Studyon is currently branded as **OnStudy** in the app. The name change reflects domain availability only; functionality remains the same.
+
 **Studyon** is the future of productive studying — built for students who want more focus, more progress, and a little more fun along the way. 🚀
 
 ## What is Studyon?
