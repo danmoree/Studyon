@@ -46,6 +46,12 @@ We believe studying should be social, supportive, and even a little exciting. St
   - Backend: Firebase Authentication, Cloud Firestore
   - Architecture: MVVM Architecture, Combine
   -	Design Tools: Figma (UI/UX Design)
+ 
+## Privacy & Device Usage
+
+Studyon does not collect, store, or share personal device usage or Screen Time data.
+Any app or website restrictions are explicitly selected by the user and applied only
+on the user’s own device during focus sessions.
 
 **Still a Work in Progress!** 🚀 
 We're constantly improving and adding new features. Stay tuned for in-room chat, detailed study analytics, and even more ways to customize your study journey!
