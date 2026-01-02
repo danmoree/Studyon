@@ -127,7 +127,7 @@ struct StudyRoomsView: View {
                                                     .fill(Color(.systemGray6))
                                                     .frame(height: 100)
                                                     .overlay(
-                                                        Text("No upcoming rooms 🙁")
+                                                        Text("Invited rooms appear here 👩‍🎓")
                                                             .fontWidth(.expanded)
                                                             .foregroundColor(.secondary)
                                                             .font(.headline)

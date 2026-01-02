@@ -64,12 +64,16 @@ struct StudyRoomCard: View {
         }
         return "-"
     }
+    private var displayHostName: String {
+        let raw = hostUsername ?? (room.hostId ?? "Unknown")
+        return raw.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
     
     private func fetchUsername(for userId: String?) async {
         guard let userId else { hostUsername = nil; return }
         do {
             let user = try await UserManager.shared.getUser(userId: userId)
-            hostUsername = user.username ?? "Unknown"
+            hostUsername = (user.username ?? "Unknown").trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
             hostUsername = "Unknown"
         }
@@ -185,6 +189,7 @@ struct StudyRoomCard: View {
                     .lineLimit(2)            // up to two lines
                     .fixedSize(horizontal: false, vertical: true)
                     .layoutPriority(1)
+                    .multilineTextAlignment(.leading)
 
                 Spacer(minLength: 8)
 
@@ -204,11 +209,12 @@ struct StudyRoomCard: View {
             Spacer()
             HStack {
                 // creators room title
-                Text((hostUsername ?? (room.hostId ?? "Unknown")) + "'s \nStudy Room 🤓")
+                Text(displayHostName + "'s \nStudy Room 🤓")
                     .font(.body)
                     .foregroundColor(.black)
                     .fontWeight(.bold)
                     .fontWidth(.expanded)
+                    .multilineTextAlignment(.leading)
                 
                 Spacer()
             }
@@ -350,3 +356,4 @@ struct StudyRoomCard: View {
     )
     StudyRoomCard(hideTabBar: .constant(true), room: demoRoom)
 }
+
