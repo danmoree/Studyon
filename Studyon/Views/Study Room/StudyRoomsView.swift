@@ -18,6 +18,7 @@ import FirebaseAuth
 struct StudyRoomsView: View {
     @State private var selectedFilter: StudyRoomsFilter = .all
     @State private var showCreateRoomSheet = false
+    @State private var showInbox = false
     @Binding var isUserLoggedIn: Bool
     @Binding var hideTabBar: Bool
     //@State private var selectedRoom: StudyRoom? = nil
@@ -47,6 +48,16 @@ struct StudyRoomsView: View {
                                     .bold()
                                 
                                 Spacer()
+                                
+                                Button {
+                                    showInbox = true
+                                } label: {
+                                    Image(systemName: "tray.circle.fill")
+                                        .resizable()
+                                        .frame(width: 28, height: 28)
+                                        .foregroundColor(.primary)
+                                    
+                                }
                                 
                                 Button {
                                     showCreateRoomSheet = true
@@ -202,6 +213,11 @@ struct StudyRoomsView: View {
             .sheet(isPresented: $showCreateRoomSheet) {
                 CreateStudyRoomView(showCreateStudyRoom: $showCreateRoomSheet)
                     .presentationDetents([.height(340)])
+                    .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showInbox) {
+                InvitesInboxView(showInboxView: $showInbox)
+                    .presentationDetents([.height(600)])
                     .presentationDragIndicator(.visible)
             }
             .onAppear {
