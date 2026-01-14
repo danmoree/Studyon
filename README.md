@@ -9,12 +9,13 @@
 Studyon is a next-gen study platform where you don't just grind alone — you team up, level up, and crush your academic goals together. Whether you're preparing for finals, learning a new skill, or just trying to stay consistent, Studyon makes studying feel a little less lonely and a lot more motivating.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/861b1cfb-a3e6-4e97-8dc3-2d80b1252c2b" alt="Studyon Home" width="250"/>
-  <img src="https://github.com/user-attachments/assets/ac522d45-3b48-49f1-a64a-af47cab31c8e" alt="Study Room View" width="250"/>
-  <img src="https://github.com/user-attachments/assets/982bff33-7d83-4ddb-a54a-9af9919f3cc8" alt="User Profile" width="250"/>
+
+  <img src="https://github.com/user-attachments/assets/9e1ea9b4-2813-4cf4-86a4-3383c95393f1" alt="Studyon Home" width="250"/>
+  <img src="https://github.com/user-attachments/assets/7d25f223-5191-48fc-a264-bc1bad042a62" alt="Study Room View" width="250"/>
+  <img src="https://github.com/user-attachments/assets/c5d89064-038c-4a96-8929-fa0ba222258f" alt="Study Rooms View" width="250"/>
 </p>
 
-##### *UI Mockups
+##### *In app screenshots
 ## Core Features
 
 - **🧳 Real-Time Study Rooms**
