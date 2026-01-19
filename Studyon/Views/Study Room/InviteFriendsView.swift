@@ -68,7 +68,19 @@ struct InviteFriendsView: View {
                                     .frame(width: 36, height: 36)
                                     .clipShape(Circle())
                             }
+                            
                             Text(friend.fullName ?? "NULL")
+                            
+                            Spacer()
+                            
+                            Button("Invite") {
+                                // TODO: Handle invite action
+                            }
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.green)
+                            .clipShape(Capsule())
                         }
                     }
                 }
@@ -78,6 +90,13 @@ struct InviteFriendsView: View {
 }
 
 #Preview {
-    InviteFriendsView()
-        .environmentObject(SocialViewModel())
+    let viewModel = SocialViewModel()
+    viewModel.friends = [
+        DBUser(userId: "1", photoUrl: nil, fullName: "John Smith"),
+        DBUser(userId: "2", photoUrl: nil, fullName: "Sarah Johnson"),
+        DBUser(userId: "3", photoUrl: nil, fullName: "Mike Chen")
+    ] as [DBUser]
+
+    return InviteFriendsView()
+        .environmentObject(viewModel)
 }
