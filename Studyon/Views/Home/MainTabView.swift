@@ -36,6 +36,7 @@ struct MainTabView: View {
                     
                 case .rooms:
                     StudyRoomsView(isUserLoggedIn: $isUserLoggedIn, hideTabBar: $hideTabBar)
+                        .environmentObject(socialVM)
                     //Text("Studyrooms")
                 case .home:
                     HomeParentView(isUserLoggedIn: $isUserLoggedIn)

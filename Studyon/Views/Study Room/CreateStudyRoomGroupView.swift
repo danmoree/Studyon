@@ -27,7 +27,10 @@ struct CreateStudyRoomGroupView: View {
     @State var openRoomDetailedView: Bool = false
     @Environment(\.colorScheme) var colorScheme
     
+    @EnvironmentObject var socialVM: SocialViewModel
+    
     @State var loadingRoom: Bool = false
+    @State private var showInviteFriends: Bool = false
     
     private func createRoomInFirestore() {
         let newRoomId = Firestore.firestore().collection("rooms").document().documentID
@@ -57,118 +60,136 @@ struct CreateStudyRoomGroupView: View {
     }
     
     var body: some View {
-        VStack(spacing: 24) {
-            // Title bar
-            HStack {
-                Text("Create room! 🌎")
-                    .font(.title)
-                    .fontWeight(.heavy)
-                    .fontWidth(.expanded)
-                
-                Spacer()
-                
-                Button {
-                    showCreateStudyRoomGroup = false
-                } label: {
-                    Image(systemName: "x.circle.fill")
-                        .resizable()
-                        .frame(width: 28, height: 28)
-                        .foregroundStyle(Color.red)
+        NavigationStack {
+            VStack(spacing: 24) {
+                // Title bar
+                HStack {
+                    Text("Create room! 🌎")
+                        .font(.title)
+                        .fontWeight(.heavy)
+                        .fontWidth(.expanded)
+                    
+                    Spacer()
+                    
+                    Button {
+                        showCreateStudyRoomGroup = false
+                    } label: {
+                        Image(systemName: "x.circle.fill")
+                            .resizable()
+                            .frame(width: 28, height: 28)
+                            .foregroundStyle(Color.red)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal)
-            .padding(.top, 8)
-            
-            ScrollView {
-                VStack(spacing: 32) {
-                    // Title TextField
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Title")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .fontWidth(.expanded)
-                        CustomTextField2(text: $title, hint: "Biology exam lock in")
-                    }
-                    .padding(.horizontal)
-                    
-                    // Pomodoro Duration Slider
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Pomodoro Duration: \(pomDuration / 60) min")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .fontWidth(.expanded)
-                        Slider(value: Binding(
-                            get: { Double(pomDuration) / 60 },
-                            set: { newValue in pomDuration = Int(newValue) * 60}
-                        ), in: 1...30, step: 1)
-                        .accentColor(colorScheme == .light ? .black : .white)
-                    }
-                    .padding(.horizontal)
-                    
-                    // Pomodoro Break Duration Slider
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Break Duration: \(pomBreakDuration / 60) min")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .fontWidth(.expanded)
-                        Slider(value: Binding(
-                            get: { Double(pomBreakDuration) / 60 },
-                            set: { pomBreakDuration = Int($0 * 60) }
-                        ), in: 1...10, step: 1)
-                        .accentColor(colorScheme == .light ? .black : .white)
-                    }
-                    .padding(.horizontal)
-                    
-                    // Start DatePicker
-                    HStack {
+                .padding(.horizontal)
+                .padding(.top, 8)
+                
+                ScrollView {
+                    VStack(spacing: 32) {
+                        // Title TextField
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Start Date")
+                            Text("Title")
                                 .font(.headline)
                                 .fontWeight(.semibold)
                                 .fontWidth(.expanded)
-                            DatePicker(
-                                "Select start date",
-                                selection: Binding(
-                                    get: { startDate ?? Date() },
-                                    set: { startDate = $0 }
-                                ),
-                                in: Date()...(Calendar.current.date(byAdding: .day, value: 3, to: Date())!),
-                                displayedComponents: [.date, .hourAndMinute]
-                            )
-                            .datePickerStyle(.compact)
-                            .labelsHidden()
+                            CustomTextField2(text: $title, hint: "Biology exam lock in")
                         }
                         .padding(.horizontal)
-                        Spacer()
-                    }
-                    
-                    // End DatePicker
-                    HStack {
+                        
+                        // Pomodoro Duration Slider
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("End Date")
+                            Text("Pomodoro Duration: \(pomDuration / 60) min")
                                 .font(.headline)
                                 .fontWeight(.semibold)
                                 .fontWidth(.expanded)
-                            let minEndDate = startDate ?? Date()
-                            let maxEndDate = Calendar.current.date(byAdding: .hour, value: 10, to: minEndDate) ?? minEndDate.addingTimeInterval(3600)
-                            DatePicker(
-                                "Select end date",
-                                selection: Binding(
-                                    get: { endDate ?? minEndDate },
-                                    set: { endDate = $0 }
-                                ),
-                                in: minEndDate...maxEndDate,
-                                displayedComponents: [.date, .hourAndMinute]
-                            )
-                            .datePickerStyle(.compact)
-                            .labelsHidden()
+                            Slider(value: Binding(
+                                get: { Double(pomDuration) / 60 },
+                                set: { newValue in pomDuration = Int(newValue) * 60}
+                            ), in: 1...30, step: 1)
+                            .accentColor(colorScheme == .light ? .black : .white)
                         }
                         .padding(.horizontal)
-                        Spacer()
-                    }
-                    
-                    // Private Toggle, false for now
+                        
+                        // Pomodoro Break Duration Slider
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Break Duration: \(pomBreakDuration / 60) min")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .fontWidth(.expanded)
+                            Slider(value: Binding(
+                                get: { Double(pomBreakDuration) / 60 },
+                                set: { pomBreakDuration = Int($0 * 60) }
+                            ), in: 1...10, step: 1)
+                            .accentColor(colorScheme == .light ? .black : .white)
+                        }
+                        .padding(.horizontal)
+                        
+                        // Start DatePicker
+                        HStack {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Start Date")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                    .fontWidth(.expanded)
+                                DatePicker(
+                                    "Select start date",
+                                    selection: Binding(
+                                        get: { startDate ?? Date() },
+                                        set: { startDate = $0 }
+                                    ),
+                                    in: Date()...(Calendar.current.date(byAdding: .day, value: 3, to: Date())!),
+                                    displayedComponents: [.date, .hourAndMinute]
+                                )
+                                .datePickerStyle(.compact)
+                                .labelsHidden()
+                            }
+                            .padding(.horizontal)
+                            Spacer()
+                        }
+                        
+                        // End DatePicker
+                        HStack {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("End Date")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                    .fontWidth(.expanded)
+                                let minEndDate = startDate ?? Date()
+                                let maxEndDate = Calendar.current.date(byAdding: .hour, value: 10, to: minEndDate) ?? minEndDate.addingTimeInterval(3600)
+                                DatePicker(
+                                    "Select end date",
+                                    selection: Binding(
+                                        get: { endDate ?? minEndDate },
+                                        set: { endDate = $0 }
+                                    ),
+                                    in: minEndDate...maxEndDate,
+                                    displayedComponents: [.date, .hourAndMinute]
+                                )
+                                .datePickerStyle(.compact)
+                                .labelsHidden()
+                            }
+                            .padding(.horizontal)
+                            Spacer()
+                        }
+                        
+                        // Show invited friends and invite
+                        HStack {
+                            Button {
+                                showInviteFriends = true
+                            } label: {
+                                Text("Invite Friends")
+                                    .font(.system(.headline, design: .rounded))
+                                    .fontWeight(.bold)
+                                    .foregroundColor(colorScheme == .light ? .white : .black)
+                                    .fontWidth(.expanded)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(title.isEmpty ? Color.green.opacity(0.5) : Color.green)
+                                    .cornerRadius(12)
+                            }
+                        }
+                        
+                        // Private Toggle, false for now
 //                    VStack(alignment: .leading, spacing: 6) {
 //                        Toggle(isOn: $isPrivate) {
 //                            Text("Private Room")
@@ -177,50 +198,54 @@ struct CreateStudyRoomGroupView: View {
 //                                .fontWidth(.expanded)
 //                        }
 //                    }
-                    .padding(.horizontal)
-                    
-                    // Create Button
-                    Button {
-                        loadingRoom = true
-                        createRoomInFirestore()
-                        Task {
-                            try? await Task.sleep(nanoseconds: 3_000_000_000)
-                            showCreateStudyRoomGroup = false
-                            loadingRoom = false
+                        .padding(.horizontal)
+                        
+                        // Create Button
+                        Button {
+                            loadingRoom = true
+                            createRoomInFirestore()
+                            Task {
+                                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                                showCreateStudyRoomGroup = false
+                                loadingRoom = false
+                            }
+                        } label: {
+                            if loadingRoom {
+                                ProgressView()
+                                    .font(.system(.headline, design: .rounded))
+                                    .fontWeight(.bold)
+                                    .foregroundColor(colorScheme == .light ? .white : .black)
+                                    .fontWidth(.expanded)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(title.isEmpty ? Color.gray.opacity(0.5) : Color.primary)
+                                    .cornerRadius(12)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                            } else {
+                                Text("Create")
+                                    .font(.system(.headline, design: .rounded))
+                                    .fontWeight(.bold)
+                                    .foregroundColor(colorScheme == .light ? .white : .black)
+                                    .fontWidth(.expanded)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(title.isEmpty ? Color.gray.opacity(0.5) : Color.primary)
+                                    .cornerRadius(12)
+                            }
                         }
-                    } label: {
-                        if loadingRoom {
-                            ProgressView()
-                                .font(.system(.headline, design: .rounded))
-                                .fontWeight(.bold)
-                                .foregroundColor(colorScheme == .light ? .white : .black)
-                                .fontWidth(.expanded)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(title.isEmpty ? Color.gray.opacity(0.5) : Color.primary)
-                                .cornerRadius(12)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                        } else {
-                            Text("Create")
-                                .font(.system(.headline, design: .rounded))
-                                .fontWeight(.bold)
-                                .foregroundColor(colorScheme == .light ? .white : .black)
-                                .fontWidth(.expanded)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(title.isEmpty ? Color.gray.opacity(0.5) : Color.primary)
-                                .cornerRadius(12)
-                        }
+                        .disabled(title.isEmpty)
+                        .padding(.horizontal)
+                        .padding(.bottom, 20)
                     }
-                    .disabled(title.isEmpty)
-                    .padding(.horizontal)
-                    .padding(.bottom, 20)
                 }
             }
-        }
             .padding(.horizontal, 1)
             .padding(.top, 20)
+            .navigationDestination(isPresented: $showInviteFriends) {
+                InviteFriendsView()
+            }
+        }
         .fullScreenCover(item: $newGroupRoom) { groupRoom in
             VStack {
                 Text("Group Room Created")
@@ -242,3 +267,4 @@ struct CreateStudyRoomGroupView: View {
 #Preview {
     CreateStudyRoomGroupView(showCreateStudyRoomGroup: .constant(true))
 }
+
