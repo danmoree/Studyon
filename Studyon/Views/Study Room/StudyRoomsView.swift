@@ -49,11 +49,24 @@ struct StudyRoomsView: View {
                                 Button {
                                     showInbox = true
                                 } label: {
-                                    Image(systemName: "tray.circle.fill")
-                                        .resizable()
-                                        .frame(width: 28, height: 28)
-                                        .foregroundColor(.primary)
-                                    
+                                    ZStack(alignment: .topTrailing) {
+                                        Image(systemName: "tray.circle.fill")
+                                            .resizable()
+                                            .frame(width: 28, height: 28)
+                                            .foregroundColor(.primary)
+
+                                        if roomInboxVM.pendingInvites.count > 0 {
+                                            ZStack {
+                                                Circle()
+                                                    .fill(Color.red)
+                                                    .frame(width: 18, height: 18)
+                                                Text("\(roomInboxVM.pendingInvites.count)")
+                                                    .font(.system(size: 10, weight: .bold))
+                                                    .foregroundColor(.white)
+                                            }
+                                            .offset(x: 6, y: -6)
+                                        }
+                                    }
                                 }
                                 
                                 Button {
@@ -102,7 +115,7 @@ struct StudyRoomsView: View {
                                                     .fill(Color(.systemGray6))
                                                     .frame(height: 100)
                                                     .overlay(
-                                                        Text("No active rooms right now 🔇")
+                                                        Text("No active rooms right now")
                                                             .fontWidth(.expanded)
                                                             .foregroundColor(.secondary)
                                                             .font(.headline)
