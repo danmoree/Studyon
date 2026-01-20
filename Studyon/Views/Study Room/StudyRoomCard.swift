@@ -45,6 +45,12 @@ struct StudyRoomCard: View {
     @State private var totalActiveCount: Int = 0
     @State private var presenceRef: DatabaseReference? = nil
     @State private var presenceHandle: DatabaseHandle? = nil
+    @State private var showEarlyJoinAlert: Bool = false
+
+    private var canJoinRoom: Bool {
+        guard let startTime = room.startTime else { return true }
+        return Date() >= startTime
+    }
     
     private var formattedStartTime: String {
         if let startDate = room.startTime as? Date {
@@ -304,22 +310,37 @@ struct StudyRoomCard: View {
                     }
                     
                     Spacer()
-                    
-                    NavigationLink(destination: GroupStudyRoomViewNew(
-                        roomId: room.roomId,
-                        currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
-                        isHost: room.hostId == Auth.auth().currentUser?.uid,
-                        pomoDuration: room.pomodoroLength,
-                        breakDuration: room.breakLength
-                    )
-                        .onAppear { hideTabBar = true }
-                        .onDisappear { hideTabBar = false }
-                    ) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 25, height: 25)
-                            .foregroundStyle(.black)
+
+                    if canJoinRoom {
+                        NavigationLink(destination: GroupStudyRoomViewNew(
+                            roomId: room.roomId,
+                            currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
+                            isHost: room.hostId == Auth.auth().currentUser?.uid,
+                            pomoDuration: room.pomodoroLength,
+                            breakDuration: room.breakLength
+                        )
+                            .onAppear { hideTabBar = true }
+                            .onDisappear { hideTabBar = false }
+                        ) {
+                            Image(systemName: "arrow.up.circle.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                                .foregroundStyle(.black)
+                        }
+                    } else {
+                        Button {
+                            // Trigger haptic feedback
+                            let generator = UINotificationFeedbackGenerator()
+                            generator.notificationOccurred(.warning)
+                            showEarlyJoinAlert = true
+                        } label: {
+                            Image(systemName: "lock.circle.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                                .foregroundStyle(.gray)
+                        }
                     }
                     
                     
@@ -332,12 +353,22 @@ struct StudyRoomCard: View {
         .frame(width: 200.2, height: 284.7)
         .background(Color(red: 183/255, green: 225/255, blue: 147/255))
         .clipShape(RoundedRectangle(cornerRadius: 20))
+        .opacity(canJoinRoom ? 1.0 : 0.6)
         .task {
             await fetchUsername(for: room.hostId)
             await fetchProfileImage(for: room.hostId)
         }
         .onAppear { observeActiveMembers() }
         .onDisappear { stopObservingPresence() }
+        .alert("Room Not Started", isPresented: $showEarlyJoinAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            if let startTime = room.startTime {
+                Text("This room hasn't started yet. It begins at \(DateFormatter.timeOnly.string(from: startTime)).")
+            } else {
+                Text("This room hasn't started yet.")
+            }
+        }
     }
 }
 

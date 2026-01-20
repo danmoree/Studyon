@@ -112,16 +112,19 @@ struct StudyRoomsView: View {
                                                 ScrollView(.horizontal, showsIndicators: false) {
                                                     HStack(spacing: 25) {
                                                         ForEach(roomInboxVM.activeRooms) { room in
-                                                            NavigationLink {
-                                                                GroupStudyRoomViewNew(
-                                                                    roomId: room.roomId,
-                                                                    currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
-                                                                    isHost: room.hostId == Auth.auth().currentUser?.uid,
-                                                                    pomoDuration: room.pomodoroLength,
-                                                                    breakDuration: room.breakLength
-
-                                                                )
-                                                            } label: {
+                                                            if let startTime = room.startTime, Date() >= startTime {
+                                                                NavigationLink {
+                                                                    GroupStudyRoomViewNew(
+                                                                        roomId: room.roomId,
+                                                                        currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
+                                                                        isHost: room.hostId == Auth.auth().currentUser?.uid,
+                                                                        pomoDuration: room.pomodoroLength,
+                                                                        breakDuration: room.breakLength
+                                                                    )
+                                                                } label: {
+                                                                    StudyRoomCard(hideTabBar: $hideTabBar, room: room)
+                                                                }
+                                                            } else {
                                                                 StudyRoomCard(hideTabBar: $hideTabBar, room: room)
                                                             }
                                                         }
@@ -158,15 +161,19 @@ struct StudyRoomsView: View {
                                                 ScrollView(.horizontal, showsIndicators: false) {
                                                     HStack(spacing: 25) {
                                                         ForEach(roomInboxVM.upcomingRooms) { room in
-                                                            NavigationLink {
-                                                                GroupStudyRoomViewNew(
-                                                                    roomId: room.roomId,
-                                                                    currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
-                                                                    isHost: room.hostId == Auth.auth().currentUser?.uid,
-                                                                    pomoDuration: room.pomodoroLength,
-                                                                    breakDuration: room.breakLength
-                                                                )
-                                                            } label: {
+                                                            if let startTime = room.startTime, Date() >= startTime {
+                                                                NavigationLink {
+                                                                    GroupStudyRoomViewNew(
+                                                                        roomId: room.roomId,
+                                                                        currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
+                                                                        isHost: room.hostId == Auth.auth().currentUser?.uid,
+                                                                        pomoDuration: room.pomodoroLength,
+                                                                        breakDuration: room.breakLength
+                                                                    )
+                                                                } label: {
+                                                                    StudyRoomCard(hideTabBar: $hideTabBar, room: room)
+                                                                }
+                                                            } else {
                                                                 StudyRoomCard(hideTabBar: $hideTabBar, room: room)
                                                             }
                                                         }

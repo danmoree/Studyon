@@ -11,9 +11,11 @@ struct SelectFriendsView: View {
     @EnvironmentObject var socialVM: SocialViewModel
     @Binding var selectedFriendIds: Set<String>
 
+    private let maxInvites = 5
+
     var body: some View {
         content
-            .navigationTitle("Select Friends")
+            .navigationTitle("Select Friends (\(selectedFriendIds.count)/\(maxInvites))")
             .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -34,6 +36,18 @@ struct SelectFriendsView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             List {
+                if selectedFriendIds.count >= maxInvites {
+                    Section {
+                        HStack {
+                            Image(systemName: "info.circle.fill")
+                                .foregroundStyle(.orange)
+                            Text("Maximum of \(maxInvites) friends reached")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
                 Section(header: Text("All Friends")) {
                     ForEach(socialVM.friends, id: \.userId) { (friend: DBUser) in
                         HStack {
@@ -80,6 +94,10 @@ struct SelectFriendsView: View {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.green)
                                     .font(.title2)
+                            } else if selectedFriendIds.count >= maxInvites {
+                                Image(systemName: "circle")
+                                    .foregroundStyle(.gray.opacity(0.3))
+                                    .font(.title2)
                             } else {
                                 Image(systemName: "circle")
                                     .foregroundStyle(.gray)
@@ -99,9 +117,10 @@ struct SelectFriendsView: View {
     private func toggleSelection(_ userId: String) {
         if selectedFriendIds.contains(userId) {
             selectedFriendIds.remove(userId)
-        } else {
+        } else if selectedFriendIds.count < maxInvites {
             selectedFriendIds.insert(userId)
         }
+        // If already at limit and trying to add more, do nothing
     }
 }
 
