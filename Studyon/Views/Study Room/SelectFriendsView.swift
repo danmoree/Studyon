@@ -1,29 +1,22 @@
 //
-//  InviteFriendsView.swift
+//  SelectFriendsView.swift
 //  Studyon
 //
-//  Created by Daniel Moreno on 1/18/26.
+//  Created by Claude on 1/19/26.
 //
 
 import SwiftUI
 
-struct InviteFriendsView: View {
+struct SelectFriendsView: View {
     @EnvironmentObject var socialVM: SocialViewModel
-    let roomId: String
-    @State private var invitedUserIds: Set<String> = []
-    @State private var isInviting: Bool = false
-    @State private var errorMessage: String?
+    @Binding var selectedFriendIds: Set<String>
 
     var body: some View {
         content
-            .navigationTitle("Invite Friends")
-            .alert("Error", isPresented: .constant(errorMessage != nil)) {
-                Button("OK") { errorMessage = nil }
-            } message: {
-                Text(errorMessage ?? "")
-            }
+            .navigationTitle("Select Friends")
+            .navigationBarTitleDisplayMode(.inline)
     }
-    
+
     @ViewBuilder
     private var content: some View {
         if socialVM.friends.isEmpty {
@@ -77,29 +70,25 @@ struct InviteFriendsView: View {
                                     .frame(width: 36, height: 36)
                                     .clipShape(Circle())
                             }
-                            
-                            Text(friend.fullName ?? "NULL")
+
+                            Text(friend.fullName ?? "Unknown")
 
                             Spacer()
 
-                            if invitedUserIds.contains(friend.userId) {
-                                // Show checkmark if invited
+                            // Checkmark if selected
+                            if selectedFriendIds.contains(friend.userId) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.green)
-                            } else if isInviting {
-                                ProgressView()
+                                    .font(.title2)
                             } else {
-                                Button("Invite") {
-                                    Task {
-                                        await inviteFriend(friend.userId)
-                                    }
-                                }
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(Color.green)
-                                .clipShape(Capsule())
+                                Image(systemName: "circle")
+                                    .foregroundStyle(.gray)
+                                    .font(.title2)
                             }
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            toggleSelection(friend.userId)
                         }
                     }
                 }
@@ -107,20 +96,12 @@ struct InviteFriendsView: View {
         }
     }
 
-    // MARK: - Invite Action
-    private func inviteFriend(_ userId: String) async {
-        isInviting = true
-        do {
-            try await RoomInvitationManager.shared.inviteUsers(roomId: roomId, userIds: [userId])
-            await MainActor.run {
-                invitedUserIds.insert(userId)
-            }
-        } catch {
-            await MainActor.run {
-                errorMessage = error.localizedDescription
-            }
+    private func toggleSelection(_ userId: String) {
+        if selectedFriendIds.contains(userId) {
+            selectedFriendIds.remove(userId)
+        } else {
+            selectedFriendIds.insert(userId)
         }
-        isInviting = false
     }
 }
 
@@ -132,6 +113,6 @@ struct InviteFriendsView: View {
         DBUser(userId: "3", photoUrl: nil, fullName: "Mike Chen")
     ] as [DBUser]
 
-    return InviteFriendsView(roomId: "preview-room-id")
+    return SelectFriendsView(selectedFriendIds: .constant(["1"]))
         .environmentObject(viewModel)
 }

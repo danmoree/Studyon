@@ -9,6 +9,8 @@ import SwiftUI
 
 struct InvitesInboxView: View {
     @Binding var showInboxView: Bool
+    @StateObject private var viewModel = RoomInboxViewModel()
+
     var body: some View {
         VStack {
             VStack {
@@ -31,22 +33,42 @@ struct InvitesInboxView: View {
                     }
                     
                 }
-                
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        RoomInvitationCardView()
-                        Divider()
-//                        RoomInvitationCardView()
-//                        Divider()
-//                        RoomInvitationCardView()
+
+                if viewModel.pendingInvites.isEmpty {
+                    // Empty state
+                    VStack(spacing: 12) {
+                        Image(systemName: "envelope.open")
+                            .font(.system(size: 40))
+                            .foregroundStyle(.secondary)
+                        Text("No pending invites")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
                     }
-                    .padding(.vertical, 8)
+                    .frame(maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(viewModel.pendingInvites) { invite in
+                                RoomInvitationCardView(roomLink: invite, viewModel: viewModel)
+                                if invite.id != viewModel.pendingInvites.last?.id {
+                                    Divider()
+                                }
+                            }
+                        }
+                        .padding(.vertical, 8)
+                    }
                 }
-                
+
             }
             .padding(.horizontal, 23)
             .padding(.top, 20)
-            
+
+        }
+        .onAppear {
+            viewModel.startListening()
+        }
+        .onDisappear {
+            viewModel.stopListening()
         }
     }
 }

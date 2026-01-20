@@ -31,13 +31,15 @@ struct CreateStudyRoomGroupView: View {
     
     @State var loadingRoom: Bool = false
     @State private var showInviteFriends: Bool = false
-    
-    private func createRoomInFirestore() {
+    @State private var selectedFriendIds: Set<String> = []
+
+    private func createRoomAndInviteFriends() async {
         let newRoomId = Firestore.firestore().collection("rooms").document().documentID
         let userId = Auth.auth().currentUser?.uid ?? ""
         let createdAt = FieldValue.serverTimestamp()
         let start = startDate ?? Date()
         let end = endDate ?? (start.addingTimeInterval(3600))
+        let activeUntil = end
         let roomData: [String: Any] = [
             GroupStudyRoom.CodingKeys.roomId.rawValue: newRoomId,
             GroupStudyRoom.CodingKeys.hostId.rawValue: userId,
@@ -50,12 +52,50 @@ struct CreateStudyRoomGroupView: View {
             GroupStudyRoom.CodingKeys.endTime.rawValue: end,
             GroupStudyRoom.CodingKeys.memberIds.rawValue: [userId]
         ]
-        Firestore.firestore().collection("rooms").document(newRoomId).setData(roomData) { error in
-            if let error = error {
-                print("Error creating room: \(error)")
-            } else {
-                print("Room created successfully with ID: \(newRoomId)")
+
+        do {
+            // Create room first
+            try await Firestore.firestore().collection("rooms").document(newRoomId).setData(roomData)
+            print("Room created successfully with ID: \(newRoomId)")
+
+            // Create RoomLink for the host so they can see their own room
+            let hostUser = try? await UserManager.shared.getUser(userId: userId)
+            let hostName = hostUser?.fullName ?? "Unknown"
+
+            let hostRoomLink = RoomLink(
+                roomId: newRoomId,
+                userId: userId,
+                status: "accepted",
+                invitedBy: userId,
+                roomTitle: title.isEmpty ? "Untitled Group Room" : title,
+                roomDescription: nil,
+                hostName: hostName,
+                startTime: start,
+                endTime: end,
+                activeUntil: activeUntil,
+                invitedAt: Date()
+            )
+
+            let hostLinkData = try Firestore.Encoder().encode(hostRoomLink)
+            try await Firestore.firestore()
+                .collection("users")
+                .document(userId)
+                .collection("roomLinks")
+                .document(newRoomId)
+                .setData(hostLinkData)
+
+            print("Host RoomLink created")
+
+            // Then send invites if any friends selected
+            if !selectedFriendIds.isEmpty {
+                try await RoomInvitationManager.shared.inviteUsers(
+                    roomId: newRoomId,
+                    userIds: Array(selectedFriendIds)
+                )
+                print("Invitations sent to \(selectedFriendIds.count) friends")
             }
+        } catch {
+            print("Error creating room or sending invites: \(error)")
         }
     }
     
@@ -177,15 +217,24 @@ struct CreateStudyRoomGroupView: View {
                             Button {
                                 showInviteFriends = true
                             } label: {
-                                Text("Invite Friends")
-                                    .font(.system(.headline, design: .rounded))
-                                    .fontWeight(.bold)
-                                    .foregroundColor(colorScheme == .light ? .white : .black)
-                                    .fontWidth(.expanded)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(title.isEmpty ? Color.green.opacity(0.5) : Color.green)
-                                    .cornerRadius(12)
+                                HStack {
+                                    Text("Invite Friends")
+                                        .font(.system(.headline, design: .rounded))
+                                        .fontWeight(.bold)
+                                        .foregroundColor(colorScheme == .light ? .white : .black)
+                                        .fontWidth(.expanded)
+                                    if !selectedFriendIds.isEmpty {
+                                        Text("(\(selectedFriendIds.count))")
+                                            .font(.system(.headline, design: .rounded))
+                                            .fontWeight(.bold)
+                                            .foregroundColor(colorScheme == .light ? .white : .black)
+                                            .fontWidth(.expanded)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green)
+                                .cornerRadius(12)
                             }
                         }
                         
@@ -202,10 +251,10 @@ struct CreateStudyRoomGroupView: View {
                         
                         // Create Button
                         Button {
-                            loadingRoom = true
-                            createRoomInFirestore()
                             Task {
-                                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                                loadingRoom = true
+                                await createRoomAndInviteFriends()
+                                try? await Task.sleep(nanoseconds: 1_000_000_000)
                                 showCreateStudyRoomGroup = false
                                 loadingRoom = false
                             }
@@ -243,7 +292,7 @@ struct CreateStudyRoomGroupView: View {
             .padding(.horizontal, 1)
             .padding(.top, 20)
             .navigationDestination(isPresented: $showInviteFriends) {
-                InviteFriendsView()
+                SelectFriendsView(selectedFriendIds: $selectedFriendIds)
             }
         }
         .fullScreenCover(item: $newGroupRoom) { groupRoom in
