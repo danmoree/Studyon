@@ -230,6 +230,22 @@ final class GroupStudyRoomViewModel: ObservableObject {
         userRef.cancelDisconnectOperations()
     }
 
+    // MARK: App Lifecycle Handling
+    /// Called when app becomes active - ensures presence is set to online
+    func restorePresence() {
+        let userRef = Database.database().reference(withPath: "status/\(roomId)/\(currentUserId)")
+        userRef.setValue(["state": "online"])
+        // Re-establish onDisconnect handler in case connection was reset
+        userRef.onDisconnectSetValue(["state": "offline"])
+    }
+
+    /// Called when app goes to background - maintains presence but prepares for potential disconnect
+    func prepareForBackground() {
+        // Keep the user online - Firebase will handle actual disconnection if needed
+        // The onDisconnect handler will automatically set offline if connection drops
+        // We don't explicitly set to offline here because the user is still "in" the room
+    }
+
     // MARK: Utils
     func formattedRemaining() -> String {
         let m = remainingSeconds / 60

@@ -22,6 +22,7 @@ struct GroupStudyRoomViewNew: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
 
     // ViewModel
     @StateObject private var vm: GroupStudyRoomViewModel
@@ -179,6 +180,21 @@ struct GroupStudyRoomViewNew: View {
                 }
             }
             .onDisappear { vm.stop() }
+            .onChange(of: scenePhase) { newPhase in
+                switch newPhase {
+                case .active:
+                    // App became active - restore presence if needed
+                    vm.restorePresence()
+                case .background:
+                    // App went to background - keep presence online but prepare for disconnect
+                    vm.prepareForBackground()
+                case .inactive:
+                    // Transitioning state - don't change presence
+                    break
+                @unknown default:
+                    break
+                }
+            }
         }
     }
 }
