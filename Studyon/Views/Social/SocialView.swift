@@ -56,9 +56,21 @@ struct SocialView: View {
             
             ScrollView {
                 VStack (spacing: 25) {
-                    
-                    ForEach(viewModel.friends, id: \.self) { user in
-                        FriendCardView(user: user, viewModel: viewModel)
+                    if viewModel.friends.isEmpty {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.systemGray6))
+                            .frame(height: 100)
+                            .overlay(
+                                Text("Add a friend to get started")
+                                    .fontWidth(.expanded)
+                                    .foregroundColor(.secondary)
+                                    .font(.headline)
+                            )
+                            .padding(.horizontal, 23)
+                    } else {
+                        ForEach(viewModel.friends, id: \.self) { user in
+                            FriendCardView(user: user, viewModel: viewModel)
+                        }
                     }
                 }
                 .padding(.top, 10)
