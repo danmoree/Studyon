@@ -494,7 +494,7 @@ struct DailyGoalProgressView: View {
         
         switch progress {
         case 0.0:
-            return "Ready when you are. Let the focus flow."
+            return "The hardest part is starting - you've got this!"
         case 0.01...0.25:
             return "A little progress goes a long way - Keep \n it up!"
         case 0.25...0.50:

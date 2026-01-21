@@ -21,12 +21,9 @@ struct StudyRoomsView: View {
     @State private var showInbox = false
     @Binding var isUserLoggedIn: Bool
     @Binding var hideTabBar: Bool
-    //@State private var selectedRoom: StudyRoom? = nil
     @Environment(\.colorScheme) var colorScheme
-    
-    @State private var activeRooms: [GroupStudyRoom] = []
-    @State private var upcomingRooms: [GroupStudyRoom] = []
-    @State private var activeRoomsListener: ListenerRegistration? = nil
+    @StateObject private var roomInboxVM = RoomInboxViewModel()
+
     @State private var showJoinSheet = false
     @State private var selectedRoomId: String? = nil
     
@@ -52,11 +49,24 @@ struct StudyRoomsView: View {
                                 Button {
                                     showInbox = true
                                 } label: {
-                                    Image(systemName: "tray.circle.fill")
-                                        .resizable()
-                                        .frame(width: 28, height: 28)
-                                        .foregroundColor(.primary)
-                                    
+                                    ZStack(alignment: .topTrailing) {
+                                        Image(systemName: "tray.circle.fill")
+                                            .resizable()
+                                            .frame(width: 28, height: 28)
+                                            .foregroundColor(.primary)
+
+                                        if roomInboxVM.pendingInvites.count > 0 {
+                                            ZStack {
+                                                Circle()
+                                                    .fill(Color.red)
+                                                    .frame(width: 18, height: 18)
+                                                Text("\(roomInboxVM.pendingInvites.count)")
+                                                    .font(.system(size: 10, weight: .bold))
+                                                    .foregroundColor(.white)
+                                            }
+                                            .offset(x: 6, y: -6)
+                                        }
+                                    }
                                 }
                                 
                                 Button {
@@ -99,26 +109,42 @@ struct StudyRoomsView: View {
                                                     .padding(.leading, 5)
                                                 Spacer()
                                             }
-                                            
-                                            ScrollView(.horizontal, showsIndicators: false) {
-                                                HStack(spacing: 25) {
-                                                    ForEach(activeRooms) { room in
-                                                        NavigationLink {
-                                                            GroupStudyRoomViewNew(
-                                                                roomId: room.roomId,
-                                                                currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
-                                                                isHost: room.hostId == Auth.auth().currentUser?.uid,
-                                                                pomoDuration: room.pomodoroLength,
-                                                                breakDuration: room.breakLength
-                                                                
-                                                            )
-                                                        } label: {
-                                                            StudyRoomCard(hideTabBar: $hideTabBar, room: room)
+
+                                            if roomInboxVM.activeRooms.isEmpty {
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .fill(Color(.systemGray6))
+                                                    .frame(height: 100)
+                                                    .overlay(
+                                                        Text("No active rooms right now")
+                                                            .fontWidth(.expanded)
+                                                            .foregroundColor(.secondary)
+                                                            .font(.headline)
+                                                    )
+                                                    .padding(.horizontal, 5)
+                                            } else {
+                                                ScrollView(.horizontal, showsIndicators: false) {
+                                                    HStack(spacing: 25) {
+                                                        ForEach(roomInboxVM.activeRooms) { room in
+                                                            if let startTime = room.startTime, Date() >= startTime {
+                                                                NavigationLink {
+                                                                    GroupStudyRoomViewNew(
+                                                                        roomId: room.roomId,
+                                                                        currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
+                                                                        isHost: room.hostId == Auth.auth().currentUser?.uid,
+                                                                        pomoDuration: room.pomodoroLength,
+                                                                        breakDuration: room.breakLength
+                                                                    )
+                                                                } label: {
+                                                                    StudyRoomCard(hideTabBar: $hideTabBar, room: room)
+                                                                }
+                                                            } else {
+                                                                StudyRoomCard(hideTabBar: $hideTabBar, room: room)
+                                                            }
                                                         }
                                                     }
                                                 }
+                                                .scrollClipDisabled()
                                             }
-                                            .scrollClipDisabled()
                                         }
                                         .padding(.bottom, 29)
                                         
@@ -133,7 +159,7 @@ struct StudyRoomsView: View {
                                                 Spacer()
                                             }
                                             
-                                            if upcomingRooms.count == 0 {
+                                            if roomInboxVM.upcomingRooms.count == 0 {
                                                 RoundedRectangle(cornerRadius: 16)
                                                     .fill(Color(.systemGray6))
                                                     .frame(height: 100)
@@ -147,16 +173,20 @@ struct StudyRoomsView: View {
                                             } else {
                                                 ScrollView(.horizontal, showsIndicators: false) {
                                                     HStack(spacing: 25) {
-                                                        ForEach(upcomingRooms) { room in
-                                                            NavigationLink {
-                                                                GroupStudyRoomViewNew(
-                                                                    roomId: room.roomId,
-                                                                    currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
-                                                                    isHost: room.hostId == Auth.auth().currentUser?.uid,
-                                                                    pomoDuration: room.pomodoroLength,
-                                                                    breakDuration: room.breakLength
-                                                                )
-                                                            } label: {
+                                                        ForEach(roomInboxVM.upcomingRooms) { room in
+                                                            if let startTime = room.startTime, Date() >= startTime {
+                                                                NavigationLink {
+                                                                    GroupStudyRoomViewNew(
+                                                                        roomId: room.roomId,
+                                                                        currentUserId: Auth.auth().currentUser?.uid ?? "unknown",
+                                                                        isHost: room.hostId == Auth.auth().currentUser?.uid,
+                                                                        pomoDuration: room.pomodoroLength,
+                                                                        breakDuration: room.breakLength
+                                                                    )
+                                                                } label: {
+                                                                    StudyRoomCard(hideTabBar: $hideTabBar, room: room)
+                                                                }
+                                                            } else {
                                                                 StudyRoomCard(hideTabBar: $hideTabBar, room: room)
                                                             }
                                                         }
@@ -221,17 +251,10 @@ struct StudyRoomsView: View {
                     .presentationDragIndicator(.visible)
             }
             .onAppear {
-                activeRoomsListener = StudyRoomManager.shared.listenActiveRooms { rooms in
-                    self.activeRooms = rooms
-                }
-                Task {
-                    let rooms = await StudyRoomManager.shared.fetchRoomsStartingSoon()
-                    self.upcomingRooms = rooms
-                }
+                roomInboxVM.startListening()
             }
             .onDisappear {
-                activeRoomsListener?.remove()
-                activeRoomsListener = nil
+                roomInboxVM.stopListening()
             }
         }
         
@@ -245,37 +268,3 @@ struct StudyRoomsView: View {
         .environmentObject(ProfileViewModel())
 }
 
-private struct ActiveRoomCard: View {
-    let room: GroupStudyRoom
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(room.title ?? "Untitled Room")
-                    .font(.headline)
-                    .lineLimit(1)
-                Spacer()
-                PhaseTag(phase: room.timer?.phase ?? "work")
-            }
-            HStack(spacing: 6) {
-                Image(systemName: "person.2")
-                Text("\(room.memberIds?.count ?? 1)")
-            }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-        }
-        .padding(12)
-        .frame(width: 220)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
-    }
-}
-
-private struct PhaseTag: View {
-    let phase: String
-    var body: some View {
-        Text(phase == "break" ? "Break" : "Work")
-            .font(.caption)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 8)
-            .background(phase == "break" ? Color.blue.opacity(0.15) : Color.green.opacity(0.15), in: Capsule())
-    }
-}

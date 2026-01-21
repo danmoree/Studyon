@@ -10,6 +10,8 @@ import Combine
 import Firebase
 import FirebaseFirestore
 import FirebaseDatabase
+import ActivityKit
+import WidgetKit
 
 // MARK: - ServerClock
 /// Keeps device time aligned with Firebase server time for sub-second sync across clients.
@@ -52,12 +54,18 @@ final class GroupStudyRoomViewModel: ObservableObject {
     @Published private(set) var pomodoroLengthSec: Int = 25 * 60
     @Published private(set) var breakLengthSec: Int = 5 * 60
 
-    
+
     // make an object to store more
     // Optional: presence map from RTDB (uid -> "online"/"offline")
     @Published var presence: [String: String] = [:]
-    
-    
+
+    // XP tracking
+    private var workSessionStart: Date?
+    private var totalWorkTimeInSession: TimeInterval = 0
+    private let statsManager = UserStatsManager.shared
+
+    // Live Activity
+    private var liveActivity: Activity<PomodoroWidgetAttributes>?
 
     // Internals
     private var roomListener: ListenerRegistration?
@@ -66,6 +74,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
     private var rtdbPresenceRef: DatabaseReference?
 
     private var endAt: Date = Date() // authoritative end when running
+    private var sessionStartDate: Date? // Track start date for Live Activity
 
     init(roomId: String, currentUserId: String, isHost: Bool) {
         self.roomId = roomId
@@ -80,9 +89,13 @@ final class GroupStudyRoomViewModel: ObservableObject {
         observePresence()
         setPresenceOnline()
         Task { await loadRoomTitle() }
+        startLiveActivity()
     }
 
     func stop() {
+        // Award XP before cleaning up
+        awardXPForSession()
+
         setPresenceOffline()
         roomListener?.remove()
         roomListener = nil
@@ -91,6 +104,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
         if let handle = rtdbPresenceHandle { rtdbPresenceRef?.removeObserver(withHandle: handle) }
         rtdbPresenceHandle = nil
         rtdbPresenceRef = nil
+        endLiveActivity()
         // Don't stop ServerClock.shared globally (shared across views)
     }
 
@@ -115,8 +129,14 @@ final class GroupStudyRoomViewModel: ObservableObject {
         guard let timer = timer else { return }
         let serverNow = ServerClock.shared.now
 
+        let previousPhase = phase
+        let previousPaused = isPaused
+
         phase = timer.phase ?? "work"
         isPaused = timer.isPaused ?? true
+
+        // Track work session changes
+        handlePhaseChange(previousPhase: previousPhase, previousPaused: previousPaused)
 
         if isPaused {
             // Paused: show remaining if available and stop ticking
@@ -130,10 +150,14 @@ final class GroupStudyRoomViewModel: ObservableObject {
             // Running: compute endAt from startedAt + duration
             if let started = timer.startedAt, let duration = timer.durationSec {
                 endAt = started.addingTimeInterval(TimeInterval(duration))
+                sessionStartDate = started
                 startTicker()
                 tick() // immediate UI update
             }
         }
+
+        // Update Live Activity whenever timer state changes
+        updateLiveActivity()
     }
 
     // MARK: Room Metadata
@@ -230,6 +254,86 @@ final class GroupStudyRoomViewModel: ObservableObject {
         userRef.cancelDisconnectOperations()
     }
 
+    // MARK: App Lifecycle Handling
+    /// Called when app becomes active - ensures presence is set to online
+    func restorePresence() {
+        let userRef = Database.database().reference(withPath: "status/\(roomId)/\(currentUserId)")
+        userRef.setValue(["state": "online"])
+        // Re-establish onDisconnect handler in case connection was reset
+        userRef.onDisconnectSetValue(["state": "offline"])
+    }
+
+    /// Called when app goes to background - maintains presence but prepares for potential disconnect
+    func prepareForBackground() {
+        // Keep the user online - Firebase will handle actual disconnection if needed
+        // The onDisconnect handler will automatically set offline if connection drops
+        // We don't explicitly set to offline here because the user is still "in" the room
+    }
+
+    // MARK: XP Tracking
+    private func handlePhaseChange(previousPhase: String, previousPaused: Bool) {
+        // Starting a work session (not paused, work phase)
+        if phase == "work" && !isPaused && (previousPhase != "work" || previousPaused) {
+            startWorkSession()
+        }
+
+        // Ending a work session (switching to break, pausing, or leaving work phase)
+        if previousPhase == "work" && !previousPaused && (phase != "work" || isPaused) {
+            endWorkSession()
+        }
+    }
+
+    private func startWorkSession() {
+        workSessionStart = Date()
+        print("GroupStudyRoom: Started work session tracking")
+    }
+
+    private func endWorkSession() {
+        guard let start = workSessionStart else { return }
+        let workTime = Date().timeIntervalSince(start)
+        totalWorkTimeInSession += workTime
+        workSessionStart = nil
+        print("GroupStudyRoom: Ended work session. Duration: \(Int(workTime))s. Total: \(Int(totalWorkTimeInSession))s")
+    }
+
+    /// Call this when the user leaves the room to award XP for all accumulated work time
+    func awardXPForSession() {
+        // End any active work session first
+        if phase == "work" && !isPaused {
+            endWorkSession()
+        }
+
+        guard totalWorkTimeInSession > 0 else {
+            print("GroupStudyRoom: No work time to award XP for")
+            return
+        }
+
+        // Capture the time value before resetting (to avoid race conditions)
+        let workTime = totalWorkTimeInSession
+        let minutes = Int(workTime / 60)
+        let baseXP = minutes // 1 XP per minute
+        let groupBonus = 20 // Bonus XP for studying in a group room
+        let totalXP = baseXP + groupBonus
+
+        // Reset immediately to prevent double-awarding
+        totalWorkTimeInSession = 0
+
+        guard baseXP > 0 else {
+            print("GroupStudyRoom: Work time less than 1 minute, no XP awarded")
+            return
+        }
+
+        Task {
+            do {
+                try await statsManager.recordStudyTime(userId: currentUserId, date: Date(), seconds: workTime)
+                try await statsManager.incrementXP(userId: currentUserId, by: totalXP)
+                print("GroupStudyRoom: Awarded \(totalXP) XP (\(baseXP) from time + \(groupBonus) group bonus) for \(Int(workTime))s of work time")
+            } catch {
+                print("GroupStudyRoom: Failed to award XP: \(error)")
+            }
+        }
+    }
+
     // MARK: Utils
     func formattedRemaining() -> String {
         let m = remainingSeconds / 60
@@ -280,6 +384,78 @@ final class GroupStudyRoomViewModel: ObservableObject {
                     await self?.fetchNameIfNeeded(for: uid)
                 }
             }
+        }
+    }
+
+    // MARK: Live Activity
+    func startLiveActivity() {
+        let attributes = PomodoroWidgetAttributes(name: roomTitle)
+        let totalDuration = phase == "break" ? breakLengthSec : pomodoroLengthSec
+        let now = Date()
+        let startDate = sessionStartDate ?? now
+        let endDate = endAt
+
+        let contentState = PomodoroWidgetAttributes.ContentState(
+            timeRemaining: TimeInterval(remainingSeconds),
+            isBreak: phase == "break",
+            isPaused: isPaused,
+            totalDuration: TimeInterval(totalDuration),
+            startDate: startDate,
+            endDate: endDate
+        )
+        let activityContent = ActivityContent(state: contentState, staleDate: nil)
+        do {
+            liveActivity = try Activity<PomodoroWidgetAttributes>.request(
+                attributes: attributes,
+                content: activityContent,
+                pushType: nil
+            )
+        } catch {
+            print("Failed to start Live Activity: \(error)")
+        }
+    }
+
+    func updateLiveActivity() {
+        guard let liveActivity else { return }
+        let totalDuration = phase == "break" ? breakLengthSec : pomodoroLengthSec
+        let now = Date()
+        let startDate: Date
+        let endDate: Date
+
+        if isPaused {
+            endDate = now.addingTimeInterval(TimeInterval(remainingSeconds))
+            startDate = endDate.addingTimeInterval(-TimeInterval(totalDuration))
+        } else {
+            startDate = sessionStartDate ?? now
+            endDate = self.endAt
+        }
+
+        let contentState = PomodoroWidgetAttributes.ContentState(
+            timeRemaining: TimeInterval(remainingSeconds),
+            isBreak: phase == "break",
+            isPaused: isPaused,
+            totalDuration: TimeInterval(totalDuration),
+            startDate: startDate,
+            endDate: endDate
+        )
+        Task {
+            await liveActivity.update(ActivityContent(state: contentState, staleDate: nil))
+        }
+    }
+
+    func endLiveActivity() {
+        guard let liveActivity else { return }
+        let finalState = PomodoroWidgetAttributes.ContentState(
+            timeRemaining: 0,
+            isBreak: false,
+            isPaused: false,
+            totalDuration: 0,
+            startDate: sessionStartDate ?? Date(),
+            endDate: endAt
+        )
+        let finalContent = ActivityContent(state: finalState, staleDate: nil)
+        Task {
+            await liveActivity.end(finalContent, dismissalPolicy: .immediate)
         }
     }
 }

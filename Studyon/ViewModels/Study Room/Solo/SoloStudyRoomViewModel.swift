@@ -174,10 +174,18 @@ final class SoloStudyRoomViewModel: ObservableObject {
         let seconds = Date().timeIntervalSince(start)
         // Prevent spamming pause/play to exploit study session logging
         guard seconds >= minRecordableSessionSeconds else { return }
+
+        // Calculate XP: 1 XP per minute
+        let minutes = Int(seconds / 60)
+        let xpToAward = minutes
+
         Task {
             do {
                 try await statsManager.recordStudyTime(userId: userId, date: Date(), seconds: seconds)
-                try await statsManager.incrementXP(userId: userId, by: 20)
+                if xpToAward > 0 {
+                    try await statsManager.incrementXP(userId: userId, by: xpToAward)
+                    print("SoloStudyRoom: Awarded \(xpToAward) XP for \(Int(seconds))s of work time")
+                }
             } catch {
                 print("Failed to record study time:", error)
             }
