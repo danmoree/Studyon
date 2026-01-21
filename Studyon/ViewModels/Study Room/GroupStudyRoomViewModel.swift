@@ -10,6 +10,8 @@ import Combine
 import Firebase
 import FirebaseFirestore
 import FirebaseDatabase
+import ActivityKit
+import WidgetKit
 
 // MARK: - ServerClock
 /// Keeps device time aligned with Firebase server time for sub-second sync across clients.
@@ -62,6 +64,9 @@ final class GroupStudyRoomViewModel: ObservableObject {
     private var totalWorkTimeInSession: TimeInterval = 0
     private let statsManager = UserStatsManager.shared
 
+    // Live Activity
+    private var liveActivity: Activity<PomodoroWidgetAttributes>?
+
     // Internals
     private var roomListener: ListenerRegistration?
     private var ticker: AnyCancellable?
@@ -69,6 +74,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
     private var rtdbPresenceRef: DatabaseReference?
 
     private var endAt: Date = Date() // authoritative end when running
+    private var sessionStartDate: Date? // Track start date for Live Activity
 
     init(roomId: String, currentUserId: String, isHost: Bool) {
         self.roomId = roomId
@@ -83,6 +89,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
         observePresence()
         setPresenceOnline()
         Task { await loadRoomTitle() }
+        startLiveActivity()
     }
 
     func stop() {
@@ -97,6 +104,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
         if let handle = rtdbPresenceHandle { rtdbPresenceRef?.removeObserver(withHandle: handle) }
         rtdbPresenceHandle = nil
         rtdbPresenceRef = nil
+        endLiveActivity()
         // Don't stop ServerClock.shared globally (shared across views)
     }
 
@@ -142,10 +150,14 @@ final class GroupStudyRoomViewModel: ObservableObject {
             // Running: compute endAt from startedAt + duration
             if let started = timer.startedAt, let duration = timer.durationSec {
                 endAt = started.addingTimeInterval(TimeInterval(duration))
+                sessionStartDate = started
                 startTicker()
                 tick() // immediate UI update
             }
         }
+
+        // Update Live Activity whenever timer state changes
+        updateLiveActivity()
     }
 
     // MARK: Room Metadata
@@ -372,6 +384,78 @@ final class GroupStudyRoomViewModel: ObservableObject {
                     await self?.fetchNameIfNeeded(for: uid)
                 }
             }
+        }
+    }
+
+    // MARK: Live Activity
+    func startLiveActivity() {
+        let attributes = PomodoroWidgetAttributes(name: roomTitle)
+        let totalDuration = phase == "break" ? breakLengthSec : pomodoroLengthSec
+        let now = Date()
+        let startDate = sessionStartDate ?? now
+        let endDate = endAt
+
+        let contentState = PomodoroWidgetAttributes.ContentState(
+            timeRemaining: TimeInterval(remainingSeconds),
+            isBreak: phase == "break",
+            isPaused: isPaused,
+            totalDuration: TimeInterval(totalDuration),
+            startDate: startDate,
+            endDate: endDate
+        )
+        let activityContent = ActivityContent(state: contentState, staleDate: nil)
+        do {
+            liveActivity = try Activity<PomodoroWidgetAttributes>.request(
+                attributes: attributes,
+                content: activityContent,
+                pushType: nil
+            )
+        } catch {
+            print("Failed to start Live Activity: \(error)")
+        }
+    }
+
+    func updateLiveActivity() {
+        guard let liveActivity else { return }
+        let totalDuration = phase == "break" ? breakLengthSec : pomodoroLengthSec
+        let now = Date()
+        let startDate: Date
+        let endDate: Date
+
+        if isPaused {
+            endDate = now.addingTimeInterval(TimeInterval(remainingSeconds))
+            startDate = endDate.addingTimeInterval(-TimeInterval(totalDuration))
+        } else {
+            startDate = sessionStartDate ?? now
+            endDate = self.endAt
+        }
+
+        let contentState = PomodoroWidgetAttributes.ContentState(
+            timeRemaining: TimeInterval(remainingSeconds),
+            isBreak: phase == "break",
+            isPaused: isPaused,
+            totalDuration: TimeInterval(totalDuration),
+            startDate: startDate,
+            endDate: endDate
+        )
+        Task {
+            await liveActivity.update(ActivityContent(state: contentState, staleDate: nil))
+        }
+    }
+
+    func endLiveActivity() {
+        guard let liveActivity else { return }
+        let finalState = PomodoroWidgetAttributes.ContentState(
+            timeRemaining: 0,
+            isBreak: false,
+            isPaused: false,
+            totalDuration: 0,
+            startDate: sessionStartDate ?? Date(),
+            endDate: endAt
+        )
+        let finalContent = ActivityContent(state: finalState, staleDate: nil)
+        Task {
+            await liveActivity.end(finalContent, dismissalPolicy: .immediate)
         }
     }
 }
