@@ -52,12 +52,15 @@ final class GroupStudyRoomViewModel: ObservableObject {
     @Published private(set) var pomodoroLengthSec: Int = 25 * 60
     @Published private(set) var breakLengthSec: Int = 5 * 60
 
-    
+
     // make an object to store more
     // Optional: presence map from RTDB (uid -> "online"/"offline")
     @Published var presence: [String: String] = [:]
-    
-    
+
+    // XP tracking
+    private var workSessionStart: Date?
+    private var totalWorkTimeInSession: TimeInterval = 0
+    private let statsManager = UserStatsManager.shared
 
     // Internals
     private var roomListener: ListenerRegistration?
@@ -83,6 +86,9 @@ final class GroupStudyRoomViewModel: ObservableObject {
     }
 
     func stop() {
+        // Award XP before cleaning up
+        awardXPForSession()
+
         setPresenceOffline()
         roomListener?.remove()
         roomListener = nil
@@ -115,8 +121,14 @@ final class GroupStudyRoomViewModel: ObservableObject {
         guard let timer = timer else { return }
         let serverNow = ServerClock.shared.now
 
+        let previousPhase = phase
+        let previousPaused = isPaused
+
         phase = timer.phase ?? "work"
         isPaused = timer.isPaused ?? true
+
+        // Track work session changes
+        handlePhaseChange(previousPhase: previousPhase, previousPaused: previousPaused)
 
         if isPaused {
             // Paused: show remaining if available and stop ticking
@@ -244,6 +256,70 @@ final class GroupStudyRoomViewModel: ObservableObject {
         // Keep the user online - Firebase will handle actual disconnection if needed
         // The onDisconnect handler will automatically set offline if connection drops
         // We don't explicitly set to offline here because the user is still "in" the room
+    }
+
+    // MARK: XP Tracking
+    private func handlePhaseChange(previousPhase: String, previousPaused: Bool) {
+        // Starting a work session (not paused, work phase)
+        if phase == "work" && !isPaused && (previousPhase != "work" || previousPaused) {
+            startWorkSession()
+        }
+
+        // Ending a work session (switching to break, pausing, or leaving work phase)
+        if previousPhase == "work" && !previousPaused && (phase != "work" || isPaused) {
+            endWorkSession()
+        }
+    }
+
+    private func startWorkSession() {
+        workSessionStart = Date()
+        print("GroupStudyRoom: Started work session tracking")
+    }
+
+    private func endWorkSession() {
+        guard let start = workSessionStart else { return }
+        let workTime = Date().timeIntervalSince(start)
+        totalWorkTimeInSession += workTime
+        workSessionStart = nil
+        print("GroupStudyRoom: Ended work session. Duration: \(Int(workTime))s. Total: \(Int(totalWorkTimeInSession))s")
+    }
+
+    /// Call this when the user leaves the room to award XP for all accumulated work time
+    func awardXPForSession() {
+        // End any active work session first
+        if phase == "work" && !isPaused {
+            endWorkSession()
+        }
+
+        guard totalWorkTimeInSession > 0 else {
+            print("GroupStudyRoom: No work time to award XP for")
+            return
+        }
+
+        // Capture the time value before resetting (to avoid race conditions)
+        let workTime = totalWorkTimeInSession
+        let minutes = Int(workTime / 60)
+        let baseXP = minutes // 1 XP per minute
+        let groupBonus = 20 // Bonus XP for studying in a group room
+        let totalXP = baseXP + groupBonus
+
+        // Reset immediately to prevent double-awarding
+        totalWorkTimeInSession = 0
+
+        guard baseXP > 0 else {
+            print("GroupStudyRoom: Work time less than 1 minute, no XP awarded")
+            return
+        }
+
+        Task {
+            do {
+                try await statsManager.recordStudyTime(userId: currentUserId, date: Date(), seconds: workTime)
+                try await statsManager.incrementXP(userId: currentUserId, by: totalXP)
+                print("GroupStudyRoom: Awarded \(totalXP) XP (\(baseXP) from time + \(groupBonus) group bonus) for \(Int(workTime))s of work time")
+            } catch {
+                print("GroupStudyRoom: Failed to award XP: \(error)")
+            }
+        }
     }
 
     // MARK: Utils
