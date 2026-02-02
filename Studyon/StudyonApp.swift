@@ -37,4 +37,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         print("Configured Firebase!")
         return true
     }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+        // Ensure app blocking is stopped when app terminates
+        AppBlockingManager.shared.stopBlocking()
+        print("App terminating - cleaned up app blocking")
+    }
 }

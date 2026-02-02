@@ -29,8 +29,9 @@ final class SoloStudyRoomViewModel: ObservableObject {
     let studyRoom: SoloStudyRoom
     private let statsManager = UserStatsManager.shared
     private let minRecordableSessionSeconds: TimeInterval = 10 // Threashold for calling recordWorkSession()
-    
+
     private var liveActivity: Activity<PomodoroWidgetAttributes>?
+    private let appBlockingManager = AppBlockingManager.shared
 
     private static let notificationPermissionKey = "didRequestNotificationPermission"
     
@@ -44,6 +45,9 @@ final class SoloStudyRoomViewModel: ObservableObject {
         startLiveActivity()
         requestNotificationPermissionIfNeeded()
         NotificationsManager.shared.schedulePomodoroNotification(duration: TimeInterval(studyRoom.pomDurationSec), sessionType: "Pomodoro")
+
+        // Start blocking apps when session begins
+        appBlockingManager.startBlocking()
     }
     
     private func requestNotificationPermissionIfNeeded() {
@@ -260,6 +264,8 @@ final class SoloStudyRoomViewModel: ObservableObject {
     
     deinit {
         timer?.cancel()
+        // Stop blocking apps when user leaves the session
+        appBlockingManager.stopBlocking()
     }
 }
 

@@ -67,6 +67,9 @@ final class GroupStudyRoomViewModel: ObservableObject {
     // Live Activity
     private var liveActivity: Activity<PomodoroWidgetAttributes>?
 
+    // App Blocking
+    private let appBlockingManager = AppBlockingManager.shared
+
     // Internals
     private var roomListener: ListenerRegistration?
     private var ticker: AnyCancellable?
@@ -90,6 +93,8 @@ final class GroupStudyRoomViewModel: ObservableObject {
         setPresenceOnline()
         Task { await loadRoomTitle() }
         startLiveActivity()
+        // Start blocking apps when joining the room
+        appBlockingManager.startBlocking()
     }
 
     func stop() {
@@ -105,6 +110,8 @@ final class GroupStudyRoomViewModel: ObservableObject {
         rtdbPresenceHandle = nil
         rtdbPresenceRef = nil
         endLiveActivity()
+        // Stop blocking apps when leaving the room
+        appBlockingManager.stopBlocking()
         // Don't stop ServerClock.shared globally (shared across views)
     }
 

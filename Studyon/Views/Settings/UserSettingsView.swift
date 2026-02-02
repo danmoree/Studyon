@@ -46,6 +46,7 @@ struct UserSettingsView: View {
                             
                             Section(header: Text("Study")) {
                                 NavigationLink("Daily Goal", destination: GoalsSettingsView(settingsVM: settingsVM))
+                                NavigationLink("App Blocking", destination: AppBlockingSettingsView())
                             }
 
                             Section {
