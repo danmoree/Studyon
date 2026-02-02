@@ -32,6 +32,7 @@ final class SoloStudyRoomViewModel: ObservableObject {
 
     private var liveActivity: Activity<PomodoroWidgetAttributes>?
     private let appBlockingManager = AppBlockingManager.shared
+    private let backgroundTaskManager = BackgroundTaskManager.shared
 
     private static let notificationPermissionKey = "didRequestNotificationPermission"
     
@@ -48,6 +49,9 @@ final class SoloStudyRoomViewModel: ObservableObject {
 
         // Start blocking apps when session begins
         appBlockingManager.startBlocking()
+
+        // Start background task to prevent iOS from killing the app
+        backgroundTaskManager.startBackgroundTask()
     }
     
     private func requestNotificationPermissionIfNeeded() {
@@ -266,6 +270,8 @@ final class SoloStudyRoomViewModel: ObservableObject {
         timer?.cancel()
         // Stop blocking apps when user leaves the session
         appBlockingManager.stopBlocking()
+        // End background task when session ends
+        backgroundTaskManager.endBackgroundTask()
     }
 }
 

@@ -70,6 +70,9 @@ final class GroupStudyRoomViewModel: ObservableObject {
     // App Blocking
     private let appBlockingManager = AppBlockingManager.shared
 
+    // Background Task Manager
+    private let backgroundTaskManager = BackgroundTaskManager.shared
+
     // Internals
     private var roomListener: ListenerRegistration?
     private var ticker: AnyCancellable?
@@ -95,6 +98,8 @@ final class GroupStudyRoomViewModel: ObservableObject {
         startLiveActivity()
         // Start blocking apps when joining the room
         appBlockingManager.startBlocking()
+        // Start background task to prevent iOS from killing the app
+        backgroundTaskManager.startBackgroundTask()
     }
 
     func stop() {
@@ -112,6 +117,8 @@ final class GroupStudyRoomViewModel: ObservableObject {
         endLiveActivity()
         // Stop blocking apps when leaving the room
         appBlockingManager.stopBlocking()
+        // End background task when session ends
+        backgroundTaskManager.endBackgroundTask()
         // Don't stop ServerClock.shared globally (shared across views)
     }
 
