@@ -50,7 +50,8 @@ struct SoloStudyRoomView: View {
                                 viewModel.recordWorkSession()
                                 viewModel.endLiveActivity()
                                 NotificationsManager.shared.cancelPomodoroNotification()
-                                dismiss()
+                                // Show summary instead of dismissing immediately
+                                viewModel.prepareSessionSummary()
                             } label: {
                                 Image(systemName: "chevron.left")
                                     .resizable()
@@ -132,6 +133,22 @@ struct SoloStudyRoomView: View {
                 .padding(.top, geo.safeAreaInsets.top + 10)
             }
             .ignoresSafeArea()
+
+            // Session Summary Overlay
+            if viewModel.showSessionSummary {
+                StudySessionSummaryView(
+                    studyTime: viewModel.totalStudyTime,
+                    xpGained: viewModel.totalXPGained,
+                    oldXP: viewModel.oldXP,
+                    newXP: viewModel.newXP,
+                    onDismiss: {
+                        viewModel.showSessionSummary = false
+                        dismiss()
+                    }
+                )
+                .transition(.opacity)
+                .zIndex(1000)
+            }
         }
     }
 }

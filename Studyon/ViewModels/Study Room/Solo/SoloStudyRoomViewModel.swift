@@ -35,6 +35,13 @@ final class SoloStudyRoomViewModel: ObservableObject {
     private let backgroundTaskManager = BackgroundTaskManager.shared
 
     private static let notificationPermissionKey = "didRequestNotificationPermission"
+
+    // Session summary tracking
+    @Published var showSessionSummary = false
+    @Published var totalStudyTime: TimeInterval = 0
+    @Published var totalXPGained: Int = 0
+    @Published var oldXP: Int = 0
+    @Published var newXP: Int = 0
     
     init(studyRoom: SoloStudyRoom) {
         self.studyRoom = studyRoom
@@ -187,6 +194,10 @@ final class SoloStudyRoomViewModel: ObservableObject {
         let minutes = Int(seconds / 60)
         let xpToAward = minutes
 
+        // Accumulate for session summary
+        totalStudyTime += seconds
+        totalXPGained += xpToAward
+
         Task {
             do {
                 try await statsManager.recordStudyTime(userId: userId, date: Date(), seconds: seconds)
@@ -196,6 +207,27 @@ final class SoloStudyRoomViewModel: ObservableObject {
                 }
             } catch {
                 print("Failed to record study time:", error)
+            }
+        }
+    }
+
+    /// Prepare and show session summary
+    func prepareSessionSummary() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+
+        Task {
+            do {
+                // Fetch current XP to calculate old/new
+                let stats = try await statsManager.fetchStats(userId: userId)
+                let currentXP = stats.xp ?? 0
+
+                await MainActor.run {
+                    self.newXP = currentXP
+                    self.oldXP = currentXP - totalXPGained
+                    self.showSessionSummary = true
+                }
+            } catch {
+                print("Failed to fetch stats for summary:", error)
             }
         }
     }

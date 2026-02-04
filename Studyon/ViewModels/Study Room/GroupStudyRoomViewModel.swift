@@ -61,7 +61,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
 
     // XP tracking
     private var workSessionStart: Date?
-    private var totalWorkTimeInSession: TimeInterval = 0
+    @Published var totalWorkTimeInSession: TimeInterval = 0
     private let statsManager = UserStatsManager.shared
 
     // Live Activity
@@ -72,6 +72,12 @@ final class GroupStudyRoomViewModel: ObservableObject {
 
     // Background Task Manager
     private let backgroundTaskManager = BackgroundTaskManager.shared
+
+    // Session summary tracking
+    @Published var showSessionSummary = false
+    @Published var totalXPGained: Int = 0
+    @Published var oldXP: Int = 0
+    @Published var newXP: Int = 0
 
     // Internals
     private var roomListener: ListenerRegistration?
@@ -102,7 +108,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
         backgroundTaskManager.startBackgroundTask()
     }
 
-    func stop() {
+    func stop(showSummary: Bool = true) {
         // Award XP before cleaning up
         awardXPForSession()
 
@@ -120,9 +126,14 @@ final class GroupStudyRoomViewModel: ObservableObject {
         // End background task when session ends
         backgroundTaskManager.endBackgroundTask()
         // Don't stop ServerClock.shared globally (shared across views)
+
+        // Prepare session summary if requested and there was study time
+        if showSummary && totalXPGained > 0 {
+            prepareSessionSummary()
+        }
     }
 
-    deinit { stop() }
+    deinit { stop(showSummary: false) }
 
     // MARK: Firestore listening
     private func listenToRoom() {
@@ -329,6 +340,9 @@ final class GroupStudyRoomViewModel: ObservableObject {
         let groupBonus = 20 // Bonus XP for studying in a group room
         let totalXP = baseXP + groupBonus
 
+        // Store for session summary
+        totalXPGained = totalXP
+
         // Reset immediately to prevent double-awarding
         totalWorkTimeInSession = 0
 
@@ -344,6 +358,25 @@ final class GroupStudyRoomViewModel: ObservableObject {
                 print("GroupStudyRoom: Awarded \(totalXP) XP (\(baseXP) from time + \(groupBonus) group bonus) for \(Int(workTime))s of work time")
             } catch {
                 print("GroupStudyRoom: Failed to award XP: \(error)")
+            }
+        }
+    }
+
+    /// Prepare and show session summary
+    func prepareSessionSummary() {
+        Task {
+            do {
+                // Fetch current XP to calculate old/new
+                let stats = try await statsManager.fetchStats(userId: currentUserId)
+                let currentXP = stats.xp ?? 0
+
+                await MainActor.run {
+                    self.newXP = currentXP
+                    self.oldXP = currentXP - totalXPGained
+                    self.showSessionSummary = true
+                }
+            } catch {
+                print("Failed to fetch stats for summary:", error)
             }
         }
     }
