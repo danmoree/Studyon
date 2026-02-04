@@ -160,24 +160,20 @@ struct GroupStudyRoomViewNew: View {
                 }
                 .padding(.horizontal, 23)
                 .padding(.top, geo.safeAreaInsets.top + 10)
-
-                // Session Summary Overlay
-                if vm.showSessionSummary {
-                    StudySessionSummaryView(
-                        studyTime: vm.totalWorkTimeInSession,
-                        xpGained: vm.totalXPGained,
-                        oldXP: vm.oldXP,
-                        newXP: vm.newXP,
-                        onDismiss: {
-                            vm.showSessionSummary = false
-                            dismiss()
-                        }
-                    )
-                    .transition(.opacity)
-                    .zIndex(1000)
-                }
             }
             .ignoresSafeArea()
+            .fullScreenCover(isPresented: $vm.showSessionSummary) {
+                StudySessionSummaryView(
+                    studyTime: vm.totalWorkTimeInSession,
+                    xpGained: vm.totalXPGained,
+                    oldXP: vm.oldXP,
+                    newXP: vm.newXP,
+                    onDismiss: {
+                        vm.showSessionSummary = false
+                        dismiss()
+                    }
+                )
+            }
             .onAppear {
                 vm.start()
                 lastPhase = vm.phase

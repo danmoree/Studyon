@@ -24,155 +24,135 @@ struct StudySessionSummaryView: View {
     @State private var showProgressBar = false
     @State private var animateProgress = false
     @State private var showLevelUp = false
+    @State private var levelUpScale: CGFloat = 1.0
     @Environment(\.colorScheme) var colorScheme
 
     private let levelSystem = LevelSystem.shared
 
     var body: some View {
         ZStack {
-            // Background
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    dismissView()
-                }
-
-            VStack(spacing: 24) {
+            VStack(spacing: 32) {
                 // Header
-                VStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.green)
-                        .scaleEffect(showContent ? 1.0 : 0.5)
-                        .opacity(showContent ? 1.0 : 0.0)
-
-                    Text("Session Complete!")
-                        .font(.title)
-                        .fontWeight(.bold)
+                VStack(spacing: 16) {
+                    Text("Session Complete")
+                        .font(.system(size: 32, weight: .bold))
                         .fontWidth(.expanded)
-                        .scaleEffect(showContent ? 1.0 : 0.5)
                         .opacity(showContent ? 1.0 : 0.0)
                 }
-                .padding(.top, 32)
+                .padding(.top, 60)
 
-                // Study Time
-                VStack(spacing: 12) {
-                    Text("Time Studied")
-                        .font(.headline)
-                        .fontWidth(.expanded)
-                        .foregroundStyle(.secondary)
+                // Stats Grid
+                VStack(spacing: 40) {
+                    // Study Time
+                    VStack(spacing: 8) {
+                        Text("TIME STUDIED")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .fontWidth(.expanded)
+                            .foregroundStyle(.secondary)
+                            .tracking(2)
 
-                    Text(formatTime(studyTime))
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .fontWidth(.expanded)
-                }
-                .opacity(showContent ? 1.0 : 0.0)
-                .offset(y: showContent ? 0 : 20)
+                        Text(formatTime(studyTime))
+                            .font(.system(size: 56, weight: .bold, design: .rounded))
+                            .fontWidth(.expanded)
+                    }
+                    .opacity(showContent ? 1.0 : 0.0)
+                    .offset(y: showContent ? 0 : 20)
 
-                Divider()
-                    .padding(.horizontal, 40)
-
-                // XP Gained
-                VStack(spacing: 12) {
-                    Text("XP Gained")
-                        .font(.headline)
-                        .fontWidth(.expanded)
-                        .foregroundStyle(.secondary)
-
-                    HStack(spacing: 8) {
-                        Image(systemName: "star.fill")
-                            .font(.title2)
-                            .foregroundColor(.yellow)
+                    // XP Gained
+                    VStack(spacing: 8) {
+                        Text("XP GAINED")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .fontWidth(.expanded)
+                            .foregroundStyle(.secondary)
+                            .tracking(2)
 
                         Text("+\(xpGained)")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                            .font(.system(size: 48, weight: .bold, design: .rounded))
                             .fontWidth(.expanded)
-                            .foregroundColor(.yellow)
                     }
-                    .scaleEffect(showXPGain ? 1.2 : 0.8)
                     .opacity(showXPGain ? 1.0 : 0.0)
+                    .offset(y: showXPGain ? 0 : 20)
                 }
 
-                // XP Progress Bar
+                // Level & Progress Section
                 if showProgressBar {
-                    VStack(spacing: 12) {
+                    VStack(spacing: 24) {
                         let oldLevelInfo = levelSystem.getLevelInfo(xp: oldXP)
                         let newLevelInfo = levelSystem.getLevelInfo(xp: newXP)
+                        let didLevelUp = levelSystem.didLevelUp(oldXP: oldXP, newXP: newXP)
 
-                        HStack {
-                            Text(oldLevelInfo.displayName)
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .fontWidth(.expanded)
+                        // Level-up announcement
+                        if showLevelUp && didLevelUp {
+                            VStack(spacing: 8) {
+                                Text("LEVEL UP")
+                                    .font(.system(size: 28, weight: .black))
+                                    .fontWidth(.expanded)
+                                    .tracking(3)
+                                    .scaleEffect(levelUpScale)
+                                    .transition(.scale.combined(with: .opacity))
 
-                            Spacer()
-
-                            Text("\(newLevelInfo.xpRequired) / \(newLevelInfo.xpForNextLevel) XP")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        // Progress bar
-                        GeometryReader { geometry in
-                            ZStack(alignment: .leading) {
-                                // Background
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.systemGray5))
-                                    .frame(height: 24)
-
-                                // Old progress
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [.blue, .green],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .frame(
-                                        width: animateProgress
-                                            ? geometry.size.width * CGFloat(newLevelInfo.progressToNextLevel)
-                                            : geometry.size.width * CGFloat(oldLevelInfo.progressToNextLevel),
-                                        height: 24
-                                    )
-                                    .animation(.spring(response: 1.0, dampingFraction: 0.6), value: animateProgress)
+                                Text(newLevelInfo.displayName)
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .fontWidth(.expanded)
+                                    .scaleEffect(levelUpScale)
+                                    .transition(.scale.combined(with: .opacity))
                             }
+                            .animation(.spring(response: 0.6, dampingFraction: 0.7), value: showLevelUp)
                         }
-                        .frame(height: 24)
+
+                        // Level and XP info
+                        VStack(spacing: 16) {
+                            HStack {
+                                if showLevelUp && didLevelUp {
+                                    Text(newLevelInfo.displayName)
+                                        .font(.headline)
+                                        .fontWeight(.bold)
+                                        .fontWidth(.expanded)
+                                        .transition(.scale.combined(with: .opacity))
+                                } else {
+                                    Text(oldLevelInfo.displayName)
+                                        .font(.headline)
+                                        .fontWeight(.bold)
+                                        .fontWidth(.expanded)
+                                        .transition(.scale.combined(with: .opacity))
+                                }
+
+                                Spacer()
+
+                                Text("\(newLevelInfo.xpRequired) / \(newLevelInfo.xpForNextLevel) XP")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .animation(.spring(response: 0.6, dampingFraction: 0.7), value: showLevelUp)
+
+                            // Progress bar
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    // Background
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(Color(.systemGray5))
+                                        .frame(height: 8)
+
+                                    // Progress fill
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(colorScheme == .dark ? Color.white : Color.black)
+                                        .frame(
+                                            width: animateProgress
+                                                ? geometry.size.width * CGFloat(newLevelInfo.progressToNextLevel)
+                                                : geometry.size.width * CGFloat(oldLevelInfo.progressToNextLevel),
+                                            height: 8
+                                        )
+                                        .animation(.spring(response: 1.0, dampingFraction: 0.6), value: animateProgress)
+                                }
+                            }
+                            .frame(height: 8)
+                        }
                     }
-                    .padding(.horizontal, 24)
-                }
-
-                // Level Up Animation
-                if showLevelUp, let newLevel = levelSystem.getNewLevelIfLeveledUp(oldXP: oldXP, newXP: newXP) {
-                    VStack(spacing: 16) {
-                        Text("LEVEL UP!")
-                            .font(.system(size: 32, weight: .black, design: .rounded))
-                            .fontWidth(.expanded)
-
-                            .scaleEffect(showLevelUp ? 1.2 : 0.5)
-
-                        Text(newLevel.displayName)
-                            .font(.system(size: 48))
-                            .scaleEffect(showLevelUp ? 1.0 : 0.5)
-
-                        // Confetti or sparkle effect
-//                        HStack(spacing: 4) {
-//                            ForEach(0..<5) { _ in
-//                                Image(systemName: "sparkle")
-//                                    .font(.title)
-//                                    .foregroundColor(.yellow)
-//                            }
-//                        }
-//                        .scaleEffect(showLevelUp ? 1.2 : 0.0)
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(colorScheme == .dark ? Color(.systemGray6) : .white)
-                            .shadow(color: .yellow.opacity(0.3), radius: 20)
-                    )
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 32)
                 }
 
                 Spacer()
@@ -183,29 +163,25 @@ struct StudySessionSummaryView: View {
                 } label: {
                     Text("Continue")
                         .font(.headline)
+                        .fontWeight(.semibold)
                         .fontWidth(.expanded)
-                        .foregroundStyle(.white)
+                        .tracking(1)
+                        .foregroundStyle(colorScheme == .dark ? .black : .white)
                         .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(.vertical, 18)
                         .background(
-                            RoundedRectangle(cornerRadius: 16)
+                            RoundedRectangle(cornerRadius: 8)
                                 .fill(colorScheme == .dark ? .white : .black)
                         )
-                        .foregroundStyle(colorScheme == .dark ? .black : .white)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 32)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 40)
                 .opacity(showContent ? 1.0 : 0.0)
             }
-            .frame(maxWidth: 400)
-            .background(
-                RoundedRectangle(cornerRadius: 28)
-                    .fill(colorScheme == .dark ? Color(.systemGray6) : .white)
-                    .shadow(radius: 20)
-            )
-            .padding(24)
-            .scaleEffect(showContent ? 1.0 : 0.8)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color("background").ignoresSafeArea())
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             startAnimationSequence()
         }
@@ -237,6 +213,7 @@ struct StudySessionSummaryView: View {
         // Step 5: Check for level up and show animation
         if levelSystem.didLevelUp(oldXP: oldXP, newXP: newXP) {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                // Show level up
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
                     showLevelUp = true
                 }
@@ -245,9 +222,14 @@ struct StudySessionSummaryView: View {
                 let generator = UINotificationFeedbackGenerator()
                 generator.notificationOccurred(.success)
 
-                // Pulse animation
-                withAnimation(.easeInOut(duration: 0.6).repeatCount(3, autoreverses: true)) {
-                    showLevelUp = true
+                // Pulse animation for level text
+                withAnimation(.easeInOut(duration: 0.5).repeatCount(2, autoreverses: true)) {
+                    levelUpScale = 1.08
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        levelUpScale = 1.0
+                    }
                 }
             }
         }

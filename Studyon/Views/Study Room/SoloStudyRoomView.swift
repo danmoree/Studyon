@@ -133,22 +133,18 @@ struct SoloStudyRoomView: View {
                 .padding(.top, geo.safeAreaInsets.top + 10)
             }
             .ignoresSafeArea()
-
-            // Session Summary Overlay
-            if viewModel.showSessionSummary {
-                StudySessionSummaryView(
-                    studyTime: viewModel.totalStudyTime,
-                    xpGained: viewModel.totalXPGained,
-                    oldXP: viewModel.oldXP,
-                    newXP: viewModel.newXP,
-                    onDismiss: {
-                        viewModel.showSessionSummary = false
-                        dismiss()
-                    }
-                )
-                .transition(.opacity)
-                .zIndex(1000)
-            }
+        }
+        .fullScreenCover(isPresented: $viewModel.showSessionSummary) {
+            StudySessionSummaryView(
+                studyTime: viewModel.totalStudyTime,
+                xpGained: viewModel.totalXPGained,
+                oldXP: viewModel.oldXP,
+                newXP: viewModel.newXP,
+                onDismiss: {
+                    viewModel.showSessionSummary = false
+                    dismiss()
+                }
+            )
         }
     }
 }
