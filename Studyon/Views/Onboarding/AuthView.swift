@@ -180,8 +180,9 @@ struct IntroView<ActionView: View>: View {
     
     var body: some View {
         VStack {
-            // Back button (if not on first intro)
+            // Back button and Skip button
             HStack {
+                // Back button (if not on first intro)
                 if intro != pageIntros.first {
                     Button {
                         changeIntro(true)
@@ -196,8 +197,23 @@ struct IntroView<ActionView: View>: View {
                     .offset(y: showView ? 0 : -200)
                     .offset(y: hideWholeView ? -200 : 0)
                 }
-                
+
                 Spacer()
+
+                // Skip button (show on pages before auth)
+                if !intro.displayAction {
+                    Button {
+                        skipToAuth()
+                    } label: {
+                        Text("Skip")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(10)
+                    .offset(y: showView ? 0 : -200)
+                    .offset(y: hideWholeView ? -200 : 0)
+                }
             }
             
             // Title
@@ -212,11 +228,14 @@ struct IntroView<ActionView: View>: View {
             
             GeometryReader { proxy in
                 let size = proxy.size
-                
-                Image(intro.introAssetImage)
+
+                // Use SF Symbols for the onboarding icons
+                Image(systemName: intro.introAssetImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .padding(30)
+                    .foregroundStyle(.primary)
+                    .font(.system(size: 100, weight: .light))
+                    .padding(40)
                     .frame(width: size.width, height: size.height)
             }
             .offset(y: showView ? 0 : -size.height / 2)
@@ -275,7 +294,7 @@ struct IntroView<ActionView: View>: View {
         withAnimation(.spring(response: 0.8, dampingFraction: 0.8, blendDuration: 0)) {
             hideWholeView = true
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             if let index = pageIntros.firstIndex(of: intro),
                (isPrevious ? index != 0 : index != pageIntros.count - 1) {
@@ -283,16 +302,34 @@ struct IntroView<ActionView: View>: View {
             } else {
                 intro = isPrevious ? pageIntros[0] : pageIntros[pageIntros.count - 1]
             }
-            
+
             hideWholeView = false
             showView = false
-            
+
             withAnimation(.spring(response: 0.8, dampingFraction: 0.8, blendDuration: 0)) {
                 showView = true
             }
         }
     }
-    
+
+    func skipToAuth() {
+        withAnimation(.spring(response: 0.8, dampingFraction: 0.8, blendDuration: 0)) {
+            hideWholeView = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            // Jump to last page (auth page)
+            intro = pageIntros.last!
+
+            hideWholeView = false
+            showView = false
+
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.8, blendDuration: 0)) {
+                showView = true
+            }
+        }
+    }
+
     var filteredPages: [PageIntro] {
         return pageIntros.filter { !$0.displayAction }
     }
