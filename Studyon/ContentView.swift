@@ -18,46 +18,29 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var isUserLoggedIn = Auth.auth().currentUser != nil
     @StateObject private var userVM = ProfileViewModel()
-    @State private var needsProfileSetup = false
     @State private var userID: String? = Auth.auth().currentUser?.uid
-    @State private var hasCheckedProfile = false
     @EnvironmentObject var settingsVM: SettingsViewModel
     
     var body: some View {
-        
         Group {
-            // check if userID is not nill then it checks the isUserLoggedin and the other var
-            if let uid = userID, isUserLoggedIn, hasCheckedProfile {
-                if needsProfileSetup {
-                    ProfileSetupView(userID: uid, needsProfileSetup: $needsProfileSetup)
-                        .environmentObject(userVM)
-                } else {
-                    ZStack {
-                        Color("background").ignoresSafeArea()
-                        MainTabView(isUserLoggedIn: $isUserLoggedIn)
-                            .task {
-                                try? await userVM.loadCurrentUser()
-                                if userVM.profileImage == nil {
-                                    await userVM.loadProfileImage()
-                                }
+            if let uid = userID, isUserLoggedIn {
+                ZStack {
+                    Color("background").ignoresSafeArea()
+                    MainTabView(isUserLoggedIn: $isUserLoggedIn)
+                        .task {
+                            try? await userVM.loadCurrentUser()
+                            if userVM.profileImage == nil {
+                                await userVM.loadProfileImage()
                             }
-                            .environmentObject(userVM)
-                            .environmentObject(settingsVM)
-                    
-                    }
+                        }
+                        .environmentObject(userVM)
+                        .environmentObject(settingsVM)
                 }
-            } else if isUserLoggedIn && !hasCheckedProfile {
-                ProgressView("Loading profile...")
             } else {
                 AuthView(onLoginSuccess: {
                     self.userID = Auth.auth().currentUser?.uid
-                    self.checkProfileThenLogin()
+                    self.isUserLoggedIn = true
                 })
-            }
-        }
-        .task {
-            if isUserLoggedIn && !hasCheckedProfile {
-                self.checkProfile()
             }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
@@ -79,42 +62,6 @@ struct ContentView: View {
                 break
             }
             
-        }
-    
-    }
-    
-    private func checkProfile() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(uid)
-
-        userRef.getDocument { snapshot, error in
-            if let data = snapshot?.data(),
-               let username = data["username"] as? String,
-               !username.isEmpty {
-                self.needsProfileSetup = false
-            } else {
-                self.needsProfileSetup = true
-            }
-            self.hasCheckedProfile = true
-        }
-    }
-    
-    private func checkProfileThenLogin() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(uid)
-
-        userRef.getDocument { snapshot, error in
-            if let data = snapshot?.data(),
-               let username = data["username"] as? String,
-               !username.isEmpty {
-                self.needsProfileSetup = false
-            } else {
-                self.needsProfileSetup = true
-            }
-            self.hasCheckedProfile = true
-            self.isUserLoggedIn = true
         }
     }
 }

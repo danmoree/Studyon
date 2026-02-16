@@ -12,6 +12,7 @@
 
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 // New combined authentication view model
 @MainActor
@@ -81,15 +82,23 @@ final class AuthViewModel: ObservableObject {
 struct AuthView: View {
     var onLoginSuccess: () -> Void
     @StateObject private var viewModel = AuthViewModel()
-    
+
     @State private var activeIntro: PageIntro = pageIntros[0]
     @State private var isSignUp = true  // true = Sign Up mode; false = Sign In mode
-    
+
+    // Profile setup management
+    @State private var showProfileSetup: Bool = false
+    @State private var authenticatedUserID: String? = nil
+    @State private var isCheckingProfile: Bool = false
+    @StateObject private var profileViewModel = ProfileViewModel()
+
     var body: some View {
-        GeometryReader { geo in
-            let size = geo.size
-            
-            IntroView(intro: $activeIntro, size: size) {
+        ZStack {
+            // Main auth flow
+            GeometryReader { geo in
+                let size = geo.size
+
+                IntroView(intro: $activeIntro, size: size) {
                 // Combined Authentication View
                 VStack(spacing: 10) {
                     // Email field
@@ -112,9 +121,9 @@ struct AuthView: View {
                     // Primary action button (Sign Up / Sign In)
                     Button {
                         if isSignUp {
-                            viewModel.signUp(onSuccess: onLoginSuccess)
+                            viewModel.signUp(onSuccess: handleAuthSuccess)
                         } else {
-                            viewModel.signIn(onSuccess: onLoginSuccess)
+                            viewModel.signIn(onSuccess: handleAuthSuccess)
                         }
                     } label: {
                         Text(isSignUp ? "Sign Up" : "Sign In")
@@ -138,20 +147,105 @@ struct AuthView: View {
                 }
                 .padding(.top, 25)
             }
-        }
-        .padding(15)
-        
-        // error banner
-        if let error = viewModel.errorMessage {
-            ErrorBannerView(message: error)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .onAppear {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        withAnimation{
-                            viewModel.errorMessage = nil
-                        }
-                    }
+            }
+            .padding(15)
+            .opacity(showProfileSetup ? 0 : 1)  // Hide when showing profile setup
+
+            // Profile Setup Overlay
+            if showProfileSetup, let userID = authenticatedUserID {
+                ProfileSetupView(userID: userID) {
+                    // On completion, navigate to main app
+                    onLoginSuccess()
                 }
+                .environmentObject(profileViewModel)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
+
+            // Loading indicator during profile check
+            if isCheckingProfile {
+                ZStack {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+
+                    VStack(spacing: 12) {
+                        ProgressView()
+                        Text("Setting up your account...")
+                            .fontWeight(.medium)
+                    }
+                    .padding(24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemBackground))
+                    )
+                }
+            }
+
+            // Error banner
+            if let error = viewModel.errorMessage {
+                VStack {
+                    ErrorBannerView(message: error)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                withAnimation{
+                                    viewModel.errorMessage = nil
+                                }
+                            }
+                        }
+                    Spacer()
+                }
+            }
+        }
+    }
+
+    // MARK: - Helper Functions
+
+    private func checkProfileCompleteness(userID: String) async {
+        await MainActor.run {
+            isCheckingProfile = true
+        }
+
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(userID)
+
+        do {
+            let snapshot = try await userRef.getDocument()
+
+            if let data = snapshot.data(),
+               let username = data["username"] as? String,
+               !username.isEmpty {
+                // Profile complete → go to main app
+                await MainActor.run {
+                    isCheckingProfile = false
+                    onLoginSuccess()
+                }
+            } else {
+                // Profile incomplete → show ProfileSetupView
+                await MainActor.run {
+                    isCheckingProfile = false
+                    showProfileSetup = true
+                }
+            }
+        } catch {
+            print("Profile check error: \(error)")
+            // Default to showing profile setup on error (safe fallback)
+            await MainActor.run {
+                isCheckingProfile = false
+                showProfileSetup = true
+            }
+        }
+    }
+
+    private func handleAuthSuccess() {
+        guard let userID = Auth.auth().currentUser?.uid else {
+            viewModel.errorMessage = "Authentication failed. Please try again."
+            return
+        }
+
+        authenticatedUserID = userID
+
+        Task {
+            await checkProfileCompleteness(userID: userID)
         }
     }
 }

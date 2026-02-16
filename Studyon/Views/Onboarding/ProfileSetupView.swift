@@ -16,13 +16,13 @@ import FirebaseAuth
 
 struct ProfileSetupView: View {
     let userID: String
-    
-    @Binding var needsProfileSetup: Bool
+    var onComplete: () -> Void
+
     @State private var fullName    = ""
     @State private var username    = ""
     @State private var birthDate   = Date()
     @State private var errorMessage: String?
-    
+
     @EnvironmentObject var userVM: ProfileViewModel
     
     
@@ -111,11 +111,14 @@ struct ProfileSetupView: View {
                             dateOfBirth: birthDate
                         )
                         
-                        // refresh profile, set flag
+                        // refresh profile
                         try await userVM.loadCurrentUser()
-                        needsProfileSetup = false
-                        
-                        
+
+                        // Call completion handler
+                        await MainActor.run {
+                            onComplete()
+                        }
+
                     } catch {
                         errorMessage = "Failed to save profile: \(error.localizedDescription)"
                         print("Failed to save profile: \(error.localizedDescription)")
@@ -144,5 +147,5 @@ struct ProfileSetupView: View {
  
 
 #Preview {
-    ProfileSetupView(userID: "sdfasdga", needsProfileSetup: .constant(true))
+    ProfileSetupView(userID: "sdfasdga", onComplete: {})
 }
