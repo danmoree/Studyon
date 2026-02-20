@@ -18,6 +18,7 @@ struct StudySessionSummaryView: View {
     let oldXP: Int // XP before session
     let newXP: Int // XP after session
     let onDismiss: () -> Void
+    let groupBonus: Int? // Optional: bonus XP for group study rooms
 
     @State private var showContent = false
     @State private var showXPGain = false
@@ -68,9 +69,23 @@ struct StudySessionSummaryView: View {
                             .foregroundStyle(.secondary)
                             .tracking(2)
 
-                        Text("+\(xpGained)")
-                            .font(.system(size: 48, weight: .bold, design: .rounded))
-                            .fontWidth(.expanded)
+                        if let bonus = groupBonus {
+                            let baseXP = xpGained - bonus
+                            VStack(spacing: 4) {
+                                Text("+\(xpGained)")
+                                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                                    .fontWidth(.expanded)
+
+                                Text("\(baseXP) × 40% = \(bonus) bonus")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } else {
+                            Text("+\(xpGained)")
+                                .font(.system(size: 48, weight: .bold, design: .rounded))
+                                .fontWidth(.expanded)
+                        }
                     }
                     .opacity(showXPGain ? 1.0 : 0.0)
                     .offset(y: showXPGain ? 0 : 20)
@@ -267,6 +282,7 @@ struct StudySessionSummaryView: View {
         xpGained: 60,
         oldXP: 250,
         newXP: 310,
-        onDismiss: {}
+        onDismiss: {},
+        groupBonus: nil
     )
 }

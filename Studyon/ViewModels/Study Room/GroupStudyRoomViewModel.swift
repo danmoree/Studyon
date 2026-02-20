@@ -78,6 +78,12 @@ final class GroupStudyRoomViewModel: ObservableObject {
     @Published var totalXPGained: Int = 0
     @Published var oldXP: Int = 0
     @Published var newXP: Int = 0
+    @Published var groupBonusXP: Int = 0 // Store bonus XP for display
+    private var totalWorkTimeForSummary: TimeInterval = 0 // Preserve work time for summary display
+
+    var displayWorkTime: TimeInterval {
+        totalWorkTimeForSummary
+    }
 
     // Internals
     private var roomListener: ListenerRegistration?
@@ -328,8 +334,11 @@ final class GroupStudyRoomViewModel: ObservableObject {
             endWorkSession()
         }
 
-        guard totalWorkTimeInSession > 0 else {
-            print("GroupStudyRoom: No work time to award XP for")
+        // Minimum threshold: must study for at least 60 seconds
+        let minStudySeconds: TimeInterval = 60
+        guard totalWorkTimeInSession >= minStudySeconds else {
+            print("GroupStudyRoom: Study time (\(Int(totalWorkTimeInSession))s) below minimum threshold (\(Int(minStudySeconds))s), no XP awarded")
+            totalWorkTimeInSession = 0 // Reset without awarding
             return
         }
 
@@ -337,11 +346,14 @@ final class GroupStudyRoomViewModel: ObservableObject {
         let workTime = totalWorkTimeInSession
         let minutes = Int(workTime / 60)
         let baseXP = minutes // 1 XP per minute
-        let groupBonus = 20 // Bonus XP for studying in a group room
-        let totalXP = baseXP + groupBonus
+        let groupBonusMultiplier = 0.4 // 40% bonus for studying in a group room
+        let bonusXP = Int(Double(baseXP) * groupBonusMultiplier)
+        let totalXP = baseXP + bonusXP
 
         // Store for session summary
         totalXPGained = totalXP
+        groupBonusXP = bonusXP // Store bonus for display
+        totalWorkTimeForSummary = workTime // Preserve for display
 
         // Reset immediately to prevent double-awarding
         totalWorkTimeInSession = 0
@@ -355,7 +367,7 @@ final class GroupStudyRoomViewModel: ObservableObject {
             do {
                 try await statsManager.recordStudyTime(userId: currentUserId, date: Date(), seconds: workTime)
                 try await statsManager.incrementXP(userId: currentUserId, by: totalXP)
-                print("GroupStudyRoom: Awarded \(totalXP) XP (\(baseXP) from time + \(groupBonus) group bonus) for \(Int(workTime))s of work time")
+                print("GroupStudyRoom: Awarded \(totalXP) XP (\(baseXP) base + \(bonusXP) group bonus [40%]) for \(Int(workTime))s of work time")
             } catch {
                 print("GroupStudyRoom: Failed to award XP: \(error)")
             }
@@ -407,7 +419,13 @@ final class GroupStudyRoomViewModel: ObservableObject {
             return nil
         }
     }
-    
+
+    // Async accessor that fetches and returns the name
+    func name(for uid: String) async throws -> String {
+        await fetchNameIfNeeded(for: uid)
+        return userNames[uid] ?? uid
+    }
+
     // Fetch and cache if missing
     @MainActor
     func fetchNameIfNeeded(for uid: String) async {

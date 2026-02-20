@@ -63,10 +63,8 @@ struct GroupStudyRoomViewNew: View {
                 
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
-                        
-                        
                         Spacer()
-                        
+
 //                        Button {
 //                           // vm.pauseToggle()
 //                        } label: {
@@ -162,16 +160,29 @@ struct GroupStudyRoomViewNew: View {
                 .padding(.top, geo.safeAreaInsets.top + 10)
             }
             .ignoresSafeArea()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        handleBackButton()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                        }
+                    }
+                }
+            }
+            .navigationBarBackButtonHidden(true)
             .fullScreenCover(isPresented: $vm.showSessionSummary) {
                 StudySessionSummaryView(
-                    studyTime: vm.totalWorkTimeInSession,
+                    studyTime: vm.displayWorkTime,
                     xpGained: vm.totalXPGained,
                     oldXP: vm.oldXP,
                     newXP: vm.newXP,
                     onDismiss: {
                         vm.showSessionSummary = false
                         dismiss()
-                    }
+                    },
+                    groupBonus: vm.groupBonusXP
                 )
             }
             .onAppear {
@@ -191,7 +202,7 @@ struct GroupStudyRoomViewNew: View {
                     phaseTotalSeconds = newRemaining
                 }
             }
-            .onDisappear { vm.stop() }
+            .onDisappear { vm.stop(showSummary: false) }
             .onChange(of: scenePhase) { newPhase in
                 switch newPhase {
                 case .active:
@@ -208,6 +219,17 @@ struct GroupStudyRoomViewNew: View {
                 }
             }
         }
+    }
+
+    private func handleBackButton() {
+        // Stop the session and show summary if there was any study time
+        vm.stop(showSummary: true)
+
+        // If no study time, dismiss immediately
+        if vm.totalXPGained == 0 {
+            dismiss()
+        }
+        // Otherwise, the summary view will handle dismissal via its onDismiss callback
     }
 }
 

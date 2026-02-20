@@ -16,6 +16,9 @@ struct GroupStudyRoomView: View {
     // ViewModel
     @StateObject private var vm: GroupStudyRoomViewModel
 
+    // Environment
+    @Environment(\.dismiss) private var dismiss
+
     // Custom initializer so we can pass params into @StateObject
     init(roomId: String, currentUserId: String, isHost: Bool) {
         self.roomId = roomId
@@ -35,8 +38,34 @@ struct GroupStudyRoomView: View {
         .padding()
         .navigationTitle("Study Room")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    handleBackButton()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Back")
+                    }
+                }
+            }
+        }
+        .navigationBarBackButtonHidden(true)
         .onAppear { vm.start() }
-        .onDisappear { vm.stop() }
+        .onDisappear { vm.stop(showSummary: false) }
+        .fullScreenCover(isPresented: $vm.showSessionSummary) {
+            StudySessionSummaryView(
+                studyTime: vm.displayWorkTime,
+                xpGained: vm.totalXPGained,
+                oldXP: vm.oldXP,
+                newXP: vm.newXP,
+                onDismiss: {
+                    vm.showSessionSummary = false
+                    dismiss()
+                },
+                groupBonus: vm.groupBonusXP
+            )
+        }
     }
 
     // MARK: - Sections
@@ -174,7 +203,7 @@ struct GroupStudyRoomView: View {
         // Without total, we can't compute fraction; show a small animated sweep using remainingSeconds modulo.
         return 1 - (Double(vm.remainingSeconds % max(vm.remainingSeconds, 1)) / Double(max(vm.remainingSeconds, 1)))
     }
-    
+
     private var nextActionDescription: String {
         if !vm.isPaused && vm.remainingSeconds > 0 { return "Tap to pause" }
         if vm.isPaused && vm.remainingSeconds > 0 { return "Tap to resume" }
@@ -182,6 +211,17 @@ struct GroupStudyRoomView: View {
             return vm.phase == "work" ? "Tap to start break" : "Tap to start work"
         }
         return "Tap to start work"
+    }
+
+    private func handleBackButton() {
+        // Stop the session and show summary if there was any study time
+        vm.stop(showSummary: true)
+
+        // If no study time, dismiss immediately
+        if vm.totalXPGained == 0 {
+            dismiss()
+        }
+        // Otherwise, the summary view will handle dismissal via its onDismiss callback
     }
 }
 

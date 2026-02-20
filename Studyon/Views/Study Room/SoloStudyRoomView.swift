@@ -143,7 +143,8 @@ struct SoloStudyRoomView: View {
                 onDismiss: {
                     viewModel.showSessionSummary = false
                     dismiss()
-                }
+                },
+                groupBonus: nil
             )
         }
     }
