@@ -32,6 +32,7 @@ struct CreateStudyRoomGroupView: View {
     @State var loadingRoom: Bool = false
     @State private var showInviteFriends: Bool = false
     @State private var selectedFriendIds: Set<String> = []
+    @State private var titleError: String? = nil
 
     private func createRoomAndInviteFriends() async {
         let newRoomId = Firestore.firestore().collection("rooms").document().documentID
@@ -128,11 +129,31 @@ struct CreateStudyRoomGroupView: View {
                     VStack(spacing: 32) {
                         // Title TextField
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Title")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .fontWidth(.expanded)
-                            CustomTextField2(text: $title, hint: "Biology exam lock in")
+                            HStack {
+                                Text("Title")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                    .fontWidth(.expanded)
+                                Spacer()
+                                Text("\(title.count)/\(InputValidator.roomTitleMax)")
+                                    .font(.caption)
+                                    .foregroundStyle(title.count > InputValidator.roomTitleMax - 10 ? .orange : .secondary)
+                            }
+                            CustomTextField2(
+                                text: Binding(
+                                    get: { title },
+                                    set: { newValue in
+                                        title = InputValidator.sanitiseTitle(newValue, maxLength: InputValidator.roomTitleMax)
+                                        titleError = nil
+                                    }
+                                ),
+                                hint: "Biology exam lock in"
+                            )
+                            if let error = titleError {
+                                Text(error)
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                            }
                         }
                         .padding(.horizontal)
                         
@@ -251,8 +272,13 @@ struct CreateStudyRoomGroupView: View {
                         
                         // Create Button
                         Button {
+                            if let error = InputValidator.validateRoomTitle(title) {
+                                titleError = error
+                                return
+                            }
                             Task {
                                 loadingRoom = true
+                                title = title.trimmingCharacters(in: .whitespacesAndNewlines)
                                 await createRoomAndInviteFriends()
                                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                                 showCreateStudyRoomGroup = false

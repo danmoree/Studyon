@@ -6,7 +6,9 @@
       "Bash(xcodebuild:*)",
       "Bash(tee:*)",
       "Bash(cd:*)",
-      "Bash(xcrun simctl:*)"
+      "Bash(xcrun simctl:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(python3:*)"
     ]
   }
 }

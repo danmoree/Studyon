@@ -19,12 +19,15 @@ struct NameSettingsView: View {
         Form {
             Section(header: Text("Name")) {
                 TextField("Full name", text: $fullName)
-                //NavigationLink("Change Password", destination: ChangePasswordView())
+                    .onChange(of: fullName) { newValue in
+                        fullName = InputValidator.sanitiseFullName(newValue)
+                    }
             }
-            Text("Your name must be fewer than 30 characters.")
-            
+            Text("2–\(InputValidator.fullNameMax) characters. Letters, spaces, hyphens and apostrophes only.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
-        
+
         .onAppear {
             if let name = userVM.user?.fullName {
                 fullName = name
@@ -33,14 +36,14 @@ struct NameSettingsView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("Done") {
+                    if let error = InputValidator.validateFullName(fullName) {
+                        alertMessage = error
+                        showAlert = true
+                        return
+                    }
                     Task {
                         do {
-                            if fullName.count >= 30 || fullName.count == 0 {
-                                alertMessage = "Name must be between 1 and 30 characters."
-                                showAlert = true
-                                return
-                            }
-                            try await settingsVM.changeName(name: fullName)
+                            try await settingsVM.changeName(name: fullName.trimmingCharacters(in: .whitespaces))
                             try await userVM.loadCurrentUser()
                             dismiss()
                         } catch {

@@ -19,12 +19,17 @@ struct UsernameSettingsView: View {
         Form {
             Section(header: Text("Username")) {
                 TextField("Username", text: $username)
-                //NavigationLink("Change Password", destination: ChangePasswordView())
+                    .autocapitalization(.none)
+                    .autocorrectionDisabled()
+                    .onChange(of: username) { newValue in
+                        username = InputValidator.sanitiseUsername(newValue)
+                    }
             }
-            Text("Your username must be available and fewer than 30 characters.")
-            
+            Text("3–\(InputValidator.usernameMax) characters. Lowercase letters, numbers and underscores only. Cannot start or end with an underscore.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
-        
+
         .onAppear {
             if let userUsername = userVM.user?.username {
                 username = userUsername
@@ -33,13 +38,13 @@ struct UsernameSettingsView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("Done") {
+                    if let error = InputValidator.validateUsername(username) {
+                        alertMessage = error
+                        showAlert = true
+                        return
+                    }
                     Task {
                         do {
-                            if username.count >= 30 || username.count == 0 {
-                                alertMessage = "Username must be between 1 and 30 characters."
-                                showAlert = true
-                                return
-                            }
                             try await settingsVM.changeUsername(username: username)
                             try await userVM.loadCurrentUser()
                             dismiss()

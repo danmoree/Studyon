@@ -21,6 +21,7 @@ struct EditTaskView: View {
     
     @State private var showPriorityOptions = false
     @State private var showDeleteAlert = false
+    @State private var titleError: String? = nil
     
     var task: UTask
     
@@ -91,6 +92,18 @@ struct EditTaskView: View {
         ScrollView {
             VStack {
                 CustomTextField(text: $title, hint: "What would you like to do?", leadingIcon: Image(systemName: "list.clipboard.fill"), isPassword: false)
+                    .onChange(of: title) { newValue in
+                        title = InputValidator.sanitiseTitle(newValue)
+                        titleError = nil
+                    }
+
+                if let error = titleError {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 4)
+                }
                 
                 
                 
@@ -166,19 +179,22 @@ struct EditTaskView: View {
                 }
                 
                 Button {
+                    if let error = InputValidator.validateTaskTitle(title) {
+                        titleError = error
+                        return
+                    }
                     Task {
                         guard let userId = Auth.auth().currentUser?.uid else { return }
-                        
-                        let updatedTask = UTask(taskId: task.taskId, title: title, createdAt: task.createdAt ?? Date(), dueDate: dueDate, completed: task.completed ?? false, priority: priority)
-                        
+
+                        let updatedTask = UTask(taskId: task.taskId, title: title.trimmingCharacters(in: .whitespacesAndNewlines), createdAt: task.createdAt ?? Date(), dueDate: dueDate, completed: task.completed ?? false, priority: priority)
+
                         do {
                             try await TaskManager.shared.updateTask(for: userId, task: updatedTask)
                             viewModel.fetchTasks(for: userId)
-                            isShowingEditSheet = false // dismiss sheet
+                            isShowingEditSheet = false
                         } catch {
                             print("Failed to update task:", error.localizedDescription)
                         }
-                        
                     }
                 } label: {
                     Text("Update")

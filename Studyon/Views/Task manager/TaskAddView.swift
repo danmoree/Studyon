@@ -19,8 +19,9 @@ struct TaskAddView: View {
     @State private var includeTime: Bool = false
     @State private var priority: String = "None"
     @State private var showPriorityOptions = false
+    @State private var titleError: String? = nil
     @Binding var showingAddTaskSheet: Bool
-    
+
     @ObservedObject var viewModel: TasksViewModel
     
     
@@ -56,6 +57,18 @@ struct TaskAddView: View {
         ScrollView {
             VStack {
                 CustomTextField(text: $title, hint: "What would you like to do?", leadingIcon: Image(systemName: "list.clipboard.fill"), isPassword: false)
+                    .onChange(of: title) { newValue in
+                        title = InputValidator.sanitiseTitle(newValue)
+                        titleError = nil
+                    }
+
+                if let error = titleError {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 4)
+                }
                 
                 
                 
@@ -131,19 +144,22 @@ struct TaskAddView: View {
                 }
                 
                 Button {
+                    if let error = InputValidator.validateTaskTitle(title) {
+                        titleError = error
+                        return
+                    }
                     Task {
                         guard let userId = Auth.auth().currentUser?.uid else { return }
-                        
-                        let newTask = UTask(taskId: "", title: title, createdAt: Date(), dueDate: dueDate, completed: false, priority: priority)
-                        
+
+                        let newTask = UTask(taskId: "", title: title.trimmingCharacters(in: .whitespacesAndNewlines), createdAt: Date(), dueDate: dueDate, completed: false, priority: priority)
+
                         do {
                             try await TaskManager.shared.addTask(for: userId, task: newTask)
                             await viewModel.fetchTasks(for: userId)
-                            showingAddTaskSheet = false // dismiss sheet
+                            showingAddTaskSheet = false
                         } catch {
                             print("Failed to add task:", error.localizedDescription)
                         }
-                        
                     }
                 } label: {
                     Text("Add")

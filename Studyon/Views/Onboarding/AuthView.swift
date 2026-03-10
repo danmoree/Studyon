@@ -22,57 +22,53 @@ final class AuthViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     
     func signUp(onSuccess: @escaping () -> Void) {
-        guard !email.isEmpty, !password.isEmpty else {
-            print("No email or password provided for sign up.")
-            return
+        if let emailError = InputValidator.validateEmail(email) {
+            errorMessage = emailError; return
         }
-        
+        if let passwordError = InputValidator.validatePassword(password) {
+            errorMessage = passwordError; return
+        }
+
         Task {
             do {
-                let returnedUserData = try await AuthenticationManager.shared.createUser(email: email, password: password)
+                let returnedUserData = try await AuthenticationManager.shared.createUser(email: email.trimmingCharacters(in: .whitespaces), password: password)
                 let user = DBUser(auth: returnedUserData)
                 try await UserManager.shared.createNewUser(user: user)
                 print("Sign up successful!")
-                print(returnedUserData)
                 onSuccess()
             } catch {
                 let nsError = error as NSError
                 if nsError.code == AuthErrorCode.emailAlreadyInUse.rawValue {
-                    // email in use already
                     DispatchQueue.main.async {
-                        withAnimation {
-                            self.errorMessage = "Email already in use."
-                        }
+                        withAnimation { self.errorMessage = "Email already in use." }
                     }
                 } else {
                     DispatchQueue.main.async {
-                        withAnimation {
-                            self.errorMessage = error.localizedDescription
-                        }
+                        withAnimation { self.errorMessage = error.localizedDescription }
                     }
                 }
-                //print("Sign up error: \(error)")
             }
         }
     }
-    
+
     func signIn(onSuccess: @escaping () -> Void) {
-        guard !email.isEmpty, !password.isEmpty else {
-            errorMessage = "Please enter both email and password."
+        if let emailError = InputValidator.validateEmail(email) {
+            errorMessage = emailError; return
+        }
+        if password.isEmpty {
+            errorMessage = "Please enter your password."
             return
         }
-        
+
         Task {
             do {
-                let userData = try await AuthenticationManager.shared.signIn(email: email, password: password)
+                let userData = try await AuthenticationManager.shared.signIn(email: email.trimmingCharacters(in: .whitespaces), password: password)
                 print("Sign in successful!")
                 print(userData)
                 onSuccess()
             } catch {
                 DispatchQueue.main.async {
-                    withAnimation {
-                        self.errorMessage = error.localizedDescription
-                    }
+                    withAnimation { self.errorMessage = error.localizedDescription }
                 }
             }
         }
