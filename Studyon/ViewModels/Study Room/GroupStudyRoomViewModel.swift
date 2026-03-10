@@ -221,6 +221,14 @@ final class GroupStudyRoomViewModel: ObservableObject {
         let now = ServerClock.shared.now
         let secs = max(0, Int(endAt.timeIntervalSince(now)))
         if secs != remainingSeconds { remainingSeconds = secs }
+
+        // When the work timer expires, stop accumulating study time immediately.
+        // Without this, study time keeps growing during the gap between the work
+        // timer hitting 0 and the host pressing play for the break timer.
+        // endWorkSession() is a no-op after the first call (workSessionStart becomes nil).
+        if secs == 0 && phase == "work" && !isPaused {
+            endWorkSession()
+        }
     }
 
     // MARK: Host controls
